@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { isString, isNumber } from '../utils';
 const TAU = Math.PI * 2;
 
 /** executes an assignment function only when the condtion passes */
@@ -21,3 +22,28 @@ export const setFps = (t, v) => t.animationSpeed = toAnimationSpeed(v);
 export const setBlendMode = (t, v) => t.blendMode = toBlendMode(v);
 export const setRelativeX = (t, v, relativeTo) => t.x = v * relativeTo;
 export const setRelativeY = (t, v, relativeTo) => t.y = v * relativeTo;
+
+/** assigns common properties for a display object */
+export function assignDisplayObjectProps(target, props) {
+	if (!props) return;
+	
+	// positions
+	assignIf(props.x, isNumber, target, setX);
+	assignIf(props.y, isNumber, target, setY);
+	assignIf(props.z, isNumber, target, setZ);
+	assignIf(props.rotation, isNumber, target, setRotation);
+	assignIf(props.fps, isNumber, target, setFps);
+	assignIf(props.blend, isString, target, setBlendMode);
+
+	// alpha
+	props.alpha = props.alpha || props.opacity;
+	assignIf(props.alpha, isNumber, target, setAlpha);
+	
+	// origin
+	assignIf(props.pivotX, isNumber, target.pivot, setRelativeX, target.width);
+	assignIf(props.pivotY, isNumber, target.pivot, setRelativeY, target.height);
+
+	// scale
+	assignIf(props.scaleX, isNumber, target.scale, setX);
+	assignIf(props.scaleY, isNumber, target.scale, setY);
+}

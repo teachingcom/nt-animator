@@ -6,7 +6,7 @@ const pending = { };
 /** handles loading an external image url 
  * @param {string} url The url of the image to load
 */
-export async function loadImage(url) {
+export default async function loadImage(url) {
 
 	// if already waiting for a resource
 	if (pending[url]) {
