@@ -9,7 +9,7 @@ export function assignIf(value, condition, target, action, ...args) {
 
 // calculations
 export const toRotation = rotation => (rotation / 360) * TAU;
-export const toBlendMode = mode => PIXI.BLEND_MODES[mode.toUpperCase()];
+export const toBlendMode = mode => PIXI.BLEND_MODES[mode.toUpperCase()] || PIXI.BLEND_MODES.NORMAL;
 export const toAnimationSpeed = fps => fps / 60;
 
 /** common pixi property assignments */

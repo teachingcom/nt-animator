@@ -15,7 +15,10 @@
   },
   "dependencies": {
     "clone-deep": "^4.0.1",
-    "deep-get-set": "^1.1.0"
+    "deep-get-set": "^1.1.0",
+    "pixi-particles": "^4.2.0",
+    "pixi.js": "^5.2.3",
+    "popmotion": "^8.7.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",

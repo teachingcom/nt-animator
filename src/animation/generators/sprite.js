@@ -6,7 +6,7 @@ import resolveImages from '../resources/resolveImages';
 import { assignDisplayObjectProps } from '../assign';
 import { setDefaults, noop, map } from '../../utils';
 
-
+// default parameters to create a sprite
 const SPRITE_DEFAULTS = {
 	rotation: 0,
 	scaleY: 1,
