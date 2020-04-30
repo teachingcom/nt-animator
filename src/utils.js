@@ -4,7 +4,7 @@ export function isArray(obj) {
 }
 
 export function isObject(obj) {
-	return typeof data === 'object';
+	return typeof obj === 'object';
 }
 
 export function isIterable(obj) {

@@ -1,9 +1,22 @@
+// import assignDeep from 'assign-deep';
+// import deepDefaults from 'deep-defaults';
+
+import deep from 'deep-get-set';
 import * as PIXI from 'pixi.js';
+import * as assign from './assign';
+import * as pop from 'popmotion';
+const { assignIf } = assign;
+
 // import * as pp from 'pixi-particles';
+const PASSTHROUGH = v => v;
+const CONVERTERS = {
+	'rotation': assign.toRotation,
+	'fps': assign.toAnimationSpeed
+};
 
 
 import { EventEmitter } from "../common/event-emitter";
-import { waitForEvent, isIterable, isString, isArray, map, flatten } from '../utils';
+import { waitForEvent, isIterable, isString, isArray, map, flatten, isNumber } from '../utils';
 import cloneDeep from 'clone-deep';
 import * as resources from './resources';
 
@@ -53,13 +66,16 @@ export class Animator extends EventEmitter {
 
 // creates an instance of a car
 async function createInstance(animator, path, data) {
-	const container = new PIXI.Container();
-	const pending = [ ];
-
+	
 	// unpack all data
 	const instance = cloneDeep(data);
-
-	// start checking each layer
+	
+	// create the instance container
+	const container = new PIXI.Container();
+	container.update = noop;
+	
+	// kick off creating each element
+	const pending = [ ];
 	for (const layer of instance.compose) {
 		const { type } = layer;
 		inheritFrom(animator, data, layer, 'base');
@@ -82,35 +98,104 @@ async function createInstance(animator, path, data) {
 
 	// wait for finished work
 	const composite = await Promise.all(pending);
-	const layers = flatten(composite);
 
-	// layers.sort(byZIndex);
+	// with all results, create the final object
+	for (const comp of composite) {
 
-	// append all layers
-	console.log(layers);
-	for (const layer of layers)
-		container.addChild(layer);
+		// add each element
+		for (const layer of comp) {
+			container.update = appendFunc(container.update, layer.update);
+			container.addChild(layer.displayObject);
+		}
+
+	}
+
+	// // const layers = flatten(composite);
+
+	// // layers.sort(byZIndex);
+
+	// // append all layers
+	// for (const layer of layers) {
+
+	// }
+	// 	container.addChild(layer);
 
 	// return the final layer
 	return container;
 }
 
-async function createSprite(animator, path, data, layer) {
+function setDefaults(target, prop, defaults) {
+	let assignTo = target[prop];
+
+	// nothing has been assigned
+	if (!assignTo) {
+		target[prop] = cloneDeep(defaults);
+		return;
+	}
+
+	// set each missing value
+	for (const id in defaults) {
+		if (assignTo[id] === undefined)
+			assignTo[id] = defaults[id];
+	}
+}
+
+function appendFunc(orig, append) {
+	return () => { orig(); append(); }
+}
+
+const noop = () => { };
+async function createSprite(animator, path, composition, layer) {
+
+	// recursively built update function
+	let update = noop;
+
+	// tracking setup phase
 	let phase = '';
 	try {
 
-		// try and load images
+		// gather all required images
 		phase = 'resolving images';
-		const images = await resolveImages(animator, path, data, layer);
+		const images = await resolveImages(animator, path, composition, layer);
 
+		// create textures for each sprite
 		phase = 'generating textures';
 		const textures = map(images, img => PIXI.Texture.from(img));
 		
-		// if there's multiple images, then it's animated
+		// create the instance of the sprite
 		phase = 'creating sprite instance';
 		const isAnimated = images.length > 1;
-		return isAnimated ? new PIXI.AnimatedSprite(textures)
+		const sprite = isAnimated
+			? new PIXI.AnimatedSprite(textures)
 			: new PIXI.Sprite(textures[0]);
+
+		// if animated, start playback
+		if (isAnimated) sprite.play();
+
+		// set some default values
+		sprite.pivot.x = sprite.width / 2;
+		sprite.pivot.y = sprite.height / 2;
+
+		// set defaults
+		setDefaults(layer, 'props', {
+			rotation: 0,
+			scaleY: 1,
+			scaleX: 1,
+			pivotX: 0.5,
+			pivotY: 0.5,
+			x: 0,
+			y: 0
+		});
+
+		// assign default props
+		assignDisplayObjectProps(sprite, layer.props);
+
+		// setup animations, if any
+		phase = 'creating animations';
+		sprite.animation = createAnimation(animator, composition, layer, sprite);
+
+		// attach the update function
+		return [{ displayObject: sprite, update }];
 	}
 	catch(ex) {
 		console.error(`Failed to create sprite ${path} while ${phase}`);
@@ -119,8 +204,108 @@ async function createSprite(animator, path, data, layer) {
 
 }
 
+
+// creates an animation
+function createAnimation(animator, composition, layer, instance) {
+	if (!layer.animation) return;
+
+	// unpack any variables
+	layer.animation = cloneDeep(layer.animation);
+	unpack(animator, composition, layer, 'animation');
+
+	// start creating the popmotion animation
+	const { keyframes, sequence, loop = Infinity, duration = 1000, ease } = layer.animation;
+	const easings = pop.easing[ease] || pop.easing.linear;
+	const animation = {
+		timings: [ ],
+		values: keyframes || sequence || [ ],
+		easings,
+		loop,
+		duration
+	};
+
+	// copy all default values for the starting frame
+	const starting = { };
+
+	//TODO: create an update mapper to improve performance
+
+	// create a timings parameter
+	for (let i = 0; i < animation.values.length; i++) {
+		const keyframe = animation.values[i];
+
+		// get the timing value, if any
+		const timing = isNumber(keyframe.at) ? keyframe.at : i / animation.values.length;
+		animation.timings.push(timing);
+
+		// copy all default values
+		for (const prop in keyframe) {
+			if (!(prop in starting)) {
+				starting[prop] = deep(layer, `props.${prop}`);
+			}
+		}
+	}
+
+	// include the starting frame of animation
+	// and also shift timings to account for
+	// the extra frame of animation
+	animation.values.unshift(starting);
+	animation.timings.push(1);
+
+	// create the animation that assigns
+	// property values
+	const handler = pop.keyframes(animation);
+	handler.start({
+		update: update => {
+			assignDisplayObjectProps(instance, update);
+		}
+	});
+
+	// return the animation object
+	return handler;
+}
+
+
+
+// update a sprite to use new props
+function assignDisplayObjectProps(target, props) {
+	if (!props) return;
+	
+	// positions
+	assignIf(props.x, isNumber, target, assign.setX);
+	assignIf(props.y, isNumber, target, assign.setY);
+	assignIf(props.z, isNumber, target, assign.setZ);
+	assignIf(props.rotation, isNumber, target, assign.setRotation);
+	assignIf(props.fps, isNumber, target, assign.setFps);
+	assignIf(props.blend, isString, target, assign.setBlendMode);
+
+	// alpha
+	props.alpha = props.alpha || props.opacity;
+	assignIf(props.alpha, isNumber, target, assign.setAlpha);
+	
+	// origin
+	assignIf(props.pivotX, isNumber, target.pivot, assign.setRelativeX, target.width);
+	assignIf(props.pivotY, isNumber, target.pivot, assign.setRelativeY, target.height);
+
+	// scale
+	assignIf(props.scaleX, isNumber, target.scale, assign.setX);
+	assignIf(props.scaleY, isNumber, target.scale, assign.setY);
+	
+
+	// // layer origin/pivot
+	// const pivot = props.pivot || props.origin;
+	// if (pivot) {
+	// }
+
+	// // sizing
+	// if (props.scale) {
+	// 	assignIf(props.scale.x, isNumber, target.scale, assign.setX);
+	// 	assignIf(props.scale.y, isNumber, target.scale, assign.setY);
+	// }
+}
+
+
 /** loads all images for a layer */
-async function resolveImages(animator, path, data, layer) {
+async function resolveImages(animator, path, composition, layer) {
 
 	// normalize images as a single array
 	let images = [ ];
@@ -134,7 +319,7 @@ async function resolveImages(animator, path, data, layer) {
 	// unpack all image reference
 	delete layer.image;
 	layer.images = images;
-	unpack(animator, data, layer, 'images');
+	unpack(animator, composition, layer, 'images');
 
 	// with each image, handle loading the correct resource
 	const pending = [ ];
@@ -276,12 +461,12 @@ function resolvePath(data, parts) {
 	return block;
 }
 
-function inheritFrom(animator, data, layer, prop) {
+function inheritFrom(animator, composition, layer, prop) {
 	const base = layer[prop];
 	if (!base) return;
 
 	// apply the inherited properties
-	const basedOn = clone(animator, data, base);
+	const basedOn = clone(animator, composition, base);
 	Object.assign(layer, basedOn);
 }
 
