@@ -3520,7 +3520,7 @@ exports.map = map;
 exports.waitForEvent = waitForEvent;
 exports.setDefaults = setDefaults;
 exports.appendFunc = appendFunc;
-exports.noop = void 0;
+exports.noop = exports.TAU = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
@@ -3537,6 +3537,9 @@ function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var TAU = Math.PI * 2;
+exports.TAU = TAU;
 
 function isArray(obj) {
   return Array.isArray(obj);
@@ -52163,7 +52166,100 @@ var svg = function (element, props) {
 };
 
 exports.svg = svg;
-},{"tslib":"../node_modules/tslib/tslib.es6.js","@popmotion/popcorn":"../node_modules/@popmotion/popcorn/dist/popcorn.es.js","framesync":"../node_modules/framesync/dist/framesync.es.js","style-value-types":"../node_modules/style-value-types/dist/style-value-types.es.js","@popmotion/easing":"../node_modules/@popmotion/easing/dist/easing.es.js","stylefire":"../node_modules/stylefire/dist/stylefire.es.js","hey-listen":"../node_modules/hey-listen/dist/hey-listen.es.js","process":"../node_modules/process/browser.js"}],"animation/assign.js":[function(require,module,exports) {
+},{"tslib":"../node_modules/tslib/tslib.es6.js","@popmotion/popcorn":"../node_modules/@popmotion/popcorn/dist/popcorn.es.js","framesync":"../node_modules/framesync/dist/framesync.es.js","style-value-types":"../node_modules/style-value-types/dist/style-value-types.es.js","@popmotion/easing":"../node_modules/@popmotion/easing/dist/easing.es.js","stylefire":"../node_modules/stylefire/dist/stylefire.es.js","hey-listen":"../node_modules/hey-listen/dist/hey-listen.es.js","process":"../node_modules/process/browser.js"}],"../node_modules/deep-get-set/index.js":[function(require,module,exports) {
+var hasOwnProp = Object.prototype.hasOwnProperty;
+
+module.exports = deep;
+
+function deep (obj, path, value) {
+  if (arguments.length === 3) return set.apply(null, arguments);
+  return get.apply(null, arguments);
+}
+
+function get (obj, path) {
+  var keys = Array.isArray(path) ? path : path.split('.');
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    if (!obj || !hasOwnProp.call(obj, key)) {
+      obj = undefined;
+      break;
+    }
+    obj = obj[key];
+  }
+  return obj;
+}
+
+function set (obj, path, value) {
+  var keys = Array.isArray(path) ? path : path.split('.');
+  for (var i = 0; i < keys.length - 1; i++) {
+    var key = keys[i];
+    if (deep.p && !hasOwnProp.call(obj, key)) obj[key] = {};
+    obj = obj[key];
+  }
+  obj[keys[i]] = value;
+  return value;
+}
+
+},{}],"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":[function(require,module,exports) {
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+
+  return arr2;
+}
+
+module.exports = _arrayLikeToArray;
+},{}],"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js":[function(require,module,exports) {
+var arrayLikeToArray = require("./arrayLikeToArray");
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return arrayLikeToArray(arr);
+}
+
+module.exports = _arrayWithoutHoles;
+},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/iterableToArray.js":[function(require,module,exports) {
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+module.exports = _iterableToArray;
+},{}],"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js":[function(require,module,exports) {
+var arrayLikeToArray = require("./arrayLikeToArray");
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(n);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+
+module.exports = _unsupportedIterableToArray;
+},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/nonIterableSpread.js":[function(require,module,exports) {
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableSpread;
+},{}],"../node_modules/@babel/runtime/helpers/toConsumableArray.js":[function(require,module,exports) {
+var arrayWithoutHoles = require("./arrayWithoutHoles");
+
+var iterableToArray = require("./iterableToArray");
+
+var unsupportedIterableToArray = require("./unsupportedIterableToArray");
+
+var nonIterableSpread = require("./nonIterableSpread");
+
+function _toConsumableArray(arr) {
+  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
+}
+
+module.exports = _toConsumableArray;
+},{"./arrayWithoutHoles":"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js","./iterableToArray":"../node_modules/@babel/runtime/helpers/iterableToArray.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableSpread":"../node_modules/@babel/runtime/helpers/nonIterableSpread.js"}],"animation/assign.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -52171,9 +52267,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.assignIf = assignIf;
 exports.assignDisplayObjectProps = assignDisplayObjectProps;
-exports.setRelativeY = exports.setRelativeX = exports.setBlendMode = exports.setFps = exports.setRotation = exports.setAlpha = exports.setZ = exports.setY = exports.setX = exports.toAnimationSpeed = exports.toBlendMode = exports.toRotation = void 0;
+exports.assignEmitterProps = assignEmitterProps;
+exports.setRelativeY = exports.setRelativeX = exports.setBlendMode = exports.setFps = exports.setRotation = exports.setAlpha = exports.setZ = exports.setY = exports.setX = exports.toEasing = exports.toAnimationSpeed = exports.toBlendMode = exports.toRotation = void 0;
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 
 var PIXI = _interopRequireWildcard(require("pixi.js"));
+
+var pop = _interopRequireWildcard(require("popmotion"));
 
 var _utils = require("../utils");
 
@@ -52181,9 +52282,9 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-var TAU = Math.PI * 2;
-/** executes an assignment function only when the condtion passes */
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/** executes an assignment function only when the condtion passes */
 function assignIf(value, condition, target, action) {
   for (var _len = arguments.length, args = new Array(_len > 4 ? _len - 4 : 0), _key = 4; _key < _len; _key++) {
     args[_key - 4] = arguments[_key];
@@ -52194,7 +52295,7 @@ function assignIf(value, condition, target, action) {
 
 
 var toRotation = function toRotation(rotation) {
-  return rotation / 360 * TAU;
+  return rotation / 360 * _utils.TAU;
 };
 
 exports.toRotation = toRotation;
@@ -52208,10 +52309,29 @@ exports.toBlendMode = toBlendMode;
 var toAnimationSpeed = function toAnimationSpeed(fps) {
   return fps / 60;
 };
+
+exports.toAnimationSpeed = toAnimationSpeed;
+
+var toEasing = function toEasing(ease) {
+  var _pop$easing;
+
+  // allow for a complex bezier
+  if ((0, _utils.isArray)(ease)) return (_pop$easing = pop.easing).cubicBezier.apply(_pop$easing, (0, _toConsumableArray2.default)(ease)); // looks wacky, but it's juset converting snake case to
+  // camel case and prefixing with "ease"
+  // so, "in_out" or "inOut" becomes "easeInOut"
+  else if ((0, _utils.isString)(ease)) {
+      ease = ease.replace(/\_.{1}/g, function (str) {
+        return str.substr(1).toUpperCase();
+      });
+      if (ease.substr(0, 4) !== 'ease') ease = "ease" + ease[0].toUpperCase() + ease.substr(1);
+    } // check for an easing or just use linear
+
+  return pop.easing[ease] || pop.easing.linear;
+};
 /** common pixi property assignments */
 
 
-exports.toAnimationSpeed = toAnimationSpeed;
+exports.toEasing = toEasing;
 
 var setX = function setX(t, v) {
   return t.x = v;
@@ -52288,7 +52408,20 @@ function assignDisplayObjectProps(target, props) {
   assignIf(props.scaleX, _utils.isNumber, target.scale, setX);
   assignIf(props.scaleY, _utils.isNumber, target.scale, setY);
 }
-},{"pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","../utils":"utils.js"}],"animation/generators/animation.js":[function(require,module,exports) {
+/** handle assigning emitter values 
+ * add more props as they make sense to include
+*/
+
+
+function assignEmitterProps(target, props) {
+  assignIf(props['emit.y'], _utils.isNumber, target, function (t, v) {
+    return t.spawnPos.y = v;
+  });
+  assignIf(props['emit.x'], _utils.isNumber, target, function (t, v) {
+    return t.spawnPos.x = v;
+  });
+}
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","popmotion":"../node_modules/popmotion/dist/popmotion.es.js","../utils":"utils.js"}],"animation/generators/animation.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -52297,6 +52430,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = createAnimation;
 
 var pop = _interopRequireWildcard(require("popmotion"));
+
+var _deepGetSet = _interopRequireDefault(require("deep-get-set"));
 
 var _cloneDeep = _interopRequireDefault(require("clone-deep"));
 
@@ -52312,10 +52447,11 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-// import deep from 'deep-get-set';
 // creates an animation
-function createAnimation(animator, composition, layer, instance) {
-  if (!layer.animation) return; // unpack any variables
+function createAnimation(animator, path, composition, layer, instance) {
+  if (!layer.animation) return; // used to update sub properties
+
+  var isEmitter = layer.type === 'emitter'; // unpack any variables
 
   layer.animation = (0, _cloneDeep.default)(layer.animation);
   (0, _utils.unpack)(animator, composition, layer, 'animation'); // start creating the popmotion animation
@@ -52328,7 +52464,7 @@ function createAnimation(animator, composition, layer, instance) {
       _layer$animation$dura = _layer$animation.duration,
       duration = _layer$animation$dura === void 0 ? 1000 : _layer$animation$dura,
       ease = _layer$animation.ease;
-  var easings = pop.easing[ease] || pop.easing.linear;
+  var easings = (0, _assign.toEasing)(ease);
   var animation = {
     timings: [],
     values: keyframes || sequence || [],
@@ -52348,7 +52484,12 @@ function createAnimation(animator, composition, layer, instance) {
 
     for (var prop in keyframe) {
       if (!(prop in starting)) {
-        starting[prop] = layer.props[prop]; // deep(layer, `props.${prop}`);
+        // TODO: this part is confusing -- special layer configurations
+        // can create animations using their prop name and sub property, but
+        // by default animations can simply use a property by their name
+        // for example, an emitter can change "emit.x" to tween a sub property
+        // however, rotation is simply "rotation" and not "props.rotation"
+        starting[prop] = !!~prop.indexOf('.') ? (0, _deepGetSet.default)(layer, prop) : layer.props[prop];
       }
     }
   } // include the starting frame of animation
@@ -52363,13 +52504,17 @@ function createAnimation(animator, composition, layer, instance) {
   var handler = pop.keyframes(animation);
   handler.start({
     update: function update(_update) {
-      (0, _assign.assignDisplayObjectProps)(instance, _update);
+      (0, _assign.assignDisplayObjectProps)(instance, _update); // assign any emitter changes
+
+      if (isEmitter) {
+        (0, _assign.assignEmitterProps)(instance.emitter, _update);
+      }
     }
   }); // return the animation object
 
   return handler;
 }
-},{"popmotion":"../node_modules/popmotion/dist/popmotion.es.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils.js","../assign":"animation/assign.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
+},{"popmotion":"../node_modules/popmotion/dist/popmotion.es.js","deep-get-set":"../node_modules/deep-get-set/index.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils.js","../assign":"animation/assign.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
 function _arrayWithHoles(arr) {
   if (Array.isArray(arr)) return arr;
 }
@@ -52404,32 +52549,7 @@ function _iterableToArrayLimit(arr, i) {
 }
 
 module.exports = _iterableToArrayLimit;
-},{}],"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":[function(require,module,exports) {
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) {
-    arr2[i] = arr[i];
-  }
-
-  return arr2;
-}
-
-module.exports = _arrayLikeToArray;
-},{}],"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js":[function(require,module,exports) {
-var arrayLikeToArray = require("./arrayLikeToArray");
-
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return arrayLikeToArray(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(n);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
-}
-
-module.exports = _unsupportedIterableToArray;
-},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/nonIterableRest.js":[function(require,module,exports) {
+},{}],"../node_modules/@babel/runtime/helpers/nonIterableRest.js":[function(require,module,exports) {
 function _nonIterableRest() {
   throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }
@@ -52935,7 +53055,7 @@ function _createSprite() {
             (0, _assign.assignDisplayObjectProps)(sprite, layer.props); // setup animations, if any
 
             phase = 'creating animations';
-            sprite.animation = (0, _animation.default)(animator, composition, layer, sprite); // attach the update function
+            sprite.animation = (0, _animation.default)(animator, path, composition, layer, sprite); // attach the update function
 
             return _context.abrupt("return", [{
               displayObject: sprite,
@@ -55117,7 +55237,37 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// default parameters to create a sprite
+// emitter property mappings
+var MAPPINGS = {
+  alpha: {
+    props: ['start', 'end'],
+    allowList: true
+  },
+  scale: {
+    props: ['start', 'end'],
+    allowList: true
+  },
+  color: {
+    props: ['start', 'end'],
+    allowList: true
+  },
+  speed: {
+    props: ['start', 'end'],
+    allowList: true
+  },
+  dir: {
+    props: ['min', 'max'],
+    renameTo: 'startRotation'
+  },
+  rotationSpeed: {
+    props: ['min', 'max']
+  },
+  life: {
+    props: ['min', 'max'],
+    renameTo: 'lifetime'
+  }
+}; // default parameters to create a sprite
+
 var EMITTER_DEFAULTS = {
   rotation: 0,
   scaleY: 1,
@@ -55131,11 +55281,12 @@ var EMITTER_DEFAULTS = {
 
 function createEmitter(_x, _x2, _x3, _x4) {
   return _createEmitter.apply(this, arguments);
-}
+} // defines generator spawn points
+
 
 function _createEmitter() {
   _createEmitter = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, path, composition, layer) {
-    var update, phase, images, textures, MAPPINGS, config, _layer$emit, emit, _loop, prop, _ret, _emit$circle, x, y, r, _emit$rect, _x5, _y, w, h, container, emitter;
+    var update, phase, images, textures, config, _layer$emit, emit, _loop, prop, _ret, container;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -55159,36 +55310,7 @@ function _createEmitter() {
               return PIXI.Texture.from(img);
             }); // create the instance of the sprite
 
-            phase = 'configuring emitter';
-            MAPPINGS = {
-              alpha: {
-                props: ['start', 'end'],
-                allowList: true
-              },
-              scale: {
-                props: ['start', 'end'],
-                allowList: true
-              },
-              color: {
-                props: ['start', 'end'],
-                allowList: true
-              },
-              speed: {
-                props: ['start', 'end'],
-                allowList: true
-              },
-              dir: {
-                props: ['min', 'max'],
-                renameTo: 'startRotation'
-              },
-              rotationSpeed: {
-                props: ['min', 'max']
-              },
-              life: {
-                props: ['min', 'max'],
-                renameTo: 'lifetime'
-              }
-            }; // generate a config -- pixi-particles uses a lot of
+            phase = 'configuring emitter'; // generate a config -- pixi-particles uses a lot of
             // objects that are difficult to work with - nt-animator
             // just accepts arrays and shorthand names, but the need to
             // be converted - the list of mappings are at the top of the
@@ -55206,7 +55328,7 @@ function _createEmitter() {
               var assign = emit[prop]; // if this is a complex list and theres
               // more than just two values, create a more
               // complex version -- for now, default timing
-              //  to be relative to the total position
+              // to be relative to the total position
 
               var total = assign.length;
 
@@ -55238,9 +55360,9 @@ function _createEmitter() {
 
             _context.t0 = _regenerator.default.keys(emit);
 
-          case 15:
+          case 14:
             if ((_context.t1 = _context.t0()).done) {
-              _context.next = 22;
+              _context.next = 21;
               break;
             }
 
@@ -55248,17 +55370,17 @@ function _createEmitter() {
             _ret = _loop(prop);
 
             if (!(_ret === "continue")) {
-              _context.next = 20;
+              _context.next = 19;
               break;
             }
 
-            return _context.abrupt("continue", 15);
+            return _context.abrupt("continue", 14);
 
-          case 20:
-            _context.next = 15;
+          case 19:
+            _context.next = 14;
             break;
 
-          case 22:
+          case 21:
             // assign a few more values
             (0, _assign4.assignIf)(emit.per, _utils.isNumber, config, function (t, v) {
               return t.particlesPerWave = v;
@@ -55272,78 +55394,169 @@ function _createEmitter() {
             (0, _assign4.assignIf)(emit.chance, _utils.isNumber, config, function (t, v) {
               return t.spawnChance = v;
             });
-            (0, _assign4.assignIf)(emit.startDir, _utils.isNumber, config, function (t, v) {
-              return t.angleStart = v;
-            });
             (0, _assign4.assignIf)(emit.type, _utils.isString, config, function (t, v) {
               return t.spawnType = v;
-            });
+            }); // as it turns out, the library will look up the correct enum on its own
+
             (0, _assign4.assignIf)(emit.blend, _utils.isString, config, function (t, v) {
-              return t.blendMode = (0, _assign4.toBlendMode)(v);
-            });
-            config.noRotation = !!config.noRotation;
-            config.atBack = !!config.atBack;
-            config.orderedArt = !!config.orderedArt; // check for emission bounds
+              return t.blendMode = v;
+            }); // boolean props
+
+            config.noRotation = !!emit.noRotation;
+            config.atBack = !!emit.atBack;
+            config.orderedArt = !!emit.orderedArt; // NOTE: Check the end of the file for overrides to Particle behavior
+            // default to random starting rotations if not overridden
+
+            if (!!emit.randomStartRotation) {
+              config.randomStartRotation = (0, _utils.isArray)(emit.randomStartRotation) ? emit.randomStartRotation : [0, 360];
+            } // appears to be required
+
+
+            config.pos = {
+              x: emit.x || 0,
+              y: emit.y || 0
+            }; // check for emission bounds
 
             phase = 'defining emitter bounds'; // is a radial spawn
 
-            if ('circle' in emit) {
-              _emit$circle = (0, _slicedToArray2.default)(emit.circle, 3), x = _emit$circle[0], y = _emit$circle[1], r = _emit$circle[2];
-              config.spawnType = 'circle';
-              config.spawnCircle = {
-                x: x,
-                y: y,
-                r: r
-              };
-            } // is a rectangle spawn
-            else if ('rect' in emit) {
-                _emit$rect = (0, _slicedToArray2.default)(emit.rect, 4), _x5 = _emit$rect[0], _y = _emit$rect[1], w = _emit$rect[2], h = _emit$rect[3];
-                config.spawnType = 'rect';
-                config.spawnRect = {
-                  x: _x5,
-                  y: _y,
-                  w: w,
-                  h: h
-                };
-              } // default to a point
-              else {
-                  config.pos = {
-                    x: 0,
-                    y: 0
-                  };
-                } // create the emitter
-
+            defineBounds(config, emit); // create the emitter
 
             phase = 'creating emitter instance';
             container = new PIXI.Container();
-            emitter = new Particles.Emitter(container, textures, config); // set container defaults
+            container.emitter = new Particles.Emitter(container, textures, config);
+            container.emitter.config = config; // set container defaults
 
             (0, _utils.setDefaults)(layer, 'props', EMITTER_DEFAULTS);
             Object.assign(container, layer.props); // animate, if needed
 
             phase = 'creating animation';
-            container.animation = (0, _animation.default)(animator, composition, layer, container); // attach the update function
+            container.animation = (0, _animation.default)(animator, path, composition, layer, container); // attach the update function
 
             return _context.abrupt("return", [{
               displayObject: container,
               update: update
             }]);
 
-          case 44:
-            _context.prev = 44;
+          case 45:
+            _context.prev = 45;
             _context.t2 = _context["catch"](2);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
             throw _context.t2;
 
-          case 48:
+          case 49:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 44]]);
+    }, _callee, null, [[2, 45]]);
   }));
   return _createEmitter.apply(this, arguments);
 }
+
+function defineBounds(config, params) {
+  // is a circle
+  if (!!params.circle) defineCircleBounds(config, params.circle); // is a rectangle
+  else if (!!params.rect || !!params.rectangle || !!params.box) defineRectangleBounds(config, params.rect || params.rectangle || params.box);
+} // creates a circular generation point
+
+
+function defineCircleBounds(config, circle) {
+  var x, y, r; // all three params provided
+
+  if (circle.length === 3) {
+    x = circle[0];
+    y = circle[1];
+    r = circle[2];
+  } // using a shorthand array
+  else if (circle.length === 1) {
+      x = 0;
+      y = 0;
+      r = circle[1];
+    } // just a single number
+    else if ((0, _utils.isNumber)(circle)) {
+        x = 0;
+        y = 0;
+        r = circle;
+      } // no matches
+      else return; // update the spawn type
+
+
+  config.spawnType = 'circle';
+  config.spawnCircle = {
+    x: x,
+    y: y,
+    r: r
+  };
+} // creates a rectangular point
+// last param is optional, otherwise creates a box
+
+
+function defineRectangleBounds(config, rect) {
+  var x, y, w, h; // parameter options
+
+  if (rect.length === 4) {
+    x = rect[0];
+    y = rect[1];
+    w = rect[2];
+    h = rect[3];
+  } else if (rect.length === 3) {
+    x = rect[0];
+    y = rect[1];
+    w = h = rect[2];
+  } else if (rect.length === 2) {
+    x = 0;
+    y = 0;
+    w = rect[0];
+    h = rect[1];
+  } else if (rect.length === 1) {
+    x = 0;
+    y = 0;
+    w = h = rect[1];
+  } else if ((0, _utils.isNumber)(rect)) {
+    x = 0;
+    y = 0;
+    w = h = rect;
+  } // no matches
+  else return; // create the rect
+
+
+  config.spawnType = 'rect';
+  config.spawnRect = {
+    w: w,
+    h: h,
+    x: x - w / 2,
+    y: y - h / 2
+  };
+} // NOTE: This overrides default PIXI Particles behavior
+// there is not way to define a random start rotation
+// but we can capture the init call and use that to 
+// apply a random rotation, if any
+
+
+var __init = Particles.Particle.prototype.init;
+
+Particles.Particle.prototype.init = function () {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  // perform normal initialzation
+  __init.apply(this, args); // check for a random start direction
+
+
+  var _this$emitter$config = this.emitter.config,
+      noRotation = _this$emitter$config.noRotation,
+      randomStartRotation = _this$emitter$config.randomStartRotation;
+
+  if (!noRotation && randomStartRotation) {
+    var _randomStartRotation = (0, _slicedToArray2.default)(randomStartRotation, 2),
+        min = _randomStartRotation[0],
+        max = _randomStartRotation[1];
+
+    var angle = Math.random() * (max - min) + min;
+    this.rotation = Math.random() * _utils.TAU * angle;
+  }
+};
 },{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../assign":"animation/assign.js","../../utils":"utils.js","../resources/resolveImages":"animation/resources/resolveImages.js","./animation":"animation/generators/animation.js"}],"animation/generators/index.js":[function(require,module,exports) {
 "use strict";
 

@@ -1,5 +1,7 @@
 import cloneDeep from "clone-deep";
 
+export const TAU = Math.PI * 2;
+
 export function isArray(obj) {
 	return Array.isArray(obj);
 }

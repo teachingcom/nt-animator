@@ -57,7 +57,7 @@ export default async function createSprite(animator, path, composition, layer) {
 
 		// setup animations, if any
 		phase = 'creating animations';
-		sprite.animation = createAnimation(animator, composition, layer, sprite);
+		sprite.animation = createAnimation(animator, path, composition, layer, sprite);
 
 		// attach the update function
 		return [{ displayObject: sprite, update }];

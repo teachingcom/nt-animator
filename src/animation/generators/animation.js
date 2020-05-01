@@ -1,13 +1,16 @@
-// import deep from 'deep-get-set';
 import * as pop from 'popmotion';
+import deep from 'deep-get-set';
 import cloneDeep from "clone-deep";
 import { unpack } from "../utils";
 import { isNumber } from "../../utils";
-import { assignDisplayObjectProps } from '../assign';
+import { assignDisplayObjectProps, toEasing, assignEmitterProps } from '../assign';
 
 // creates an animation
-export default function createAnimation(animator, composition, layer, instance) {
+export default function createAnimation(animator, path, composition, layer, instance) {
 	if (!layer.animation) return;
+
+	// used to update sub properties
+	const isEmitter = layer.type === 'emitter';
 
 	// unpack any variables
 	layer.animation = cloneDeep(layer.animation);
@@ -15,7 +18,7 @@ export default function createAnimation(animator, composition, layer, instance) 
 
 	// start creating the popmotion animation
 	const { keyframes, sequence, loop = Infinity, duration = 1000, ease } = layer.animation;
-	const easings = pop.easing[ease] || pop.easing.linear;
+	const easings = toEasing(ease);
 	const animation = {
 		timings: [ ],
 		values: keyframes || sequence || [ ],
@@ -40,7 +43,15 @@ export default function createAnimation(animator, composition, layer, instance) 
 		// copy all default values
 		for (const prop in keyframe) {
 			if (!(prop in starting)) {
-				starting[prop] = layer.props[prop]; // deep(layer, `props.${prop}`);
+
+				// TODO: this part is confusing -- special layer configurations
+				// can create animations using their prop name and sub property, but
+				// by default animations can simply use a property by their name
+				// for example, an emitter can change "emit.x" to tween a sub property
+				// however, rotation is simply "rotation" and not "props.rotation"
+				starting[prop] = !!~prop.indexOf('.')
+					? deep(layer, prop)
+					: layer.props[prop];
 			}
 		}
 	}
@@ -57,6 +68,12 @@ export default function createAnimation(animator, composition, layer, instance) 
 	handler.start({
 		update: update => {
 			assignDisplayObjectProps(instance, update);
+
+			// assign any emitter changes
+			if (isEmitter) {
+				assignEmitterProps(instance.emitter, update);
+			}
+
 		}
 	});
 
