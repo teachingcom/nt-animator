@@ -14,6 +14,7 @@ export class Animator extends EventEmitter {
 		this.options = options;
 	}
 
+	/** the preferred prefix for loading external urls */
 	get baseUrl() {
 		return this.options.baseUrl || '/';
 	}
@@ -29,13 +30,16 @@ export class Animator extends EventEmitter {
 
 		// doesn't seem to exist
 		if (!data) {
-			console.error(`Cannot resolve ${resource}`);
+			console.error(`Cannot resolve node ${resource}`);
 			return;
 		}
 
 		// has composition data
-		if (data.compose !== undefined)
-			return await createInstance(this, resource, data);
+		if (data.compose !== undefined) {
+			const instance = await createInstance(this, resource, data);
+			instance.type = data.type;
+			return instance;
+		}
 
 		// nothing to compose
 		else {

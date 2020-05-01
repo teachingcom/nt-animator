@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import * as pop from 'popmotion';
 import { isString, isNumber, isArray, TAU } from '../utils';
+import { evaluateExpression } from './expressions';
 
 /** executes an assignment function only when the condtion passes */
 export function assignIf(value, condition, target, action, ...args) {
@@ -72,4 +73,16 @@ export function assignDisplayObjectProps(target, props) {
 export function assignEmitterProps(target, props) {
 	assignIf(props['emit.y'], isNumber, target, (t, v) => t.spawnPos.y = v);
 	assignIf(props['emit.x'], isNumber, target, (t, v) => t.spawnPos.x = v);
+}
+
+/** evaluates dynamic expression for display objects */
+export function evaluateDisplayObjectExpressions(props) {
+	if (!props) return;
+	props.x = evaluateExpression(props.x);
+	props.y = evaluateExpression(props.y);
+	props.rotation = evaluateExpression(props.rotation);
+	props.scaleX = evaluateExpression(props.scaleX);
+	props.scaleY = evaluateExpression(props.scaleY);
+	props.pivotX = evaluateExpression(props.pivotX);
+	props.pivotY = evaluateExpression(props.pivotY);
 }

@@ -4,6 +4,7 @@ import cloneDeep from "clone-deep";
 import { unpack } from "../utils";
 import { isNumber } from "../../utils";
 import { assignDisplayObjectProps, toEasing, assignEmitterProps } from '../assign';
+import { isExpression, evaluateExpression } from '../expressions';
 
 // creates an animation
 export default function createAnimation(animator, path, composition, layer, instance) {
@@ -49,9 +50,11 @@ export default function createAnimation(animator, path, composition, layer, inst
 				// by default animations can simply use a property by their name
 				// for example, an emitter can change "emit.x" to tween a sub property
 				// however, rotation is simply "rotation" and not "props.rotation"
-				starting[prop] = !!~prop.indexOf('.')
-					? deep(layer, prop)
-					: layer.props[prop];
+				const isSubProperty = !!~prop.indexOf('.');
+				starting[prop] = isSubProperty ? deep(layer, prop) : layer.props[prop];
+
+				// evaluate any expression values
+				keyframe[prop] = evaluateExpression(keyframe[prop], starting[prop]);
 			}
 		}
 	}

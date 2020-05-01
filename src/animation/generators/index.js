@@ -10,6 +10,9 @@ import createEmitter from './emitter';
 // creates an instance of a car
 export default async function createInstance(animator, path, data) {
 	
+	// format the path
+	path = path.replace(/^\/*/, '');
+	
 	// unpack all data
 	const instance = cloneDeep(data);
 	

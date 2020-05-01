@@ -3,7 +3,7 @@ import * as PIXI from 'pixi.js';
 import createAnimation from './animation';
 import resolveImages from '../resources/resolveImages';
 
-import { assignDisplayObjectProps } from '../assign';
+import { assignDisplayObjectProps, evaluateDisplayObjectExpressions } from '../assign';
 import { setDefaults, noop, map } from '../../utils';
 
 // default parameters to create a sprite
@@ -49,10 +49,13 @@ export default async function createSprite(animator, path, composition, layer) {
 		sprite.pivot.x = sprite.width / 2;
 		sprite.pivot.y = sprite.height / 2;
 
+		// prepare expressions
+		evaluateDisplayObjectExpressions(layer.props);
+
 		// set defaults
 		setDefaults(layer, 'props', SPRITE_DEFAULTS);
-
-		// assign default props
+		
+		// prepare data
 		assignDisplayObjectProps(sprite, layer.props);
 
 		// setup animations, if any

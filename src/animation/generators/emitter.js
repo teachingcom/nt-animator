@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import * as Particles from 'pixi-particles';
-import { assignIf } from "../assign";
-import { isNumber, noop, map, setDefaults, isString, isArray, TAU } from "../../utils";
+import { assignIf, evaluateDisplayObjectExpressions } from "../assign";
+import { isNumber, noop, map, setDefaults, isString, isArray, RAD } from "../../utils";
 
 import resolveImages from "../resources/resolveImages";
 import createAnimation from './animation';
@@ -13,7 +13,7 @@ const MAPPINGS = {
 	color: { props: ['start', 'end'], allowList: true },
 	speed: { props: ['start', 'end'], allowList: true },
 	dir: { props: ['min', 'max'], renameTo: 'startRotation' },
-	rotationSpeed: { props: ['min', 'max'] },
+	rotation: { props: ['min', 'max'], renameTo: 'rotationSpeed' },
 	life: { props: ['min', 'max'], renameTo: 'lifetime' }
 };
 
@@ -48,6 +48,9 @@ export default async function createEmitter(animator, path, composition, layer) 
 		
 		// create the instance of the sprite
 		phase = 'configuring emitter';
+		
+		// prepare expressions
+		evaluateDisplayObjectExpressions(layer.props);
 
 		// generate a config -- pixi-particles uses a lot of
 		// objects that are difficult to work with - nt-animator
@@ -93,6 +96,7 @@ export default async function createEmitter(animator, path, composition, layer) 
 		assignIf(emit.per, isNumber, config, (t, v) => t.particlesPerWave = v);
 		assignIf(emit.max, isNumber, config, (t, v) => t.maxParticles = v);
 		assignIf(emit.frequency, isNumber, config, (t, v) => t.frequency = 1 / v);
+		assignIf(emit.freq, isNumber, config, (t, v) => t.frequency = 1 / v);
 		assignIf(emit.chance, isNumber, config, (t, v) => t.spawnChance = v);
 		assignIf(emit.type, isString, config, (t, v) => t.spawnType = v);
 		
@@ -103,6 +107,8 @@ export default async function createEmitter(animator, path, composition, layer) 
 		config.noRotation = !!emit.noRotation;
 		config.atBack = !!emit.atBack;
 		config.orderedArt = !!emit.orderedArt;
+		config.flipParticleX = !!emit.flipParticleX;
+		config.flipParticleY = !!emit.flipParticleY;
 
 		// NOTE: Check the end of the file for overrides to Particle behavior
 		// default to random starting rotations if not overridden
@@ -199,26 +205,27 @@ function defineRectangleBounds(config, rect) {
 	
 	// parameter options
 	if (rect.length === 4) {
-		x = rect[0];
-		y = rect[1];
-		w = rect[2];
-		h = rect[3];
-	}
-	else if (rect.length === 3) {
-		x = rect[0];
-		y = rect[1];
-		w = h = rect[2];
-	}
-	else if (rect.length === 2) {
-		x = 0;
-		y = 0;
 		w = rect[0];
 		h = rect[1];
+		x = rect[2];
+		y = rect[3];
 	}
-	else if (rect.length === 1) {
+	else if (rect.length === 3) {
+		w = rect[0];
+		h = rect[1];
+		x = rect[2];
+		y = 0;
+	}
+	else if (rect.length === 2) {
+		w = rect[0];
+		h = rect[1];
 		x = 0;
 		y = 0;
-		w = h = rect[1];
+	}
+	else if (rect.length === 1) {
+		w = h = rect[0];
+		x = 0;
+		y = 0;
 	}
 	else  if (isNumber(rect)) {
 		x = 0;
@@ -239,21 +246,58 @@ function defineRectangleBounds(config, rect) {
 
 
 
-// NOTE: This overrides default PIXI Particles behavior
-// there is not way to define a random start rotation
-// but we can capture the init call and use that to 
-// apply a random rotation, if any
-const __init = Particles.Particle.prototype.init;
+
+// NOTE: this overrides default PIXI behavior for particles
+// There are several properties about particles that cannot be
+// adjusted using the configuration. This overrides the update process
+// to use the normal update sequence, but then apply additional
+// modifiers
+// Particles traveling to the left are flipped upside down since their
+// "direction" is technically 180 degrees. This this change allows for
+// sprites to have their images flipped or rotated based on a starting
+// value. 
+const __override_update__ = Particles.Particle.prototype.update;
+Particles.Particle.prototype.update = function (...args) {
+	
+	// perform normal updateialzation
+	__override_update__.apply(this, args);
+
+	// apply the default starting rotation
+	if (this.startingRotation)
+		this.rotation += this.startingRotation;
+
+	// allow sprite flipping on x axis
+	if (this.emitter.config.flipParticleX && this.scale.x > 0)
+		this.scale.x *= -1;
+
+	// allow sprite flipping on y axis
+	if (this.emitter.config.flipParticleY && this.scale.y > 0)
+		this.scale.y *= -1;
+	
+};
+
+
+/** NOTE: This will override default PIXI Particle behavior
+ * When creating a new particle this will define random start
+ * rotations for particles, if needed
+ */
+const DEFAULT_RANDOM_ROTATIONS = [ 0, 360 ];
+const __override_init__ = Particles.Particle.prototype.init;
 Particles.Particle.prototype.init = function (...args) {
 	
-	// perform normal initialzation
-	__init.apply(this, args);
-	
-	// check for a random start direction
-	const { noRotation, randomStartRotation } = this.emitter.config;
-	if (!noRotation && randomStartRotation) {
-		const [min, max] = randomStartRotation;
+	// perform normal updateialzation
+	__override_init__.apply(this, args);
+
+	// apply the default starting rotation
+	const { startingRotation } = this.emitter.config;
+	if (isNumber(startingRotation))
+		this.startingRotation = startingRotation * RAD;
+
+	// when not explicitly disabled, use a random rotation
+	if (startingRotation !== false) {
+		const [min, max] = startingRotation || DEFAULT_RANDOM_ROTATIONS;
 		const angle = (Math.random() * (max - min)) + min;
-		this.rotation = (Math.random() * TAU) * angle;
+		this.startingRotation = angle * RAD;
 	}
+
 };

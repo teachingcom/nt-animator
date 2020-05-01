@@ -3,6 +3,14 @@
 // a loop since it's performed each frame of animation by
 // many children
 
+// generates a function simiar to
+// function findResponsiveState(container) {
+//   if (!container.parent) return;
+//   if (container.parent.isResponsiveState) return container.parent;
+//   if (!container.parent.parent) return;
+//   if (container.parent.parent.isResponsiveState) return container.parent.parent;
+// ... and so on
+
 /** Searches PIXI ancestors looking for a ResponsiveStage */
 export const findResponsiveStage = (() => {
 	const MAXIMUM_LOOKUPS = 10;

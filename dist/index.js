@@ -3520,7 +3520,7 @@ exports.map = map;
 exports.waitForEvent = waitForEvent;
 exports.setDefaults = setDefaults;
 exports.appendFunc = appendFunc;
-exports.noop = exports.TAU = void 0;
+exports.noop = exports.RAD = exports.TAU = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
@@ -3540,6 +3540,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 var TAU = Math.PI * 2;
 exports.TAU = TAU;
+var RAD = Math.PI / 180;
+exports.RAD = RAD;
 
 function isArray(obj) {
   return Array.isArray(obj);
@@ -52259,7 +52261,79 @@ function _toConsumableArray(arr) {
 }
 
 module.exports = _toConsumableArray;
-},{"./arrayWithoutHoles":"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js","./iterableToArray":"../node_modules/@babel/runtime/helpers/iterableToArray.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableSpread":"../node_modules/@babel/runtime/helpers/nonIterableSpread.js"}],"animation/assign.js":[function(require,module,exports) {
+},{"./arrayWithoutHoles":"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js","./iterableToArray":"../node_modules/@babel/runtime/helpers/iterableToArray.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableSpread":"../node_modules/@babel/runtime/helpers/nonIterableSpread.js"}],"animation/expressions.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getRandom = getRandom;
+exports.addTo = addTo;
+exports.subtractBy = subtractBy;
+exports.multiplyBy = multiplyBy;
+exports.divideBy = divideBy;
+exports.isExpression = isExpression;
+exports.evaluateExpression = evaluateExpression;
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _utils = require("../utils");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/** expression types */
+var EXPRESSIONS = {
+  rnd: getRandom,
+  '+': addTo,
+  '-': subtractBy,
+  '*': multiplyBy,
+  '/': divideBy
+};
+/** returns a random number in a range */
+
+function getRandom(min, max) {
+  var toInt = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+  var value = Math.random() * (max - min) + min;
+  return toInt ? 0 | value : value;
+}
+
+function addTo(add, relativeTo) {
+  return relativeTo + add;
+}
+
+function subtractBy(subtract, relativeTo) {
+  return relativeTo - subtract;
+}
+
+function multiplyBy(multiply, relativeTo) {
+  return relativeTo * multiply;
+}
+
+function divideBy(divide, relativeTo) {
+  return relativeTo / divide;
+}
+/** checks if a node appears to be an expression */
+
+
+function isExpression(value) {
+  return (0, _utils.isArray)(value) && !!EXPRESSIONS[value[0]];
+}
+/** evaluates an expression node */
+
+
+function evaluateExpression(expression) {
+  if (!isExpression(expression)) return expression;
+  var handler = EXPRESSIONS[expression[0]];
+  var rest = expression.slice(1);
+
+  for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+    args[_key - 1] = arguments[_key];
+  }
+
+  rest.push.apply(rest, args);
+  return handler ? handler.apply(void 0, (0, _toConsumableArray2.default)(rest)) : null;
+}
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","../utils":"utils.js"}],"animation/assign.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -52268,6 +52342,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.assignIf = assignIf;
 exports.assignDisplayObjectProps = assignDisplayObjectProps;
 exports.assignEmitterProps = assignEmitterProps;
+exports.evaluateDisplayObjectExpressions = evaluateDisplayObjectExpressions;
 exports.setRelativeY = exports.setRelativeX = exports.setBlendMode = exports.setFps = exports.setRotation = exports.setAlpha = exports.setZ = exports.setY = exports.setX = exports.toEasing = exports.toAnimationSpeed = exports.toBlendMode = exports.toRotation = void 0;
 
 var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
@@ -52277,6 +52352,8 @@ var PIXI = _interopRequireWildcard(require("pixi.js"));
 var pop = _interopRequireWildcard(require("popmotion"));
 
 var _utils = require("../utils");
+
+var _expressions = require("./expressions");
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
@@ -52421,7 +52498,20 @@ function assignEmitterProps(target, props) {
     return t.spawnPos.x = v;
   });
 }
-},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","popmotion":"../node_modules/popmotion/dist/popmotion.es.js","../utils":"utils.js"}],"animation/generators/animation.js":[function(require,module,exports) {
+/** evaluates dynamic expression for display objects */
+
+
+function evaluateDisplayObjectExpressions(props) {
+  if (!props) return;
+  props.x = (0, _expressions.evaluateExpression)(props.x);
+  props.y = (0, _expressions.evaluateExpression)(props.y);
+  props.rotation = (0, _expressions.evaluateExpression)(props.rotation);
+  props.scaleX = (0, _expressions.evaluateExpression)(props.scaleX);
+  props.scaleY = (0, _expressions.evaluateExpression)(props.scaleY);
+  props.pivotX = (0, _expressions.evaluateExpression)(props.pivotX);
+  props.pivotY = (0, _expressions.evaluateExpression)(props.pivotY);
+}
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","popmotion":"../node_modules/popmotion/dist/popmotion.es.js","../utils":"utils.js","./expressions":"animation/expressions.js"}],"animation/generators/animation.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -52440,6 +52530,8 @@ var _utils = require("../utils");
 var _utils2 = require("../../utils");
 
 var _assign = require("../assign");
+
+var _expressions = require("../expressions");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -52489,7 +52581,10 @@ function createAnimation(animator, path, composition, layer, instance) {
         // by default animations can simply use a property by their name
         // for example, an emitter can change "emit.x" to tween a sub property
         // however, rotation is simply "rotation" and not "props.rotation"
-        starting[prop] = !!~prop.indexOf('.') ? (0, _deepGetSet.default)(layer, prop) : layer.props[prop];
+        var isSubProperty = !!~prop.indexOf('.');
+        starting[prop] = isSubProperty ? (0, _deepGetSet.default)(layer, prop) : layer.props[prop]; // evaluate any expression values
+
+        keyframe[prop] = (0, _expressions.evaluateExpression)(keyframe[prop], starting[prop]);
       }
     }
   } // include the starting frame of animation
@@ -52514,7 +52609,7 @@ function createAnimation(animator, path, composition, layer, instance) {
 
   return handler;
 }
-},{"popmotion":"../node_modules/popmotion/dist/popmotion.es.js","deep-get-set":"../node_modules/deep-get-set/index.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils.js","../assign":"animation/assign.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
+},{"popmotion":"../node_modules/popmotion/dist/popmotion.es.js","deep-get-set":"../node_modules/deep-get-set/index.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
 function _arrayWithHoles(arr) {
   if (Array.isArray(arr)) return arr;
 }
@@ -53048,9 +53143,11 @@ function _createSprite() {
             if (isAnimated) sprite.play(); // set some default values
 
             sprite.pivot.x = sprite.width / 2;
-            sprite.pivot.y = sprite.height / 2; // set defaults
+            sprite.pivot.y = sprite.height / 2; // prepare expressions
 
-            (0, _utils.setDefaults)(layer, 'props', SPRITE_DEFAULTS); // assign default props
+            (0, _assign.evaluateDisplayObjectExpressions)(layer.props); // set defaults
+
+            (0, _utils.setDefaults)(layer, 'props', SPRITE_DEFAULTS); // prepare data
 
             (0, _assign.assignDisplayObjectProps)(sprite, layer.props); // setup animations, if any
 
@@ -53062,18 +53159,18 @@ function _createSprite() {
               update: update
             }]);
 
-          case 22:
-            _context.prev = 22;
+          case 23:
+            _context.prev = 23;
             _context.t0 = _context["catch"](2);
             console.error("Failed to create sprite ".concat(path, " while ").concat(phase));
             throw _context.t0;
 
-          case 26:
+          case 27:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 22]]);
+    }, _callee, null, [[2, 23]]);
   }));
   return _createSprite.apply(this, arguments);
 }
@@ -55259,8 +55356,9 @@ var MAPPINGS = {
     props: ['min', 'max'],
     renameTo: 'startRotation'
   },
-  rotationSpeed: {
-    props: ['min', 'max']
+  rotation: {
+    props: ['min', 'max'],
+    renameTo: 'rotationSpeed'
   },
   life: {
     props: ['min', 'max'],
@@ -55310,7 +55408,9 @@ function _createEmitter() {
               return PIXI.Texture.from(img);
             }); // create the instance of the sprite
 
-            phase = 'configuring emitter'; // generate a config -- pixi-particles uses a lot of
+            phase = 'configuring emitter'; // prepare expressions
+
+            (0, _assign4.evaluateDisplayObjectExpressions)(layer.props); // generate a config -- pixi-particles uses a lot of
             // objects that are difficult to work with - nt-animator
             // just accepts arrays and shorthand names, but the need to
             // be converted - the list of mappings are at the top of the
@@ -55360,9 +55460,9 @@ function _createEmitter() {
 
             _context.t0 = _regenerator.default.keys(emit);
 
-          case 14:
+          case 15:
             if ((_context.t1 = _context.t0()).done) {
-              _context.next = 21;
+              _context.next = 22;
               break;
             }
 
@@ -55370,17 +55470,17 @@ function _createEmitter() {
             _ret = _loop(prop);
 
             if (!(_ret === "continue")) {
-              _context.next = 19;
+              _context.next = 20;
               break;
             }
 
-            return _context.abrupt("continue", 14);
+            return _context.abrupt("continue", 15);
 
-          case 19:
-            _context.next = 14;
+          case 20:
+            _context.next = 15;
             break;
 
-          case 21:
+          case 22:
             // assign a few more values
             (0, _assign4.assignIf)(emit.per, _utils.isNumber, config, function (t, v) {
               return t.particlesPerWave = v;
@@ -55389,6 +55489,9 @@ function _createEmitter() {
               return t.maxParticles = v;
             });
             (0, _assign4.assignIf)(emit.frequency, _utils.isNumber, config, function (t, v) {
+              return t.frequency = 1 / v;
+            });
+            (0, _assign4.assignIf)(emit.freq, _utils.isNumber, config, function (t, v) {
               return t.frequency = 1 / v;
             });
             (0, _assign4.assignIf)(emit.chance, _utils.isNumber, config, function (t, v) {
@@ -55404,7 +55507,9 @@ function _createEmitter() {
 
             config.noRotation = !!emit.noRotation;
             config.atBack = !!emit.atBack;
-            config.orderedArt = !!emit.orderedArt; // NOTE: Check the end of the file for overrides to Particle behavior
+            config.orderedArt = !!emit.orderedArt;
+            config.flipParticleX = !!emit.flipParticleX;
+            config.flipParticleY = !!emit.flipParticleY; // NOTE: Check the end of the file for overrides to Particle behavior
             // default to random starting rotations if not overridden
 
             if (!!emit.randomStartRotation) {
@@ -55437,18 +55542,18 @@ function _createEmitter() {
               update: update
             }]);
 
-          case 45:
-            _context.prev = 45;
+          case 49:
+            _context.prev = 49;
             _context.t2 = _context["catch"](2);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
             throw _context.t2;
 
-          case 49:
+          case 53:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 45]]);
+    }, _callee, null, [[2, 49]]);
   }));
   return _createEmitter.apply(this, arguments);
 }
@@ -55495,23 +55600,24 @@ function defineRectangleBounds(config, rect) {
   var x, y, w, h; // parameter options
 
   if (rect.length === 4) {
-    x = rect[0];
-    y = rect[1];
-    w = rect[2];
-    h = rect[3];
-  } else if (rect.length === 3) {
-    x = rect[0];
-    y = rect[1];
-    w = h = rect[2];
-  } else if (rect.length === 2) {
-    x = 0;
-    y = 0;
     w = rect[0];
     h = rect[1];
-  } else if (rect.length === 1) {
+    x = rect[2];
+    y = rect[3];
+  } else if (rect.length === 3) {
+    w = rect[0];
+    h = rect[1];
+    x = rect[2];
+    y = 0;
+  } else if (rect.length === 2) {
+    w = rect[0];
+    h = rect[1];
     x = 0;
     y = 0;
-    w = h = rect[1];
+  } else if (rect.length === 1) {
+    w = h = rect[0];
+    x = 0;
+    y = 0;
   } else if ((0, _utils.isNumber)(rect)) {
     x = 0;
     y = 0;
@@ -55527,34 +55633,63 @@ function defineRectangleBounds(config, rect) {
     x: x - w / 2,
     y: y - h / 2
   };
-} // NOTE: This overrides default PIXI Particles behavior
-// there is not way to define a random start rotation
-// but we can capture the init call and use that to 
-// apply a random rotation, if any
+} // NOTE: this overrides default PIXI behavior for particles
+// There are several properties about particles that cannot be
+// adjusted using the configuration. This overrides the update process
+// to use the normal update sequence, but then apply additional
+// modifiers
+// Particles traveling to the left are flipped upside down since their
+// "direction" is technically 180 degrees. This this change allows for
+// sprites to have their images flipped or rotated based on a starting
+// value. 
 
 
-var __init = Particles.Particle.prototype.init;
+var __override_update__ = Particles.Particle.prototype.update;
 
-Particles.Particle.prototype.init = function () {
+Particles.Particle.prototype.update = function () {
   for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
     args[_key] = arguments[_key];
   }
 
-  // perform normal initialzation
-  __init.apply(this, args); // check for a random start direction
+  // perform normal updateialzation
+  __override_update__.apply(this, args); // apply the default starting rotation
 
 
-  var _this$emitter$config = this.emitter.config,
-      noRotation = _this$emitter$config.noRotation,
-      randomStartRotation = _this$emitter$config.randomStartRotation;
+  if (this.startingRotation) this.rotation += this.startingRotation; // allow sprite flipping on x axis
 
-  if (!noRotation && randomStartRotation) {
-    var _randomStartRotation = (0, _slicedToArray2.default)(randomStartRotation, 2),
-        min = _randomStartRotation[0],
-        max = _randomStartRotation[1];
+  if (this.emitter.config.flipParticleX && this.scale.x > 0) this.scale.x *= -1; // allow sprite flipping on y axis
+
+  if (this.emitter.config.flipParticleY && this.scale.y > 0) this.scale.y *= -1;
+};
+/** NOTE: This will override default PIXI Particle behavior
+ * When creating a new particle this will define random start
+ * rotations for particles, if needed
+ */
+
+
+var DEFAULT_RANDOM_ROTATIONS = [0, 360];
+var __override_init__ = Particles.Particle.prototype.init;
+
+Particles.Particle.prototype.init = function () {
+  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
+  }
+
+  // perform normal updateialzation
+  __override_init__.apply(this, args); // apply the default starting rotation
+
+
+  var startingRotation = this.emitter.config.startingRotation;
+  if ((0, _utils.isNumber)(startingRotation)) this.startingRotation = startingRotation * _utils.RAD; // when not explicitly disabled, use a random rotation
+
+  if (startingRotation !== false) {
+    var _ref = startingRotation || DEFAULT_RANDOM_ROTATIONS,
+        _ref2 = (0, _slicedToArray2.default)(_ref, 2),
+        min = _ref2[0],
+        max = _ref2[1];
 
     var angle = Math.random() * (max - min) + min;
-    this.rotation = Math.random() * _utils.TAU * angle;
+    this.startingRotation = angle * _utils.RAD;
   }
 };
 },{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../assign":"animation/assign.js","../../utils":"utils.js","../resources/resolveImages":"animation/resources/resolveImages.js","./animation":"animation/generators/animation.js"}],"animation/generators/index.js":[function(require,module,exports) {
@@ -55606,7 +55741,9 @@ function _createInstance() {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            // unpack all data
+            // format the path
+            path = path.replace(/^\/*/, ''); // unpack all data
+
             instance = (0, _cloneDeep.default)(data); // create the instance container
 
             container = new PIXI.Container();
@@ -55640,10 +55777,10 @@ function _createInstance() {
               _iterator.f();
             }
 
-            _context.next = 8;
+            _context.next = 9;
             return Promise.all(pending);
 
-          case 8:
+          case 9:
             composite = _context.sent;
             // with all results, create the final object
             _iterator2 = _createForOfIteratorHelper(composite);
@@ -55675,7 +55812,7 @@ function _createInstance() {
 
             return _context.abrupt("return", container);
 
-          case 12:
+          case 13:
           case "end":
             return _context.stop();
         }
@@ -55737,7 +55874,7 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
 
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "create", /*#__PURE__*/function () {
       var _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(resource) {
-        var path, data;
+        var path, data, instance;
         return _regenerator.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -55751,12 +55888,12 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
                   break;
                 }
 
-                console.error("Cannot resolve ".concat(resource));
+                console.error("Cannot resolve node ".concat(resource));
                 return _context.abrupt("return");
 
               case 5:
                 if (!(data.compose !== undefined)) {
-                  _context.next = 11;
+                  _context.next = 13;
                   break;
                 }
 
@@ -55764,12 +55901,14 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
                 return (0, _generators.default)((0, _assertThisInitialized2.default)(_this), resource, data);
 
               case 8:
-                return _context.abrupt("return", _context.sent);
+                instance = _context.sent;
+                instance.type = data.type;
+                return _context.abrupt("return", instance);
 
-              case 11:
+              case 13:
                 console.error('nothing to compse at', resource);
 
-              case 12:
+              case 14:
               case "end":
                 return _context.stop();
             }
@@ -55785,6 +55924,8 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
     _this.options = options;
     return _this;
   }
+  /** the preferred prefix for loading external urls */
+
 
   (0, _createClass2.default)(Animator, [{
     key: "baseUrl",
@@ -55848,6 +55989,13 @@ exports.findResponsiveStage = void 0;
 // This function is generated to be flat as opposed to using
 // a loop since it's performed each frame of animation by
 // many children
+// generates a function simiar to
+// function findResponsiveState(container) {
+//   if (!container.parent) return;
+//   if (container.parent.isResponsiveState) return container.parent;
+//   if (!container.parent.parent) return;
+//   if (container.parent.parent.isResponsiveState) return container.parent.parent;
+// ... and so on
 
 /** Searches PIXI ancestors looking for a ResponsiveStage */
 var findResponsiveStage = function () {
@@ -56033,7 +56181,7 @@ function _createSuper(Derived) { return function () { var Super = (0, _getProtot
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
-/** Handles responsive scalinga resizing relative to a stage */
+/** Handles responsive scaling for a container relative to a stage */
 var ResponsiveContainer = /*#__PURE__*/function (_PIXI$Container) {
   (0, _inherits2.default)(ResponsiveContainer, _PIXI$Container);
 
@@ -56084,13 +56232,6 @@ var ResponsiveContainer = /*#__PURE__*/function (_PIXI$Container) {
     }
   }, {
     key: "relativeX",
-    // /** creates a new ResponsiveContainer */
-    // constructor(...args) {
-    // 	super(...args);
-    // 	// ensure relative position values
-    // 	this.relativeX = 0;
-    // 	this.relativeY = 0;
-    // }
 
     /** returns the relative position for a container 
      * @returns {number} the relative position value
