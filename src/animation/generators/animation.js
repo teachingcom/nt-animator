@@ -1,7 +1,7 @@
 import * as pop from 'popmotion';
 import deep from 'deep-get-set';
 import cloneDeep from "clone-deep";
-import { unpack } from "../utils";
+import { unpack, inheritFrom } from "../utils";
 import { isNumber } from "../../utils";
 import { assignDisplayObjectProps, toEasing, assignEmitterProps } from '../assign';
 import { isExpression, evaluateExpression } from '../expressions';
@@ -15,6 +15,7 @@ export default function createAnimation(animator, path, composition, layer, inst
 
 	// unpack any variables
 	layer.animation = cloneDeep(layer.animation);
+	inheritFrom(animation, composition, layer.animation, 'base');
 	unpack(animator, composition, layer, 'animation');
 
 	// start creating the popmotion animation

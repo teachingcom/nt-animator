@@ -38,6 +38,7 @@ export class Animator extends EventEmitter {
 		if (data.compose !== undefined) {
 			const instance = await createInstance(this, resource, data);
 			instance.type = data.type;
+			instance.path = resource;
 			return instance;
 		}
 

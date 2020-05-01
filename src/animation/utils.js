@@ -1,4 +1,5 @@
 import cloneDeep from "clone-deep";
+import deepDefaults from 'deep-defaults';
 
 import { isString, isIterable } from "../utils";
 import { parsePath, resolvePath } from "./path";
@@ -11,7 +12,8 @@ export function inheritFrom(animator, composition, layer, prop) {
 
 	// apply the inherited properties
 	const basedOn = clone(animator, composition, base);
-	Object.assign(layer, basedOn);
+	deepDefaults(layer, basedOn);
+	return layer;
 }
 
 /** clones an individual data node */

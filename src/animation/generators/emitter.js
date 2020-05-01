@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import * as Particles from 'pixi-particles';
-import { assignIf, evaluateDisplayObjectExpressions } from "../assign";
+import { assignIf, evaluateDisplayObjectExpressions, assignDisplayObjectProps } from "../assign";
 import { isNumber, noop, map, setDefaults, isString, isArray, RAD } from "../../utils";
 
 import resolveImages from "../resources/resolveImages";
@@ -25,7 +25,8 @@ const EMITTER_DEFAULTS = {
 	pivotX: 0.5,
 	pivotY: 0.5,
 	x: 0,
-	y: 0
+	y: 0,
+	z: 0
 };
 
 /** creates an emitter instance */
@@ -138,7 +139,7 @@ export default async function createEmitter(animator, path, composition, layer) 
 
 		// set container defaults
 		setDefaults(layer, 'props', EMITTER_DEFAULTS);
-		Object.assign(container, layer.props);
+		assignDisplayObjectProps(container, layer.props);
 
 		// animate, if needed
 		phase = 'creating animation';
