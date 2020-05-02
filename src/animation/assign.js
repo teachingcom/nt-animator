@@ -9,6 +9,16 @@ export function assignIf(value, condition, target, action, ...args) {
 }
 
 // calculations
+export const toColor = value => {
+		
+	// already a hex string
+	if (isString(value)) return value;
+
+	// parse decimals as hex
+	const hex = parseInt(value, 10).toString(16);
+	return '000000'.substr(hex.length) + hex;
+};
+
 export const toRotation = rotation => (rotation / 360) * TAU;
 export const toBlendMode = mode => PIXI.BLEND_MODES[mode.toUpperCase()] || PIXI.BLEND_MODES.NORMAL;
 export const toAnimationSpeed = fps => fps / 60;
@@ -36,6 +46,7 @@ export const setX = (t, v) => t.x = v;
 export const setY = (t, v) => t.y = v;
 export const setZ = (t, v) => t.zIndex = v;
 export const setAlpha = (t, v) => t.alpha = v;
+export const setTint = (t, v) => t.tint = v;
 export const setRotation = (t, v) => t.rotation = toRotation(v);
 export const setFps = (t, v) => t.animationSpeed = toAnimationSpeed(v);
 export const setBlendMode = (t, v) => t.blendMode = toBlendMode(v);
@@ -50,6 +61,7 @@ export function assignDisplayObjectProps(target, props) {
 	assignIf(props.x, isNumber, target, setX);
 	assignIf(props.y, isNumber, target, setY);
 	assignIf(props.z, isNumber, target, setZ);
+	assignIf(props.tint, isNumber, target, setTint);
 	assignIf(props.rotation, isNumber, target, setRotation);
 	assignIf(props.fps, isNumber, target, setFps);
 	assignIf(props.blend, isString, target, setBlendMode);

@@ -69489,7 +69489,7 @@ exports.assignIf = assignIf;
 exports.assignDisplayObjectProps = assignDisplayObjectProps;
 exports.assignEmitterProps = assignEmitterProps;
 exports.evaluateDisplayObjectExpressions = evaluateDisplayObjectExpressions;
-exports.setRelativeY = exports.setRelativeX = exports.setBlendMode = exports.setFps = exports.setRotation = exports.setAlpha = exports.setZ = exports.setY = exports.setX = exports.toEasing = exports.toAnimationSpeed = exports.toBlendMode = exports.toRotation = void 0;
+exports.setRelativeY = exports.setRelativeX = exports.setBlendMode = exports.setFps = exports.setRotation = exports.setTint = exports.setAlpha = exports.setZ = exports.setY = exports.setX = exports.toEasing = exports.toAnimationSpeed = exports.toBlendMode = exports.toRotation = exports.toColor = void 0;
 
 var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 
@@ -69516,6 +69516,16 @@ function assignIf(value, condition, target, action) {
   if (condition(value)) action.apply(void 0, [target, value].concat(args));
 } // calculations
 
+
+var toColor = function toColor(value) {
+  // already a hex string
+  if ((0, _utils.isString)(value)) return value; // parse decimals as hex
+
+  var hex = parseInt(value, 10).toString(16);
+  return '000000'.substr(hex.length) + hex;
+};
+
+exports.toColor = toColor;
 
 var toRotation = function toRotation(rotation) {
   return rotation / 360 * _utils.TAU;
@@ -69580,6 +69590,12 @@ var setAlpha = function setAlpha(t, v) {
 
 exports.setAlpha = setAlpha;
 
+var setTint = function setTint(t, v) {
+  return t.tint = v;
+};
+
+exports.setTint = setTint;
+
 var setRotation = function setRotation(t, v) {
   return t.rotation = toRotation(v);
 };
@@ -69618,6 +69634,7 @@ function assignDisplayObjectProps(target, props) {
   assignIf(props.x, _utils.isNumber, target, setX);
   assignIf(props.y, _utils.isNumber, target, setY);
   assignIf(props.z, _utils.isNumber, target, setZ);
+  assignIf(props.tint, _utils.isNumber, target, setTint);
   assignIf(props.rotation, _utils.isNumber, target, setRotation);
   assignIf(props.fps, _utils.isNumber, target, setFps);
   assignIf(props.blend, _utils.isString, target, setBlendMode); // alpha
@@ -72485,19 +72502,20 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var MAPPINGS = {
   alpha: {
     props: ['start', 'end'],
-    allowList: true
+    displayAsList: true
   },
   scale: {
     props: ['start', 'end'],
-    allowList: true
+    displayAsList: true
   },
   color: {
     props: ['start', 'end'],
-    allowList: true
+    displayAsList: true,
+    converter: _assign4.toColor
   },
   speed: {
     props: ['start', 'end'],
-    allowList: true
+    displayAsList: true
   },
   dir: {
     props: ['min', 'max'],
@@ -72580,9 +72598,10 @@ function _createEmitter() {
 
               var total = assign.length;
 
-              if (total > 2 && mapping.allowList) {
+              if (total > 2 && mapping.displayAsList) {
                 assign = {
                   list: (0, _utils.map)(assign, function (value, i) {
+                    if (mapping.converter) value = mapping.converter(value);
                     return {
                       value: value,
                       time: i / (total - 1)
@@ -72596,7 +72615,13 @@ function _createEmitter() {
                   var _assign = assign,
                       _assign2 = (0, _slicedToArray2.default)(_assign, 2),
                       start = _assign2[0],
-                      stop = _assign2[1];
+                      stop = _assign2[1]; // conversion, if any
+
+
+                  if (mapping.converter) {
+                    start = mapping.converter(start);
+                    stop = mapping.converter(stop);
+                  }
 
                   assign = (_assign3 = {}, (0, _defineProperty2.default)(_assign3, mapping.props[0], start), (0, _defineProperty2.default)(_assign3, mapping.props[1], stop), _assign3);
                 } // copy the properties using 'start' and 'end' as default
@@ -72662,6 +72687,11 @@ function _createEmitter() {
 
             if (!!emit.randomStartRotation) {
               config.randomStartRotation = (0, _utils.isArray)(emit.randomStartRotation) ? emit.randomStartRotation : [0, 360];
+            } // explicity disabled
+
+
+            if (emit.startingRotation === false) {
+              config.startingRotation = false;
             } // appears to be required
 
 
@@ -72690,18 +72720,18 @@ function _createEmitter() {
               update: update
             }]);
 
-          case 49:
-            _context.prev = 49;
+          case 50:
+            _context.prev = 50;
             _context.t2 = _context["catch"](2);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
             throw _context.t2;
 
-          case 53:
+          case 54:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 49]]);
+    }, _callee, null, [[2, 50]]);
   }));
   return _createEmitter.apply(this, arguments);
 }
@@ -73474,7 +73504,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62704" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55566" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

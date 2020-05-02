@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import * as Particles from 'pixi-particles';
-import { assignIf, evaluateDisplayObjectExpressions, assignDisplayObjectProps } from "../assign";
+import { assignIf, toColor, evaluateDisplayObjectExpressions, assignDisplayObjectProps } from "../assign";
 import { isNumber, noop, map, setDefaults, isString, isArray, RAD } from "../../utils";
 
 import resolveImages from "../resources/resolveImages";
@@ -8,10 +8,10 @@ import createAnimation from './animation';
 
 // emitter property mappings
 const MAPPINGS = {
-	alpha: { props: ['start', 'end'], allowList: true },
-	scale: { props: ['start', 'end'], allowList: true },
-	color: { props: ['start', 'end'], allowList: true },
-	speed: { props: ['start', 'end'], allowList: true },
+	alpha: { props: ['start', 'end'], displayAsList: true },
+	scale: { props: ['start', 'end'], displayAsList: true },
+	color: { props: ['start', 'end'], displayAsList: true, converter: toColor },
+	speed: { props: ['start', 'end'], displayAsList: true },
 	dir: { props: ['min', 'max'], renameTo: 'startRotation' },
 	rotation: { props: ['min', 'max'], renameTo: 'rotationSpeed' },
 	life: { props: ['min', 'max'], renameTo: 'lifetime' }
@@ -72,16 +72,24 @@ export default async function createEmitter(animator, path, composition, layer) 
 			// complex version -- for now, default timing
 			// to be relative to the total position
 			const total = assign.length;
-			if (total > 2 && mapping.allowList) {
+			if (total > 2 && mapping.displayAsList) {
 				assign = {
-					list: map(assign, (value, i) => ({
-						value, time: i / (total - 1)
-					}))
+					list: map(assign, (value, i) => {
+						if (mapping.converter) value = mapping.converter(value);
+						return { value, time: i / (total - 1) };
+					})
 				};
 			}
 			// otherwise, just create a simple start/stop
 			else {
-				const [start, stop] = assign;
+				let [start, stop] = assign;
+
+				// conversion, if any
+				if (mapping.converter) {
+					start = mapping.converter(start);
+					stop = mapping.converter(stop);
+				}
+
 				assign = {
 					[mapping.props[0]]: start,
 					[mapping.props[1]]: stop
@@ -117,6 +125,11 @@ export default async function createEmitter(animator, path, composition, layer) 
 			config.randomStartRotation = isArray(emit.randomStartRotation)
 				? emit.randomStartRotation
 				: [0, 360];
+		}
+		
+		// explicity disabled
+		if (emit.startingRotation === false) {
+			config.startingRotation = false;
 		}
 
 		// appears to be required
