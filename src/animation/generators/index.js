@@ -15,6 +15,7 @@ export default async function createInstance(animator, path, data) {
 	
 	// unpack all data
 	const instance = cloneDeep(data);
+	inheritFrom(animator, data, instance, 'base');
 	
 	// create the instance container
 	const container = new PIXI.Container();
@@ -23,10 +24,10 @@ export default async function createInstance(animator, path, data) {
 	// kick off creating each element
 	const pending = [ ];
 	for (const layer of instance.compose) {
-		const { type } = layer;
 		inheritFrom(animator, data, layer, 'base');
-
+		
 		// sprite layers
+		const { type } = layer;
 		if (type === 'sprite') {
 			const sprite = createSprite(animator, path, data, layer);
 			pending.push(sprite);

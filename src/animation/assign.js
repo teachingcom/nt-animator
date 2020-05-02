@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import * as pop from 'popmotion';
-import { isString, isNumber, isArray, TAU } from '../utils';
+import { isString, isNumber, isArray, TAU, RAD } from '../utils';
 import { evaluateExpression } from './expressions';
 
 /** executes an assignment function only when the condtion passes */
@@ -19,7 +19,7 @@ export const toColor = value => {
 	return '000000'.substr(hex.length) + hex;
 };
 
-export const toRotation = rotation => (rotation / 360) * TAU;
+export const toRotation = rotation => rotation * RAD;
 export const toBlendMode = mode => PIXI.BLEND_MODES[mode.toUpperCase()] || PIXI.BLEND_MODES.NORMAL;
 export const toAnimationSpeed = fps => fps / 60;
 export const toEasing = ease => {

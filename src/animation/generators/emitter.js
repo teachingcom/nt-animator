@@ -119,17 +119,24 @@ export default async function createEmitter(animator, path, composition, layer) 
 		config.flipParticleX = !!emit.flipParticleX;
 		config.flipParticleY = !!emit.flipParticleY;
 
+		// if rotation is disabled
+		if (emit.noRotation) {
+			config.rotationSpeed = undefined;
+		}
+
 		// NOTE: Check the end of the file for overrides to Particle behavior
 		// default to random starting rotations if not overridden
-		if (!!emit.randomStartRotation) {
-			config.randomStartRotation = isArray(emit.randomStartRotation)
-				? emit.randomStartRotation
-				: [0, 360];
-		}
-		
-		// explicity disabled
-		if (emit.startingRotation === false) {
-			config.startingRotation = false;
+		if (!emit.noRotation) {
+
+			// has a random start rotation range
+			if (isNumber(emit.startRotation)) {
+				config.hasDefinedStartRotation = true;
+				config.definedStartRotation = emit.startRotation;
+			}
+			// if it's a range
+			else if (isArray(emit.startRotation)) {
+				config.randomStartRotation = emit.randomStartRotation;
+			}
 		}
 
 		// appears to be required
@@ -277,8 +284,8 @@ Particles.Particle.prototype.update = function (...args) {
 	__override_update__.apply(this, args);
 
 	// apply the default starting rotation
-	if (this.startingRotation)
-		this.rotation += this.startingRotation;
+	if (this.rotationModifier)
+		this.rotation += this.rotationModifier;
 
 	// allow sprite flipping on x axis
 	if (this.emitter.config.flipParticleX && this.scale.x > 0)
@@ -303,15 +310,33 @@ Particles.Particle.prototype.init = function (...args) {
 	__override_init__.apply(this, args);
 
 	// apply the default starting rotation
-	const { startingRotation } = this.emitter.config;
-	if (isNumber(startingRotation))
-		this.startingRotation = startingRotation * RAD;
-
-	// when not explicitly disabled, use a random rotation
-	if (startingRotation !== false) {
-		const [min, max] = startingRotation || DEFAULT_RANDOM_ROTATIONS;
+	const {
+		rotationSpeed,
+		randomStartRotation,
+		hasDefinedStartRotation,
+		definedStartRotation
+	} = this.emitter.config;
+	
+	// has a defined start rotation
+	if (hasDefinedStartRotation) {
+		this.rotation = this.rotationModifier = definedStartRotation;
+	}
+	// has a random range of start rotations
+	else if (randomStartRotation) {
+		const [min, max] = randomStartRotation || DEFAULT_RANDOM_ROTATIONS;
 		const angle = (Math.random() * (max - min)) + min;
-		this.startingRotation = angle * RAD;
+		this.rotation = this.rotationModifier = angle * RAD;
+	}
+	// no rotation modification
+	else {
+		this.rotation = this.rotationModifier = 0;
+	}
+
+	// if there's a constant rotation applied, then
+	// this should be every frame. otherwise, do it
+	// once any stop
+	if (!!rotationSpeed) {
+		this.rotationModifier = undefined;
 	}
 
 };

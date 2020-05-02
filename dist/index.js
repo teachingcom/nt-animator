@@ -69528,7 +69528,7 @@ var toColor = function toColor(value) {
 exports.toColor = toColor;
 
 var toRotation = function toRotation(rotation) {
-  return rotation / 360 * _utils.TAU;
+  return rotation * _utils.RAD;
 };
 
 exports.toRotation = toRotation;
@@ -72682,16 +72682,23 @@ function _createEmitter() {
             config.atBack = !!emit.atBack;
             config.orderedArt = !!emit.orderedArt;
             config.flipParticleX = !!emit.flipParticleX;
-            config.flipParticleY = !!emit.flipParticleY; // NOTE: Check the end of the file for overrides to Particle behavior
+            config.flipParticleY = !!emit.flipParticleY; // if rotation is disabled
+
+            if (emit.noRotation) {
+              config.rotationSpeed = undefined;
+            } // NOTE: Check the end of the file for overrides to Particle behavior
             // default to random starting rotations if not overridden
 
-            if (!!emit.randomStartRotation) {
-              config.randomStartRotation = (0, _utils.isArray)(emit.randomStartRotation) ? emit.randomStartRotation : [0, 360];
-            } // explicity disabled
 
-
-            if (emit.startingRotation === false) {
-              config.startingRotation = false;
+            if (!emit.noRotation) {
+              // has a random start rotation range
+              if ((0, _utils.isNumber)(emit.startRotation)) {
+                config.hasDefinedStartRotation = true;
+                config.definedStartRotation = emit.startRotation;
+              } // if it's a range
+              else if ((0, _utils.isArray)(emit.startRotation)) {
+                  config.randomStartRotation = emit.randomStartRotation;
+                }
             } // appears to be required
 
 
@@ -72833,7 +72840,7 @@ Particles.Particle.prototype.update = function () {
   __override_update__.apply(this, args); // apply the default starting rotation
 
 
-  if (this.startingRotation) this.rotation += this.startingRotation; // allow sprite flipping on x axis
+  if (this.rotationModifier) this.rotation += this.rotationModifier; // allow sprite flipping on x axis
 
   if (this.emitter.config.flipParticleX && this.scale.x > 0) this.scale.x *= -1; // allow sprite flipping on y axis
 
@@ -72857,17 +72864,33 @@ Particles.Particle.prototype.init = function () {
   __override_init__.apply(this, args); // apply the default starting rotation
 
 
-  var startingRotation = this.emitter.config.startingRotation;
-  if ((0, _utils.isNumber)(startingRotation)) this.startingRotation = startingRotation * _utils.RAD; // when not explicitly disabled, use a random rotation
+  var _this$emitter$config = this.emitter.config,
+      rotationSpeed = _this$emitter$config.rotationSpeed,
+      randomStartRotation = _this$emitter$config.randomStartRotation,
+      hasDefinedStartRotation = _this$emitter$config.hasDefinedStartRotation,
+      definedStartRotation = _this$emitter$config.definedStartRotation; // has a defined start rotation
 
-  if (startingRotation !== false) {
-    var _ref = startingRotation || DEFAULT_RANDOM_ROTATIONS,
-        _ref2 = (0, _slicedToArray2.default)(_ref, 2),
-        min = _ref2[0],
-        max = _ref2[1];
+  if (hasDefinedStartRotation) {
+    this.rotation = this.rotationModifier = definedStartRotation;
+  } // has a random range of start rotations
+  else if (randomStartRotation) {
+      var _ref = randomStartRotation || DEFAULT_RANDOM_ROTATIONS,
+          _ref2 = (0, _slicedToArray2.default)(_ref, 2),
+          min = _ref2[0],
+          max = _ref2[1];
 
-    var angle = Math.random() * (max - min) + min;
-    this.startingRotation = angle * _utils.RAD;
+      var angle = Math.random() * (max - min) + min;
+      this.rotation = this.rotationModifier = angle * _utils.RAD;
+    } // no rotation modification
+    else {
+        this.rotation = this.rotationModifier = 0;
+      } // if there's a constant rotation applied, then
+  // this should be every frame. otherwise, do it
+  // once any stop
+
+
+  if (!!rotationSpeed) {
+    this.rotationModifier = undefined;
   }
 };
 },{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../assign":"animation/assign.js","../../utils":"utils.js","../resources/resolveImages":"animation/resources/resolveImages.js","./animation":"animation/generators/animation.js"}],"animation/generators/index.js":[function(require,module,exports) {
@@ -72922,7 +72945,8 @@ function _createInstance() {
             // format the path
             path = path.replace(/^\/*/, ''); // unpack all data
 
-            instance = (0, _cloneDeep.default)(data); // create the instance container
+            instance = (0, _cloneDeep.default)(data);
+            (0, _utils.inheritFrom)(animator, data, instance, 'base'); // create the instance container
 
             container = new PIXI.Container();
             container.update = _utils2.noop; // kick off creating each element
@@ -72933,8 +72957,9 @@ function _createInstance() {
             try {
               for (_iterator.s(); !(_step = _iterator.n()).done;) {
                 layer = _step.value;
-                type = layer.type;
                 (0, _utils.inheritFrom)(animator, data, layer, 'base'); // sprite layers
+
+                type = layer.type;
 
                 if (type === 'sprite') {
                   sprite = (0, _sprite.default)(animator, path, data, layer);
@@ -72955,10 +72980,10 @@ function _createInstance() {
               _iterator.f();
             }
 
-            _context.next = 9;
+            _context.next = 10;
             return Promise.all(pending);
 
-          case 9:
+          case 10:
             composite = _context.sent;
             // with all results, create the final object
             _iterator2 = _createForOfIteratorHelper(composite);
@@ -72990,7 +73015,7 @@ function _createInstance() {
 
             return _context.abrupt("return", container);
 
-          case 13:
+          case 14:
           case "end":
             return _context.stop();
         }
@@ -73504,7 +73529,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55566" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49657" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
