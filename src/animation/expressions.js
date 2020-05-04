@@ -1,12 +1,13 @@
-import { isArray } from "../utils";
+import { isArray, isString } from "../utils";
 
 /** expression types */
 const EXPRESSIONS = {
-	rnd: getRandom,
-	'+': addTo,
-	'-': subtractBy,
-	'*': multiplyBy,
-	'/': divideBy
+	':rnd': getRandom,
+	':+': addTo,
+	':-': subtractBy,
+	':*': multiplyBy,
+	':/': divideBy,
+	':%': percentOf,
 };
 
 /** returns a random number in a range */
@@ -31,16 +32,34 @@ export function divideBy(divide, relativeTo) {
 	return relativeTo / divide;
 }
 
+export function percentOf(percent, relativeTo) {
+	return relativeTo * (percent / 100);
+}
+
 /** checks if a node appears to be an expression */
 export function isExpression(value) {
-	return isArray(value) && !!EXPRESSIONS[value[0]];
+	return isArray(value) && isString(value[0]) && value[0][0] === ':';
 }
 
 /** evaluates an expression node */
 export function evaluateExpression(expression, ...args) {
 	if (!isExpression(expression)) return expression;
-	const handler = EXPRESSIONS[expression[0]];
-	const rest = expression.slice(1);
+	const [token] = expression;
+	const handler = EXPRESSIONS[token];
+	const rest = expression.slice(1);	
 	rest.push.apply(rest, args);
-	return handler ? handler(...rest) : null;
+
+	// this expression will probably fail
+	if (!handler) {
+		console.error(`No expression handler was found for token ${token}`);
+		return null;
+	}
+
+	try {
+		return handler(...rest);
+	}
+	catch (ex) {
+		console.error(`Failed to evaluate expression ${token} with ${rest.join(', ')}`);
+		throw ex;
+	}
 }

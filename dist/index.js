@@ -69407,7 +69407,62 @@ function _toConsumableArray(arr) {
 }
 
 module.exports = _toConsumableArray;
-},{"./arrayWithoutHoles":"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js","./iterableToArray":"../node_modules/@babel/runtime/helpers/iterableToArray.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableSpread":"../node_modules/@babel/runtime/helpers/nonIterableSpread.js"}],"animation/expressions.js":[function(require,module,exports) {
+},{"./arrayWithoutHoles":"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js","./iterableToArray":"../node_modules/@babel/runtime/helpers/iterableToArray.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableSpread":"../node_modules/@babel/runtime/helpers/nonIterableSpread.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+module.exports = _arrayWithHoles;
+},{}],"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js":[function(require,module,exports) {
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+module.exports = _iterableToArrayLimit;
+},{}],"../node_modules/@babel/runtime/helpers/nonIterableRest.js":[function(require,module,exports) {
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableRest;
+},{}],"../node_modules/@babel/runtime/helpers/slicedToArray.js":[function(require,module,exports) {
+var arrayWithHoles = require("./arrayWithHoles");
+
+var iterableToArrayLimit = require("./iterableToArrayLimit");
+
+var unsupportedIterableToArray = require("./unsupportedIterableToArray");
+
+var nonIterableRest = require("./nonIterableRest");
+
+function _slicedToArray(arr, i) {
+  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
+}
+
+module.exports = _slicedToArray;
+},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArrayLimit":"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"animation/expressions.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -69418,10 +69473,13 @@ exports.addTo = addTo;
 exports.subtractBy = subtractBy;
 exports.multiplyBy = multiplyBy;
 exports.divideBy = divideBy;
+exports.percentOf = percentOf;
 exports.isExpression = isExpression;
 exports.evaluateExpression = evaluateExpression;
 
 var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 
 var _utils = require("../utils");
 
@@ -69429,11 +69487,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /** expression types */
 var EXPRESSIONS = {
-  rnd: getRandom,
-  '+': addTo,
-  '-': subtractBy,
-  '*': multiplyBy,
-  '/': divideBy
+  ':rnd': getRandom,
+  ':+': addTo,
+  ':-': subtractBy,
+  ':*': multiplyBy,
+  ':/': divideBy,
+  ':%': percentOf
 };
 /** returns a random number in a range */
 
@@ -69458,28 +69517,47 @@ function multiplyBy(multiply, relativeTo) {
 function divideBy(divide, relativeTo) {
   return relativeTo / divide;
 }
+
+function percentOf(percent, relativeTo) {
+  return relativeTo * (percent / 100);
+}
 /** checks if a node appears to be an expression */
 
 
 function isExpression(value) {
-  return (0, _utils.isArray)(value) && !!EXPRESSIONS[value[0]];
+  return (0, _utils.isArray)(value) && (0, _utils.isString)(value[0]) && value[0][0] === ':';
 }
 /** evaluates an expression node */
 
 
 function evaluateExpression(expression) {
   if (!isExpression(expression)) return expression;
-  var handler = EXPRESSIONS[expression[0]];
+
+  var _expression = (0, _slicedToArray2.default)(expression, 1),
+      token = _expression[0];
+
+  var handler = EXPRESSIONS[token];
   var rest = expression.slice(1);
 
   for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
     args[_key - 1] = arguments[_key];
   }
 
-  rest.push.apply(rest, args);
-  return handler ? handler.apply(void 0, (0, _toConsumableArray2.default)(rest)) : null;
+  rest.push.apply(rest, args); // this expression will probably fail
+
+  if (!handler) {
+    console.error("No expression handler was found for token ".concat(token));
+    return null;
+  }
+
+  try {
+    return handler.apply(void 0, (0, _toConsumableArray2.default)(rest));
+  } catch (ex) {
+    console.error("Failed to evaluate expression ".concat(token, " with ").concat(rest.join(', ')));
+    throw ex;
+  }
 }
-},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","../utils":"utils.js"}],"animation/assign.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils.js"}],"animation/assign.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -69546,10 +69624,15 @@ var toAnimationSpeed = function toAnimationSpeed(fps) {
 exports.toAnimationSpeed = toAnimationSpeed;
 
 var toEasing = function toEasing(ease) {
-  var _pop$easing;
-
   // allow for a complex bezier
-  if ((0, _utils.isArray)(ease)) return (_pop$easing = pop.easing).cubicBezier.apply(_pop$easing, (0, _toConsumableArray2.default)(ease)); // looks wacky, but it's juset converting snake case to
+  if ((0, _utils.isArray)(ease)) {
+    var _pop$easing;
+
+    // if the first value is a number, assume cubic bezier
+    if ((0, _utils.isNumber)(ease[0])) return (_pop$easing = pop.easing).cubicBezier.apply(_pop$easing, (0, _toConsumableArray2.default)(ease)); // otherwise, map each
+
+    return (0, _utils.map)(ease, toEasing);
+  } // looks wacky, but it's juset converting snake case to
   // camel case and prefixing with "ease"
   // so, "in_out" or "inOut" becomes "easeInOut"
   else if ((0, _utils.isString)(ease)) {
@@ -69558,6 +69641,7 @@ var toEasing = function toEasing(ease) {
       });
       if (ease.substr(0, 4) !== 'ease') ease = "ease" + ease[0].toUpperCase() + ease.substr(1);
     } // check for an easing or just use linear
+
 
   return pop.easing[ease] || pop.easing.linear;
 };
@@ -69682,6 +69766,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = createAnimation;
 
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
 var pop = _interopRequireWildcard(require("popmotion"));
 
 var _deepGetSet = _interopRequireDefault(require("deep-get-set"));
@@ -69696,139 +69782,131 @@ var _assign = require("../assign");
 
 var _expressions = require("../expressions");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 // creates an animation
 function createAnimation(animator, path, composition, layer, instance) {
-  if (!layer.animation) return; // used to update sub properties
+  // check for special debugging flags
+  if (layer.animate === false) return; // find the source of animations
 
-  var isEmitter = layer.type === 'emitter'; // unpack any variables
+  var animations = [];
 
-  layer.animation = (0, _cloneDeep.default)(layer.animation);
-  (0, _utils.inheritFrom)(animation, composition, layer.animation, 'base');
-  (0, _utils.unpack)(animator, composition, layer, 'animation'); // start creating the popmotion animation
-
-  var _layer$animation = layer.animation,
-      keyframes = _layer$animation.keyframes,
-      sequence = _layer$animation.sequence,
-      _layer$animation$loop = _layer$animation.loop,
-      loop = _layer$animation$loop === void 0 ? Infinity : _layer$animation$loop,
-      _layer$animation$dura = _layer$animation.duration,
-      duration = _layer$animation$dura === void 0 ? 1000 : _layer$animation$dura,
-      ease = _layer$animation.ease;
-  var easings = (0, _assign.toEasing)(ease);
-  var animation = {
-    timings: [],
-    values: keyframes || sequence || [],
-    easings: easings,
-    loop: loop,
-    duration: duration
-  }; // copy all default values for the starting frame
-
-  var starting = {}; //TODO: create an update mapper to improve performance
-  // create a timings parameter
-
-  for (var i = 0; i < animation.values.length; i++) {
-    var keyframe = animation.values[i]; // get the timing value, if any
-
-    var timing = (0, _utils2.isNumber)(keyframe.at) ? keyframe.at : i / animation.values.length;
-    animation.timings.push(timing); // copy all default values
-
-    for (var prop in keyframe) {
-      if (!(prop in starting)) {
-        // TODO: this part is confusing -- special layer configurations
-        // can create animations using their prop name and sub property, but
-        // by default animations can simply use a property by their name
-        // for example, an emitter can change "emit.x" to tween a sub property
-        // however, rotation is simply "rotation" and not "props.rotation"
-        var isSubProperty = !!~prop.indexOf('.');
-        starting[prop] = isSubProperty ? (0, _deepGetSet.default)(layer, prop) : layer.props[prop]; // evaluate any expression values
-
-        keyframe[prop] = (0, _expressions.evaluateExpression)(keyframe[prop], starting[prop]);
-      }
-    }
-  } // include the starting frame of animation
-  // and also shift timings to account for
-  // the extra frame of animation
+  if ((0, _utils2.isArray)(layer.animations)) {
+    animations = animations.concat(layer.animations);
+  } else if (!!layer.animation) {
+    animations = [layer.animation];
+  } // without animations, just quit
 
 
-  animation.values.unshift(starting);
-  animation.timings.push(1); // create the animation that assigns
-  // property values
+  if (animations.length === 0) {
+    return;
+  } // used to update sub properties
 
-  var handler = pop.keyframes(animation);
-  handler.start({
-    update: function update(_update) {
-      (0, _assign.assignDisplayObjectProps)(instance, _update); // assign any emitter changes
 
-      if (isEmitter) {
-        (0, _assign.assignEmitterProps)(instance.emitter, _update);
-      }
-    }
-  }); // return the animation object
+  var isEmitter = layer.type === 'emitter'; // update function
 
-  return handler;
-}
-},{"popmotion":"../node_modules/popmotion/dist/popmotion.es.js","deep-get-set":"../node_modules/deep-get-set/index.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
+  var updater = _utils2.noop;
+  layer.animations = []; // create each animation
 
-module.exports = _arrayWithHoles;
-},{}],"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js":[function(require,module,exports) {
-function _iterableToArrayLimit(arr, i) {
-  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
-  var _arr = [];
-  var _n = true;
-  var _d = false;
-  var _e = undefined;
-
-  try {
-    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-      _arr.push(_s.value);
-
-      if (i && _arr.length === i) break;
-    }
-  } catch (err) {
-    _d = true;
-    _e = err;
-  } finally {
+  for (var i = 0; i < animations.length; i++) {
     try {
-      if (!_n && _i["return"] != null) _i["return"]();
-    } finally {
-      if (_d) throw _e;
+      // unpack any variables
+      var animation = (0, _cloneDeep.default)(animations[i]);
+      (0, _utils.inheritFrom)(animator, composition, animation, 'base'); // REFACTOR: don't create object just for array prop - 
+      // consider allowing the "prop" for unpack to be an array index
+      // unpack expects it to be part of the layer object
+
+      (0, _utils.unpack)(animator, composition, {
+        animation: animation
+      }, 'animation'); // start creating the popmotion animation
+
+      var keyframes = animation.keyframes,
+          sequence = animation.sequence,
+          _animation$loop = animation.loop,
+          loop = _animation$loop === void 0 ? Infinity : _animation$loop,
+          _animation$flip = animation.flip,
+          flip = _animation$flip === void 0 ? 0 : _animation$flip,
+          _animation$elapsed = animation.elapsed,
+          elapsed = _animation$elapsed === void 0 ? 0 : _animation$elapsed,
+          _animation$duration = animation.duration,
+          duration = _animation$duration === void 0 ? 1000 : _animation$duration,
+          ease = animation.ease;
+      var easings = (0, _assign.toEasing)(ease); // check for how to repeat the animation - if it's a flip then
+      // we're just going to use the flip value
+
+      var repeating = !!flip ? flip : loop;
+      var config = (0, _defineProperty2.default)({
+        timings: [],
+        values: keyframes || sequence || [],
+        elapsed: (0, _expressions.evaluateExpression)(elapsed, duration) || 0,
+        easings: easings,
+        duration: duration
+      }, flip === true ? 'flip' : 'loop', (0, _utils2.isNumber)(repeating) ? repeating : Infinity); // copy all default values for the starting frame
+
+      var starting = {}; //TODO: create an update mapper to improve performance
+      // create a timings parameter
+
+      for (var _i = 0; _i < config.values.length; _i++) {
+        var keyframe = config.values[_i]; // get the timing value, if any
+
+        var timing = (0, _utils2.isNumber)(keyframe.at) ? keyframe.at : _i / config.values.length;
+        config.timings.push(timing); // copy all default values
+
+        for (var prop in keyframe) {
+          if (!(prop in starting)) {
+            // TODO: Colors have special rules
+            // using tint/hue shift/and Popmotion color tween rules
+            // TODO: this part is confusing -- special layer configurations
+            // can create animations using their prop name and sub property, but
+            // by default animations can simply use a property by their name
+            // for example, an emitter can change "emit.x" to tween a sub property
+            // however, rotation is simply "rotation" and not "props.rotation"
+            var isSubProperty = !!~prop.indexOf('.');
+            starting[prop] = isSubProperty ? (0, _deepGetSet.default)(layer, prop) : layer.props[prop]; // evaluate any expression values
+          } // evaluate any expressions
+
+
+          keyframe[prop] = (0, _expressions.evaluateExpression)(keyframe[prop], starting[prop]);
+        }
+      } // include the starting frame of animation
+      // and also shift timings to account for
+      // the extra frame of animation
+
+
+      config.values.unshift(starting);
+      config.timings.push(1); // create the animation that assigns
+      // property values
+      // TODO: research the "merge" function for Popmotion
+
+      var handler = pop.keyframes(config);
+      handler.start({
+        update: function update(_update) {
+          (0, _assign.assignDisplayObjectProps)(instance, _update); // assign any emitter changes
+
+          if (isEmitter) {
+            (0, _assign.assignEmitterProps)(instance.emitter, _update);
+          }
+        },
+        complete: function complete() {// console.log('restart');
+          // handler.start();
+        }
+      }); // return the animation object
+      // track the object
+      // return handler;
+    } // make it clear which animation failed
+    catch (ex) {
+      console.error("failed to create animation ".concat(i));
+      throw ex;
     }
   }
 
-  return _arr;
+  return updater;
 }
-
-module.exports = _iterableToArrayLimit;
-},{}],"../node_modules/@babel/runtime/helpers/nonIterableRest.js":[function(require,module,exports) {
-function _nonIterableRest() {
-  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}
-
-module.exports = _nonIterableRest;
-},{}],"../node_modules/@babel/runtime/helpers/slicedToArray.js":[function(require,module,exports) {
-var arrayWithHoles = require("./arrayWithHoles");
-
-var iterableToArrayLimit = require("./iterableToArrayLimit");
-
-var unsupportedIterableToArray = require("./unsupportedIterableToArray");
-
-var nonIterableRest = require("./nonIterableRest");
-
-function _slicedToArray(arr, i) {
-  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
-}
-
-module.exports = _slicedToArray;
-},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArrayLimit":"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"animation/resources/loadImage.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","popmotion":"../node_modules/popmotion/dist/popmotion.es.js","deep-get-set":"../node_modules/deep-get-set/index.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js"}],"animation/resources/loadImage.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -70261,6 +70339,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 // default parameters to create a sprite
 var SPRITE_DEFAULTS = {
+  alpha: 1,
   rotation: 0,
   scaleY: 1,
   scaleX: 1,
@@ -70320,6 +70399,7 @@ function _createSprite() {
 
             return _context.abrupt("return", [{
               displayObject: sprite,
+              data: layer,
               update: update
             }]);
 
@@ -72532,6 +72612,7 @@ var MAPPINGS = {
 }; // default parameters to create a sprite
 
 var EMITTER_DEFAULTS = {
+  alpha: 1,
   rotation: 0,
   scaleY: 1,
   scaleX: 1,
@@ -72585,7 +72666,13 @@ function _createEmitter() {
             config = {
               autoUpdate: true
             };
-            _layer$emit = layer.emit, emit = _layer$emit === void 0 ? {} : _layer$emit;
+            _layer$emit = layer.emit, emit = _layer$emit === void 0 ? {} : _layer$emit; // fix common naming mistakes
+
+            if (emit.colors) {
+              emit.color = emit.colors;
+              emit.colors = undefined;
+            } // update each property
+
 
             _loop = function _loop(prop) {
               var mapping = MAPPINGS[prop];
@@ -72633,9 +72720,9 @@ function _createEmitter() {
 
             _context.t0 = _regenerator.default.keys(emit);
 
-          case 15:
+          case 16:
             if ((_context.t1 = _context.t0()).done) {
-              _context.next = 22;
+              _context.next = 23;
               break;
             }
 
@@ -72643,17 +72730,17 @@ function _createEmitter() {
             _ret = _loop(prop);
 
             if (!(_ret === "continue")) {
-              _context.next = 20;
+              _context.next = 21;
               break;
             }
 
-            return _context.abrupt("continue", 15);
+            return _context.abrupt("continue", 16);
 
-          case 20:
-            _context.next = 15;
+          case 21:
+            _context.next = 16;
             break;
 
-          case 22:
+          case 23:
             // assign a few more values
             (0, _assign4.assignIf)(emit.per, _utils.isNumber, config, function (t, v) {
               return t.particlesPerWave = v;
@@ -72724,21 +72811,22 @@ function _createEmitter() {
 
             return _context.abrupt("return", [{
               displayObject: container,
+              data: layer,
               update: update
             }]);
 
-          case 50:
-            _context.prev = 50;
+          case 51:
+            _context.prev = 51;
             _context.t2 = _context["catch"](2);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
             throw _context.t2;
 
-          case 54:
+          case 55:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 50]]);
+    }, _callee, null, [[2, 51]]);
   }));
   return _createEmitter.apply(this, arguments);
 }
@@ -72758,17 +72846,22 @@ function defineCircleBounds(config, circle) {
     y = circle[1];
     r = circle[2];
   } // using a shorthand array
-  else if (circle.length === 1) {
-      x = 0;
+  else if (circle.length === 2) {
+      r = circle[0];
+      x = circle[1];
       y = 0;
-      r = circle[1];
-    } // just a single number
-    else if ((0, _utils.isNumber)(circle)) {
+    } // using a shorthand array
+    else if (circle.length === 1) {
+        r = circle[0];
         x = 0;
         y = 0;
-        r = circle;
-      } // no matches
-      else return; // update the spawn type
+      } // just a single number
+      else if ((0, _utils.isNumber)(circle)) {
+          x = 0;
+          y = 0;
+          r = circle;
+        } // no matches
+        else return; // update the spawn type
 
 
   config.spawnType = 'circle';
@@ -72936,7 +73029,7 @@ function createInstance(_x, _x2, _x3) {
 
 function _createInstance() {
   _createInstance = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, path, data) {
-    var instance, container, pending, _iterator, _step, layer, type, sprite, emitter, composite, _iterator2, _step2, comp, _iterator3, _step3, _layer;
+    var instance, container, pending, _iterator, _step, layer, type, sprite, emitter, composite, _iterator2, _step2, composition, _iterator3, _step3, _layer, role;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -72985,27 +73078,41 @@ function _createInstance() {
 
           case 10:
             composite = _context.sent;
-            // with all results, create the final object
+            // a few additional tracking options
+            container.instances = {}; // with all results, create the final object
+
             _iterator2 = _createForOfIteratorHelper(composite);
 
             try {
               for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-                comp = _step2.value;
+                composition = _step2.value;
                 // add each element
-                _iterator3 = _createForOfIteratorHelper(comp);
+                _iterator3 = _createForOfIteratorHelper(composition);
 
                 try {
                   for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
                     _layer = _step3.value;
                     container.update = (0, _utils2.appendFunc)(container.update, _layer.update);
-                    container.addChild(_layer.displayObject);
+                    container.addChild(_layer.displayObject); // set named instances, if fund
+
+                    role = _layer.data.role;
+
+                    if (role) {
+                      // warn of duplicate roles
+                      if (container.instances[role]) {
+                        console.error("Duplicate layer role found \"".concat(role, "\" for ").concat(path));
+                      } // save for later
+
+
+                      container.instances[role] = _layer;
+                    }
                   }
                 } catch (err) {
                   _iterator3.e(err);
                 } finally {
                   _iterator3.f();
                 }
-              } // return the final layer
+              } // update based on ordering
 
             } catch (err) {
               _iterator2.e(err);
@@ -73013,9 +73120,11 @@ function _createInstance() {
               _iterator2.f();
             }
 
+            container.sortChildren(); // return the final layer
+
             return _context.abrupt("return", container);
 
-          case 14:
+          case 16:
           case "end":
             return _context.stop();
         }

@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import * as pop from 'popmotion';
-import { isString, isNumber, isArray, TAU, RAD } from '../utils';
+import { isString, isNumber, isArray, TAU, RAD, map } from '../utils';
 import { evaluateExpression } from './expressions';
 
 /** executes an assignment function only when the condtion passes */
@@ -25,8 +25,15 @@ export const toAnimationSpeed = fps => fps / 60;
 export const toEasing = ease => {
 	
 	// allow for a complex bezier
-	if (isArray(ease))
-		return pop.easing.cubicBezier(...ease);
+	if (isArray(ease)) {
+
+		// if the first value is a number, assume cubic bezier
+		if (isNumber(ease[0]))
+			return pop.easing.cubicBezier(...ease);
+
+		// otherwise, map each
+		return map(ease, toEasing);
+	}
 
 	// looks wacky, but it's juset converting snake case to
 	// camel case and prefixing with "ease"

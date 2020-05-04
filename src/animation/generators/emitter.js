@@ -19,6 +19,7 @@ const MAPPINGS = {
 
 // default parameters to create a sprite
 const EMITTER_DEFAULTS = {
+	alpha: 1,
 	rotation: 0,
 	scaleY: 1,
 	scaleX: 1,
@@ -60,6 +61,15 @@ export default async function createEmitter(animator, path, composition, layer) 
 		// file to make it easier to understand
 		const config = { autoUpdate: true };
 		const { emit = { } } = layer;
+
+		// fix common naming mistakes
+		if (emit.colors) {
+			emit.color = emit.colors;
+			emit.colors = undefined;
+		}
+
+
+		// update each property
 		for (const prop in emit) {
 			const mapping = MAPPINGS[prop];
 			if (!mapping) continue;
@@ -166,7 +176,7 @@ export default async function createEmitter(animator, path, composition, layer) 
 		container.animation = createAnimation(animator, path, composition, layer, container);
 
 		// attach the update function
-		return [{ displayObject: container, update }];
+		return [{ displayObject: container, data: layer, update }];
 	}
 	catch(ex) {
 		console.error(`Failed to create emitter ${path} while ${phase}`);
@@ -200,10 +210,16 @@ function defineCircleBounds(config, circle) {
 		r = circle[2];
 	}
 	// using a shorthand array
+	else if (circle.length === 2) {
+		r = circle[0];
+		x = circle[1];
+		y = 0;
+	}
+	// using a shorthand array
 	else if (circle.length === 1) {
+		r = circle[0];
 		x = 0;
 		y = 0;
-		r = circle[1]
 	}
 	// just a single number
 	else if (isNumber(circle)) {

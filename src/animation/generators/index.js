@@ -47,15 +47,35 @@ export default async function createInstance(animator, path, data) {
 	// wait for finished work
 	const composite = await Promise.all(pending);
 
+	// a few additional tracking options
+	container.instances = { };
+
 	// with all results, create the final object
-	for (const comp of composite) {
+	for (const composition of composite) {
 
 		// add each element
-		for (const layer of comp) {
+		for (const layer of composition) {
 			container.update = appendFunc(container.update, layer.update);
 			container.addChild(layer.displayObject);
+
+			// set named instances, if fund
+			const { role } = layer.data;
+			if (role) {
+
+				// warn of duplicate roles
+				if (container.instances[role]) {
+					console.error(`Duplicate layer role found "${role}" for ${path}`);
+				}
+
+				// save for later
+				container.instances[role] = layer;
+			}
+
 		}
 	}
+
+	// update based on ordering
+	container.sortChildren();
 
 	// return the final layer
 	return container;

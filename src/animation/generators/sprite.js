@@ -8,6 +8,7 @@ import { setDefaults, noop, map } from '../../utils';
 
 // default parameters to create a sprite
 const SPRITE_DEFAULTS = {
+	alpha: 1,
 	rotation: 0,
 	scaleY: 1,
 	scaleX: 1,
@@ -63,7 +64,7 @@ export default async function createSprite(animator, path, composition, layer) {
 		sprite.animation = createAnimation(animator, path, composition, layer, sprite);
 
 		// attach the update function
-		return [{ displayObject: sprite, update }];
+		return [{ displayObject: sprite, data: layer, update }];
 	}
 	catch(ex) {
 		console.error(`Failed to create sprite ${path} while ${phase}`);
