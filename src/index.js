@@ -6,3 +6,6 @@ export { Animator } from './animation';
 import ResponsiveContainer from './pixi/responsive';
 import ResponsiveStage from './pixi/stage';
 export const PIXI = { ResponsiveContainer, ResponsiveStage };
+
+// helpful utils
+export { default as loadImage } from './animation/resources/loadImage';

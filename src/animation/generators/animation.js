@@ -104,8 +104,6 @@ export default function createAnimation(animator, path, composition, layer, inst
 						// however, rotation is simply "rotation" and not "props.rotation"
 						const isSubProperty = !!~prop.indexOf('.');
 						starting[prop] = isSubProperty ? deep(layer, prop) : layer.props[prop];
-
-						// evaluate any expression values
 					}
 
 					// evaluate any expressions
@@ -132,10 +130,6 @@ export default function createAnimation(animator, path, composition, layer, inst
 						assignEmitterProps(instance.emitter, update);
 					}
 
-				},
-				complete: () => {
-					// console.log('restart');
-					// handler.start();
 				}
 			});
 

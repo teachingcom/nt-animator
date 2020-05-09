@@ -1,7 +1,22 @@
 import * as PIXI from 'pixi.js';
 import * as pop from 'popmotion';
-import { isString, isNumber, isArray, TAU, RAD, map } from '../utils';
-import { evaluateExpression } from './expressions';
+import { isString, isNumber, isArray, TAU, RAD, map, noop, appendFunc } from '../utils';
+import { evaluateExpression, createDynamicExpression, isDynamic } from './expressions';
+import ResponsiveStage from '../pixi/stage';
+
+const DYNAMIC_PROPERTY_DEFAULTS = {
+	x: 0,
+	y: 0,
+	z: 0,
+	rotation: 0,
+	skewX: 0,
+	skewY: 0,
+	pivotX: 0,
+	pivotY: 0,
+	scaleX: 1,
+	scaleY: 1,
+};
+
 
 /** executes an assignment function only when the condtion passes */
 export function assignIf(value, condition, target, action, ...args) {
@@ -104,4 +119,42 @@ export function evaluateDisplayObjectExpressions(props) {
 	props.scaleY = evaluateExpression(props.scaleY);
 	props.pivotX = evaluateExpression(props.pivotX);
 	props.pivotY = evaluateExpression(props.pivotY);
+}
+
+/** handles adding dynamically rendered properties */
+export function applyDynamicProperties(obj, props) {
+	if (!props) return;
+
+	let hasDynamicProperties = false;
+	let update = noop;
+
+	// check and map all dynamic props
+	for (const id in DYNAMIC_PROPERTY_DEFAULTS) {
+		if (isDynamic(props[id])) {
+			const handler = createDynamicExpression(id, props);
+			hasDynamicProperties = true;
+
+			// append the update function
+			update = appendFunc(update, handler);
+			props[id] = DYNAMIC_PROPERTY_DEFAULTS[id];
+		}
+	}
+
+	// if nothing was found, just skip
+	if (!hasDynamicProperties) {
+		return;
+	}
+
+	// override the existing render function
+	const __render__ = obj.render;
+	obj.render = (...args) => {
+
+		// get the stage and perform the update
+		const stage = ResponsiveStage.findResponsiveStage(obj);
+		update(obj, stage);
+
+		// render normally
+		return __render__.apply(obj, args);
+	};
+
 }

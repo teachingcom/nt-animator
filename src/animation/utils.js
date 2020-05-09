@@ -22,7 +22,7 @@ export function clone(animator, data, path) {
 		path = parsePath(path);
 	}
 
-	const source = path.isAbsolute ? animator.data : data;
+	const source = path.isAbsolute ? animator.manifest : data;
 	const cloned = resolvePath(source, path.parts);
 	return cloneDeep(cloned);
 }

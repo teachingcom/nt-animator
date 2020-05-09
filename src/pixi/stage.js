@@ -35,13 +35,14 @@ export default class ResponsiveStage extends PIXI.Container {
 	_definedHeight = 0;
 
 	/** returns that this is a stage that acts as a defined stage for responsive PIXI containers */
-	get isResponsiveStage() {
-		return true;
-	}
+	isResponsiveStage = true;
 
 	/** resizes the stage */
 	resize(width, height) {
 		const { options } = this;
+
+		// track when last updated
+		this.lastUpdate = +new Date;
 		
 		// update scaling values
 		this._definedWidth = width;

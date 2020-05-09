@@ -4,7 +4,8 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "npx parcel watch ./src/index.js"
+    "dev": "npx parcel watch ./src/index.js",
+    "build": "npx parcel build ./src/index.js"
   },
   "author": "",
   "license": "ISC",

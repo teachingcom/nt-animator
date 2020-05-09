@@ -38,6 +38,9 @@ export default class ResponsiveContainer extends PIXI.Container {
 
 	/** match the scaling as required */
 	render(...args) {
+		// TODO -- optimise and check for a timestamp
+		// timestamp changes with resizes
+
 		const stage = ResponsiveStage.findResponsiveStage(this);
 		const { width, height, scaleX, scaleY } = stage;
 		const { x, y } = this.scale;

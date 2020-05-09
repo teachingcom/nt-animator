@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import cloneDeep from 'clone-deep';
 import { inheritFrom } from '../utils';
-import { appendFunc, noop } from '../../utils';
+import { appendFunc, noop, isString } from '../../utils';
 
 // types
 import createSprite from './sprite';
@@ -39,7 +39,17 @@ export default async function createInstance(animator, path, data) {
 		}
 		// not a valid type
 		else {
-			console.error(`[compose] Unknown layer type "${type}"`);
+
+			// check for plugins
+			const plugin = animator.plugins[type];
+			if (plugin) {
+				const custom = plugin(animator, path, data, layer);
+				pending.push(custom);
+			}
+			// unable to create this type
+			else {
+				console.error(`[compose] Unknown layer type "${type}"`);
+			}
 		}
 
 	}
@@ -50,6 +60,9 @@ export default async function createInstance(animator, path, data) {
 	// a few additional tracking options
 	container.instances = { };
 
+	// tracking masks, if any
+	const masks = [ ];
+
 	// with all results, create the final object
 	for (const composition of composite) {
 
@@ -57,6 +70,11 @@ export default async function createInstance(animator, path, data) {
 		for (const layer of composition) {
 			container.update = appendFunc(container.update, layer.update);
 			container.addChild(layer.displayObject);
+
+			// capture masks
+			if ('masks' in layer.data) {
+				masks.push(layer);
+			}
 
 			// set named instances, if fund
 			const { role } = layer.data;
@@ -71,6 +89,20 @@ export default async function createInstance(animator, path, data) {
 				container.instances[role] = layer;
 			}
 
+		}
+	}
+
+	// TODO: this works, but it doesn't work with
+	// alpha channels (not sure why), though it does seem
+	// like it's supported
+	for (const mask of masks) {
+		const { data } = mask;
+		const targets = isString(data.masks) ? [data.masks] : data.masks;
+		for (const ref of targets) {
+			const target = container.instances[ref];
+			if (target) {
+				target.displayObject.mask = mask.displayObject;
+			}
 		}
 	}
 

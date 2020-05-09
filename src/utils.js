@@ -94,5 +94,5 @@ export function setDefaults(target, prop, defaults) {
 
 /** Merges two functions into sequential calls */
 export function appendFunc(orig, append) {
-	return () => { orig(); append(); }
+	return (...args) => { orig(...args); append(...args); }
 }

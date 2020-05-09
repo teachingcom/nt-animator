@@ -1,16 +1,23 @@
+import * as PIXI from 'pixi.js';
 import { EventEmitter } from "../common/event-emitter";
 import { parsePath, resolvePath } from "./path";
 import createInstance from "./generators";
+import getSprite from "./resources/getSprite";
+import getSpritesheet from "./resources/getSpritesheet";
+import { isString } from '../utils';
 
 /** handles creating PIXI animations using defined files */
 export class Animator extends EventEmitter {
 
+	// custom types for compositions
+	plugins = { }
+
 	/** creates a new instance */
-	constructor(data, options) {
+	constructor(manifest, options) {
 		super();
 
 		// save the data file
-		this.data = data;
+		this.manifest = manifest;
 		this.options = options;
 	}
 
@@ -19,14 +26,45 @@ export class Animator extends EventEmitter {
 		return this.options.baseUrl || '/';
 	}
 
+	/** handles loading a single sprite */
+	getSpritesheet = async id => {
+		return getSpritesheet(this, id);
+	}
+
+	/** handles loading a single sprite */
+	getSprite = async (spritesheetId, id) => {
+		const canvas = await getSprite(this, spritesheetId, id);
+		// const texture = PIXI.Texture.from(canvas);
+		return PIXI.Sprite.from(canvas);
+	}
+
+	/** handles a custom type */
+	install = (plugin, customizer) => {
+		this.plugins[plugin] = customizer;
+	}
+
+	/** attempts to find data for a path */
+	lookup = resource => {
+		const path = parsePath(resource);
+		return resolvePath(this.manifest, path.parts);
+	}
+
+	/** handles composing a layer using the provided data
+	 * @type {object} composition data
+	 * @type {string} the relative path for the resource
+	 */
+	compose = async (data, resource) => {
+		const instance = await createInstance(this, resource, data);
+		instance.type = data.type;
+		instance.path = resource;
+		return instance;
+	}
+
 	/** handles creating a new instance from a path
 	 * @type {string} path The resource name to create
 	 */
-	create = async (resource) => {
-		
-		// start by finding the resource
-		const path = parsePath(resource);
-		const data = resolvePath(this.data, path.parts);
+	create = async resource => {
+		const data = this.lookup(resource);
 
 		// doesn't seem to exist
 		if (!data) {
@@ -34,19 +72,14 @@ export class Animator extends EventEmitter {
 			return;
 		}
 
-		// has composition data
-		if (data.compose !== undefined) {
-			const instance = await createInstance(this, resource, data);
-			instance.type = data.type;
-			instance.path = resource;
-			return instance;
+		// missing composition data
+		if (data.compose === undefined) {
+			console.error('nothing to compose at', resource);
+			return;
 		}
 
-		// nothing to compose
-		else {
-			console.error('nothing to compse at', resource);
-		}
-
+		// compose the resource
+		return this.compose(data, resource);
 	}
 
 }

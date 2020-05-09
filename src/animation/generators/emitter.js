@@ -163,17 +163,28 @@ export default async function createEmitter(animator, path, composition, layer) 
 
 		// create the emitter
 		phase = 'creating emitter instance';
-		const container = new PIXI.Container();
-		container.emitter = new Particles.Emitter(container, textures, config);
-		container.emitter.config = config;
 
+		// NOTE: emitters are added to one more container on purpose
+		// because any animations that modify scale will interfere
+		// with scaling done to fit within responsive containers
+		const container = new PIXI.Container();
+
+		// create the particle generator
+		const generator = new PIXI.Container();
+		generator.emitter = new Particles.Emitter(generator, textures, config);
+		generator.emitter.config = config;
+		container.addChild(generator);
+		
 		// set container defaults
 		setDefaults(layer, 'props', EMITTER_DEFAULTS);
-		assignDisplayObjectProps(container, layer.props);
+		assignDisplayObjectProps(generator, layer.props);
+
+		// apply z-indexing
+		container.zIndex = generator.zIndex;
 
 		// animate, if needed
 		phase = 'creating animation';
-		container.animation = createAnimation(animator, path, composition, layer, container);
+		generator.animation = createAnimation(animator, path, composition, layer, generator);
 
 		// attach the update function
 		return [{ displayObject: container, data: layer, update }];
