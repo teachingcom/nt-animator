@@ -89,7 +89,7 @@ export function assignDisplayObjectProps(target, props) {
 	assignIf(props.blend, isString, target, setBlendMode);
 
 	// alpha
-	props.alpha = props.alpha || props.opacity;
+	if (isNumber(props.opacity)) props.alpha = props.opacity;
 	assignIf(props.alpha, isNumber, target, setAlpha);
 	
 	// origin

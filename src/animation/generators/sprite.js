@@ -5,6 +5,7 @@ import resolveImages from '../resources/resolveImages';
 
 import { assignDisplayObjectProps, evaluateDisplayObjectExpressions, applyDynamicProperties } from '../assign';
 import { setDefaults, noop, map } from '../../utils';
+import createTextureFromImage from '../resources/createTextureFromImage';
 
 // default parameters to create a sprite
 const SPRITE_DEFAULTS = {
@@ -39,12 +40,15 @@ export default async function createSprite(animator, path, composition, layer) {
 
 		// create textures for each sprite
 		phase = 'generating textures';
-		const textures = map(images, img => {
-			const texture = PIXI.Texture.from(img);
-			texture.scaleMode = PIXI.SCALE_MODES.LINEAR;
-			texture.mipmap = true;
-			return texture;
-		});
+		let textures;
+		try {
+			textures = map(images, createTextureFromImage);
+		}
+		// had a problem
+		catch (ex) {
+			console.error(`Failed to create a texture for ${path}`, composition);
+			throw ex;
+		}
 		
 		// create the instance of the sprite
 		phase = 'creating sprite instance';

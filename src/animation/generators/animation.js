@@ -62,6 +62,7 @@ export default function createAnimation(animator, path, composition, layer, inst
 			// check for how to repeat the animation - if it's a flip then
 			// we're just going to use the flip value
 			const repeating = !!flip ? flip : loop;
+			const repeatType = flip === true /* intentional */ ? 'flip' : 'loop';
 			const config = {
 				timings: [ ],
 				values: keyframes || sequence || [ ],
@@ -74,7 +75,7 @@ export default function createAnimation(animator, path, composition, layer, inst
 				// it simply plays the animation backwards. Setting them
 				// both causes the "flip" to wait until "loop" finishes, which
 				// when you use Infinity, it never happens
-				[flip === true ? 'flip' : 'loop']: isNumber(repeating) ? repeating : Infinity
+				[repeatType]: isNumber(repeating) ? repeating : Infinity
 			};
 
 			// copy all default values for the starting frame
@@ -89,6 +90,9 @@ export default function createAnimation(animator, path, composition, layer, inst
 				// get the timing value, if any
 				const timing = isNumber(keyframe.at) ? keyframe.at : i / config.values.length;
 				config.timings.push(timing);
+
+				// remove any timing helpers, if any
+				delete keyframe.at;
 
 				// copy all default values
 				for (const prop in keyframe) {
@@ -132,11 +136,6 @@ export default function createAnimation(animator, path, composition, layer, inst
 
 				}
 			});
-
-			// return the animation object
-			// track the object
-			// return handler;
-
 
 		}
 		// make it clear which animation failed

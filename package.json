@@ -18,6 +18,7 @@
     "clone-deep": "^4.0.1",
     "deep-defaults": "^1.0.5",
     "deep-get-set": "^1.1.0",
+    "pixi": "^0.3.1",
     "pixi-particles": "^4.2.0",
     "pixi.js": "^5.2.3",
     "popmotion": "^8.7.1"

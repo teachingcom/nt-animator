@@ -64600,8 +64600,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.RecursiveLimitExceededException = RecursiveLimitExceededException;
+exports.InvalidTextureRequestException = InvalidTextureRequestException;
 
 function RecursiveLimitExceededException() {}
+
+function InvalidTextureRequestException() {}
 },{}],"animation/utils.js":[function(require,module,exports) {
 "use strict";
 
@@ -70123,7 +70126,7 @@ function assignDisplayObjectProps(target, props) {
   assignIf(props.fps, _utils.isNumber, target, setFps);
   assignIf(props.blend, _utils.isString, target, setBlendMode); // alpha
 
-  props.alpha = props.alpha || props.opacity;
+  if ((0, _utils.isNumber)(props.opacity)) props.alpha = props.opacity;
   assignIf(props.alpha, _utils.isNumber, target, setAlpha); // origin
 
   assignIf(props.pivotX, _utils.isNumber, target.pivot, setRelativeX, target.width);
@@ -70278,13 +70281,16 @@ function createAnimation(animator, path, composition, layer, instance) {
       // we're just going to use the flip value
 
       var repeating = !!flip ? flip : loop;
+      var repeatType = flip === true
+      /* intentional */
+      ? 'flip' : 'loop';
       var config = (0, _defineProperty2.default)({
         timings: [],
         values: keyframes || sequence || [],
         elapsed: (0, _expressions.evaluateExpression)(elapsed, duration) || 0,
         easings: easings,
         duration: duration
-      }, flip === true ? 'flip' : 'loop', (0, _utils2.isNumber)(repeating) ? repeating : Infinity); // copy all default values for the starting frame
+      }, repeatType, (0, _utils2.isNumber)(repeating) ? repeating : Infinity); // copy all default values for the starting frame
 
       var starting = {}; //TODO: create an update mapper to improve performance
       // create a timings parameter
@@ -70293,7 +70299,9 @@ function createAnimation(animator, path, composition, layer, instance) {
         var keyframe = config.values[_i]; // get the timing value, if any
 
         var timing = (0, _utils2.isNumber)(keyframe.at) ? keyframe.at : _i / config.values.length;
-        config.timings.push(timing); // copy all default values
+        config.timings.push(timing); // remove any timing helpers, if any
+
+        delete keyframe.at; // copy all default values
 
         for (var prop in keyframe) {
           if (!(prop in starting)) {
@@ -70330,9 +70338,7 @@ function createAnimation(animator, path, composition, layer, instance) {
             (0, _assign.assignEmitterProps)(instance.emitter, _update);
           }
         }
-      }); // return the animation object
-      // track the object
-      // return handler;
+      });
     } // make it clear which animation failed
     catch (ex) {
       console.error("failed to create animation ".concat(i));
@@ -70745,7 +70751,74 @@ function _resolveImages() {
   }));
   return _resolveImages.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../utils":"utils.js","../path":"animation/path.js","../utils":"animation/utils.js","./getSprite":"animation/resources/getSprite.js","./loadImage":"animation/resources/loadImage.js"}],"animation/generators/sprite.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../utils":"utils.js","../path":"animation/path.js","../utils":"animation/utils.js","./getSprite":"animation/resources/getSprite.js","./loadImage":"animation/resources/loadImage.js"}],"animation/resources/createTextureFromImage.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createTextureFromImage;
+
+var PIXI = _interopRequireWildcard(require("pixi.js"));
+
+var _errors = require("../errors");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+// internal texture cache
+var TEXTURES = {};
+/** handles creating a texture from an image */
+
+function createTextureFromImage(img) {
+  var spritesheet;
+  var sprite; // attempt to load the texture
+
+  try {
+    if (!img) {
+      throw new _errors.InvalidTextureRequestException();
+    } // get sprite info
+
+
+    spritesheet = img.getAttribute('spritesheet');
+    sprite = img.getAttribute('sprite');
+    var useCache = spritesheet && sprite; // texture to load
+
+    var texture; // create the cache, if missing
+
+    if (useCache) {
+      TEXTURES[spritesheet] = TEXTURES[spritesheet] || {};
+      texture = TEXTURES[spritesheet][sprite];
+    } // if it exists, reuse it
+
+
+    if (texture) {
+      return texture;
+    } // create the new texture
+
+
+    texture = PIXI.Texture.from(img);
+    texture.scaleMode = PIXI.SCALE_MODES.LINEAR;
+    texture.mipmap = true; // cache, if needed
+
+    if (useCache) {
+      TEXTURES[spritesheet][sprite] = texture;
+    } // return the result
+
+
+    return texture;
+  } // handle the error
+  catch (ex) {
+    // the image has data to work with
+    if (sprite && spritesheet) {
+      console.error("failed to load ".concat(sprite, " from source ").concat(spritesheet));
+    }
+
+    throw ex;
+  }
+}
+},{"pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","../errors":"animation/errors.js"}],"animation/generators/sprite.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -70766,6 +70839,8 @@ var _resolveImages = _interopRequireDefault(require("../resources/resolveImages"
 var _assign = require("../assign");
 
 var _utils = require("../../utils");
+
+var _createTextureFromImage = _interopRequireDefault(require("../resources/createTextureFromImage"));
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
@@ -70815,13 +70890,19 @@ function _createSprite() {
             images = _context.sent;
             // create textures for each sprite
             phase = 'generating textures';
-            textures = (0, _utils.map)(images, function (img) {
-              var texture = PIXI.Texture.from(img);
-              texture.scaleMode = PIXI.SCALE_MODES.LINEAR;
-              texture.mipmap = true;
-              return texture;
-            }); // create the instance of the sprite
+            _context.prev = 9;
+            textures = (0, _utils.map)(images, _createTextureFromImage.default);
+            _context.next = 17;
+            break;
 
+          case 13:
+            _context.prev = 13;
+            _context.t0 = _context["catch"](9);
+            console.error("Failed to create a texture for ".concat(path), composition);
+            throw _context.t0;
+
+          case 17:
+            // create the instance of the sprite
             phase = 'creating sprite instance';
             isAnimated = images.length > 1;
             sprite = isAnimated ? new PIXI.AnimatedSprite(textures) : new PIXI.Sprite(textures[0]); // if animated, start playback
@@ -70856,22 +70937,22 @@ function _createSprite() {
               animation: animation
             }]);
 
-          case 31:
-            _context.prev = 31;
-            _context.t0 = _context["catch"](2);
+          case 38:
+            _context.prev = 38;
+            _context.t1 = _context["catch"](2);
             console.error("Failed to create sprite ".concat(path, " while ").concat(phase));
-            throw _context.t0;
+            throw _context.t1;
 
-          case 35:
+          case 42:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 31]]);
+    }, _callee, null, [[2, 38], [9, 13]]);
   }));
   return _createSprite.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./animation":"animation/generators/animation.js","../resources/resolveImages":"animation/resources/resolveImages.js","../assign":"animation/assign.js","../../utils":"utils.js"}],"../node_modules/pixi-particles/lib/pixi-particles.es.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./animation":"animation/generators/animation.js","../resources/resolveImages":"animation/resources/resolveImages.js","../assign":"animation/assign.js","../../utils":"utils.js","../resources/createTextureFromImage":"animation/resources/createTextureFromImage.js"}],"../node_modules/pixi-particles/lib/pixi-particles.es.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -72997,7 +73078,256 @@ function (_super) {
 }(Particle);
 
 exports.AnimatedParticle = AnimatedParticle;
-},{"pixi.js":"../node_modules/pixi.js/lib/pixi.es.js"}],"animation/generators/emitter.js":[function(require,module,exports) {
+},{"pixi.js":"../node_modules/pixi.js/lib/pixi.es.js"}],"animation/generators/emitter/bounds.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = defineEmitterBounds;
+
+// defines generator spawn points
+function defineEmitterBounds(config, params) {
+  // is a circle
+  if (!!params.circle) defineCircleBounds(config, params.circle); // is a circle
+  else if (!!params.ring) defineRingBounds(config, params.ring); // // is a arc
+    // else if (!!params.arc)
+    // 	defineArcBounds(config, params.arc);
+    // // is a burst
+    // else if (!!params.burst)
+    // 	defineBurstBounds(config, params.burst);
+    // is a rectangle
+    else if (!!params.rect || !!params.rectangle || !!params.box) defineRectangleBounds(config, params.rect || params.rectangle || params.box);
+} // standard warning
+
+
+function warn(type) {
+  console.warn("Invalid ".concat(type, " emitter bounds defined"));
+} // create circular bounding area for an emitter
+
+
+function defineCircleBounds(config, circle) {
+  var x, y, r; // radius, x, and y
+
+  if (circle.length === 3) {
+    x = circle[0];
+    y = circle[1];
+    r = circle[2];
+  } // radius and x
+  else if (circle.length === 2) {
+      r = circle[0];
+      x = circle[1];
+      y = 0;
+    } // radius only
+    else if (circle.length === 1) {
+        r = circle[0];
+        x = 0;
+        y = 0;
+      } // radius only (numeric form)
+      else if (isNumber(circle)) {
+          x = 0;
+          y = 0;
+          r = circle;
+        } // no matches
+        else {
+            warn('circular');
+            return;
+          } // update the spawn type
+
+
+  config.spawnType = 'circle';
+  config.spawnCircle = {
+    x: x,
+    y: y,
+    r: r
+  };
+} // create circular bounding area for an emitter
+
+
+function defineRingBounds(config, ring) {
+  var x, y, r, minR; // radius, x, y, min-radius
+
+  if (ring.length === 4) {
+    r = ring[0];
+    x = ring[1];
+    y = ring[2];
+    minR = ring[3];
+  } // radius, x, and y
+  else if (ring.length === 3) {
+      r = ring[0];
+      x = ring[1];
+      y = ring[2];
+      minR = r - 1;
+    } // radius and x
+    else if (ring.length === 2) {
+        r = ring[0];
+        x = ring[1];
+        y = 0;
+        minR = r - 1;
+      } // radius only
+      else if (ring.length === 1) {
+          r = ring[0];
+          x = 0;
+          y = 0;
+          minR = r - 1;
+        } // radius only (numeric form)
+        else if (isNumber(ring)) {
+            x = 0;
+            y = 0;
+            r = ring;
+            minR = r - 1;
+          } // no matches
+          else {
+              warn('ring');
+              return;
+            } // update the spawn type
+
+
+  config.spawnType = 'ring';
+  config.spawnCircle = {
+    x: x,
+    y: y,
+    r: r,
+    minR: minR
+  };
+} // creates a rectangular point
+// last param is optional, otherwise creates a box
+
+
+function defineRectangleBounds(config, rect) {
+  var x, y, w, h; // width, height, x, and y
+
+  if (rect.length === 4) {
+    w = rect[0];
+    h = rect[1];
+    x = rect[2];
+    y = rect[3];
+  } // width, height, and x
+  else if (rect.length === 3) {
+      w = rect[0];
+      h = rect[1];
+      x = rect[2];
+      y = 0;
+    } // width, height
+    else if (rect.length === 2) {
+        w = rect[0];
+        h = rect[1];
+        x = 0;
+        y = 0;
+      } // width (box shape -- height is assumed to match)
+      else if (rect.length === 1) {
+          w = h = rect[0];
+          x = 0;
+          y = 0;
+        } // width (box shape -- height is assumed to match)
+        else if (isNumber(rect)) {
+            x = 0;
+            y = 0;
+            w = h = rect;
+          } // no matches
+          else {
+              warn('rectangular');
+              return;
+            } // create the rect
+
+
+  config.spawnType = 'rect';
+  config.spawnRect = {
+    w: w,
+    h: h,
+    x: x - w / 2,
+    y: y - h / 2
+  };
+}
+},{}],"animation/generators/emitter/overrides.js":[function(require,module,exports) {
+"use strict";
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var Particles = _interopRequireWildcard(require("pixi-particles"));
+
+var _utils = require("../../utils");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// NOTE: this overrides default PIXI behavior for particles
+// There are several properties about particles that cannot be
+// adjusted using the configuration. This overrides the update process
+// to use the normal update sequence, but then apply additional
+// modifiers
+// Particles traveling to the left are flipped upside down since their
+// "direction" is technically 180 degrees. This this change allows for
+// sprites to have their images flipped or rotated based on a starting
+// value. 
+var __override_update__ = Particles.Particle.prototype.update;
+
+Particles.Particle.prototype.update = function () {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  // perform normal updateialzation
+  __override_update__.apply(this, args); // apply the default starting rotation
+
+
+  if (this.rotationModifier) this.rotation += this.rotationModifier; // allow sprite flipping on x axis
+
+  if (this.emitter.config.flipParticleX && this.scale.x > 0) this.scale.x *= -1; // allow sprite flipping on y axis
+
+  if (this.emitter.config.flipParticleY && this.scale.y > 0) this.scale.y *= -1;
+};
+/** NOTE: This will override default PIXI Particle behavior
+ * When creating a new particle this will define random start
+ * rotations for particles, if needed
+ */
+
+
+var DEFAULT_RANDOM_ROTATIONS = [0, 360];
+var __override_init__ = Particles.Particle.prototype.init;
+
+Particles.Particle.prototype.init = function () {
+  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
+  }
+
+  // perform normal updateialzation
+  __override_init__.apply(this, args); // apply the default starting rotation
+
+
+  var _this$emitter$config = this.emitter.config,
+      rotationSpeed = _this$emitter$config.rotationSpeed,
+      randomStartRotation = _this$emitter$config.randomStartRotation,
+      hasDefinedRotationOffset = _this$emitter$config.hasDefinedRotationOffset,
+      definedRotationOffset = _this$emitter$config.definedRotationOffset; // has a defined start rotation
+
+  if (hasDefinedRotationOffset) {
+    this.rotation = this.rotationModifier = definedRotationOffset;
+  } // has a random range of start rotations
+  else if (randomStartRotation) {
+      var _ref = randomStartRotation || DEFAULT_RANDOM_ROTATIONS,
+          _ref2 = (0, _slicedToArray2.default)(_ref, 2),
+          min = _ref2[0],
+          max = _ref2[1];
+
+      var angle = Math.random() * (max - min) + min;
+      this.rotation = this.rotationModifier = angle * _utils.RAD;
+    } // no rotation modification
+    else {
+        this.rotation = this.rotationModifier = 0;
+      } // if there's a constant rotation applied, then
+  // this should be every frame. otherwise, do it
+  // once any stop
+
+
+  if (!!rotationSpeed) {
+    this.rotationModifier = undefined;
+  }
+};
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../../utils":"animation/utils.js"}],"animation/generators/emitter/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -73017,13 +73347,19 @@ var PIXI = _interopRequireWildcard(require("pixi.js"));
 
 var Particles = _interopRequireWildcard(require("pixi-particles"));
 
-var _assign4 = require("../assign");
+var _assign4 = require("../../assign");
 
-var _utils = require("../../utils");
+var _utils = require("../../../utils");
 
-var _resolveImages = _interopRequireDefault(require("../resources/resolveImages"));
+var _bounds = _interopRequireDefault(require("./bounds"));
 
-var _animation = _interopRequireDefault(require("./animation"));
+require("./overrides");
+
+var _animation = _interopRequireDefault(require("../animation"));
+
+var _resolveImages = _interopRequireDefault(require("../../resources/resolveImages"));
+
+var _createTextureFromImage = _interopRequireDefault(require("../../resources/createTextureFromImage"));
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
@@ -73031,6 +73367,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// apply PIXI rendering overrides
 // emitter property mappings
 var MAPPINGS = {
   alpha: {
@@ -73079,8 +73416,7 @@ var EMITTER_DEFAULTS = {
 
 function createEmitter(_x, _x2, _x3, _x4) {
   return _createEmitter.apply(this, arguments);
-} // defines generator spawn points
-
+}
 
 function _createEmitter() {
   _createEmitter = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, path, composition, layer) {
@@ -73104,10 +73440,19 @@ function _createEmitter() {
             images = _context.sent;
             // create textures for each sprite
             phase = 'generating textures';
-            textures = (0, _utils.map)(images, function (img) {
-              return PIXI.Texture.from(img);
-            }); // create the instance of the sprite
+            _context.prev = 8;
+            textures = (0, _utils.map)(images, _createTextureFromImage.default);
+            _context.next = 16;
+            break;
 
+          case 12:
+            _context.prev = 12;
+            _context.t0 = _context["catch"](8);
+            console.error("Failed to create a texture for ".concat(path), composition);
+            throw _context.t0;
+
+          case 16:
+            // create the instance of the sprite
             phase = 'configuring emitter'; // prepare expressions
 
             (0, _assign4.evaluateDisplayObjectExpressions)(layer.props); // generate a config -- pixi-particles uses a lot of
@@ -73171,29 +73516,29 @@ function _createEmitter() {
               config[mapping.renameTo || prop] = assign;
             };
 
-            _context.t0 = _regenerator.default.keys(emit);
+            _context.t1 = _regenerator.default.keys(emit);
 
-          case 16:
-            if ((_context.t1 = _context.t0()).done) {
-              _context.next = 23;
+          case 23:
+            if ((_context.t2 = _context.t1()).done) {
+              _context.next = 30;
               break;
             }
 
-            prop = _context.t1.value;
+            prop = _context.t2.value;
             _ret = _loop(prop);
 
             if (!(_ret === "continue")) {
-              _context.next = 21;
+              _context.next = 28;
               break;
             }
 
-            return _context.abrupt("continue", 16);
+            return _context.abrupt("continue", 23);
 
-          case 21:
-            _context.next = 16;
+          case 28:
+            _context.next = 23;
             break;
 
-          case 23:
+          case 30:
             // assign a few more values
             (0, _assign4.assignIf)(emit.per, _utils.isNumber, config, function (t, v) {
               return t.particlesPerWave = v;
@@ -73232,9 +73577,9 @@ function _createEmitter() {
 
             if (!emit.noRotation) {
               // has a random start rotation range
-              if ((0, _utils.isNumber)(emit.startRotation)) {
-                config.hasDefinedStartRotation = true;
-                config.definedStartRotation = emit.startRotation;
+              if ((0, _utils.isNumber)(emit.rotationOffset)) {
+                config.hasDefinedRotationOffset = true;
+                config.definedRotationOffset = emit.rotationOffset * _utils.RAD;
               } // if it's a range
               else if ((0, _utils.isArray)(emit.startRotation)) {
                   config.randomStartRotation = emit.randomStartRotation;
@@ -73247,9 +73592,8 @@ function _createEmitter() {
               y: emit.y || 0
             }; // check for emission bounds
 
-            phase = 'defining emitter bounds'; // is a radial spawn
-
-            defineBounds(config, emit); // create the emitter
+            phase = 'defining emitter bounds';
+            (0, _bounds.default)(config, emit); // create the emitter
 
             phase = 'creating emitter instance'; // NOTE: emitters are added to one more container on purpose
             // because any animations that modify scale will interfere
@@ -73276,178 +73620,137 @@ function _createEmitter() {
               update: update
             }]);
 
-          case 54:
-            _context.prev = 54;
-            _context.t2 = _context["catch"](2);
+          case 61:
+            _context.prev = 61;
+            _context.t3 = _context["catch"](2);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
-            throw _context.t2;
+            throw _context.t3;
 
-          case 58:
+          case 65:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 54]]);
+    }, _callee, null, [[2, 61], [8, 12]]);
   }));
   return _createEmitter.apply(this, arguments);
 }
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../../assign":"animation/assign.js","../../../utils":"utils.js","./bounds":"animation/generators/emitter/bounds.js","./overrides":"animation/generators/emitter/overrides.js","../animation":"animation/generators/animation.js","../../resources/resolveImages":"animation/resources/resolveImages.js","../../resources/createTextureFromImage":"animation/resources/createTextureFromImage.js"}],"animation/generators/group.js":[function(require,module,exports) {
+"use strict";
 
-function defineBounds(config, params) {
-  // is a circle
-  if (!!params.circle) defineCircleBounds(config, params.circle); // is a rectangle
-  else if (!!params.rect || !!params.rectangle || !!params.box) defineRectangleBounds(config, params.rect || params.rectangle || params.box);
-} // creates a circular generation point
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createGroup;
 
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-function defineCircleBounds(config, circle) {
-  var x, y, r; // all three params provided
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-  if (circle.length === 3) {
-    x = circle[0];
-    y = circle[1];
-    r = circle[2];
-  } // using a shorthand array
-  else if (circle.length === 2) {
-      r = circle[0];
-      x = circle[1];
-      y = 0;
-    } // using a shorthand array
-    else if (circle.length === 1) {
-        r = circle[0];
-        x = 0;
-        y = 0;
-      } // just a single number
-      else if ((0, _utils.isNumber)(circle)) {
-          x = 0;
-          y = 0;
-          r = circle;
-        } // no matches
-        else return; // update the spawn type
+var PIXI = _interopRequireWildcard(require("pixi.js"));
 
+var _animation = _interopRequireDefault(require("./animation"));
 
-  config.spawnType = 'circle';
-  config.spawnCircle = {
-    x: x,
-    y: y,
-    r: r
-  };
-} // creates a rectangular point
-// last param is optional, otherwise creates a box
+var _assign = require("../assign");
 
+var _utils = require("../../utils");
 
-function defineRectangleBounds(config, rect) {
-  var x, y, w, h; // parameter options
+var _ = _interopRequireDefault(require("."));
 
-  if (rect.length === 4) {
-    w = rect[0];
-    h = rect[1];
-    x = rect[2];
-    y = rect[3];
-  } else if (rect.length === 3) {
-    w = rect[0];
-    h = rect[1];
-    x = rect[2];
-    y = 0;
-  } else if (rect.length === 2) {
-    w = rect[0];
-    h = rect[1];
-    x = 0;
-    y = 0;
-  } else if (rect.length === 1) {
-    w = h = rect[0];
-    x = 0;
-    y = 0;
-  } else if ((0, _utils.isNumber)(rect)) {
-    x = 0;
-    y = 0;
-    w = h = rect;
-  } // no matches
-  else return; // create the rect
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-  config.spawnType = 'rect';
-  config.spawnRect = {
-    w: w,
-    h: h,
-    x: x - w / 2,
-    y: y - h / 2
-  };
-} // NOTE: this overrides default PIXI behavior for particles
-// There are several properties about particles that cannot be
-// adjusted using the configuration. This overrides the update process
-// to use the normal update sequence, but then apply additional
-// modifiers
-// Particles traveling to the left are flipped upside down since their
-// "direction" is technically 180 degrees. This this change allows for
-// sprites to have their images flipped or rotated based on a starting
-// value. 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-
-var __override_update__ = Particles.Particle.prototype.update;
-
-Particles.Particle.prototype.update = function () {
-  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-    args[_key] = arguments[_key];
-  }
-
-  // perform normal updateialzation
-  __override_update__.apply(this, args); // apply the default starting rotation
-
-
-  if (this.rotationModifier) this.rotation += this.rotationModifier; // allow sprite flipping on x axis
-
-  if (this.emitter.config.flipParticleX && this.scale.x > 0) this.scale.x *= -1; // allow sprite flipping on y axis
-
-  if (this.emitter.config.flipParticleY && this.scale.y > 0) this.scale.y *= -1;
+// for creating child instances
+// default parameters to create a sprite
+var GROUP_DEFAULTS = {
+  alpha: 1,
+  rotation: 0,
+  scaleY: 1,
+  scaleX: 1,
+  pivotX: 0.5,
+  pivotY: 0.5,
+  x: 0,
+  y: 0
 };
-/** NOTE: This will override default PIXI Particle behavior
- * When creating a new particle this will define random start
- * rotations for particles, if needed
- */
+/** creates a group instance */
 
+function createGroup(_x, _x2, _x3, _x4) {
+  return _createGroup.apply(this, arguments);
+}
 
-var DEFAULT_RANDOM_ROTATIONS = [0, 360];
-var __override_init__ = Particles.Particle.prototype.init;
+function _createGroup() {
+  _createGroup = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, path, composition, layer) {
+    var update, phase, container, group, animation;
+    return _regenerator.default.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            // recursively built update function
+            update = _utils.noop; // tracking setup phase
 
-Particles.Particle.prototype.init = function () {
-  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    args[_key2] = arguments[_key2];
-  }
+            phase = '';
+            _context.prev = 2;
+            // NOTE: sprites are added a wrapper container on purpose
+            // because any animations that modify scale will interfere
+            // with scaling done to fit within responsive containers
+            container = new PIXI.Container(); // create the instance of the sprite
 
-  // perform normal updateialzation
-  __override_init__.apply(this, args); // apply the default starting rotation
+            phase = 'creating group contents';
+            _context.next = 7;
+            return (0, _.default)(animator, path, layer);
 
+          case 7:
+            group = _context.sent;
+            // sort the contents
+            group.sortChildren(); // create dynamically rendered properties
 
-  var _this$emitter$config = this.emitter.config,
-      rotationSpeed = _this$emitter$config.rotationSpeed,
-      randomStartRotation = _this$emitter$config.randomStartRotation,
-      hasDefinedStartRotation = _this$emitter$config.hasDefinedStartRotation,
-      definedStartRotation = _this$emitter$config.definedStartRotation; // has a defined start rotation
+            phase = 'creating dynamic properties';
+            (0, _assign.applyDynamicProperties)(group, layer.props); // prepare expressions
 
-  if (hasDefinedStartRotation) {
-    this.rotation = this.rotationModifier = definedStartRotation;
-  } // has a random range of start rotations
-  else if (randomStartRotation) {
-      var _ref = randomStartRotation || DEFAULT_RANDOM_ROTATIONS,
-          _ref2 = (0, _slicedToArray2.default)(_ref, 2),
-          min = _ref2[0],
-          max = _ref2[1];
+            phase = 'evaluating property expressions';
+            (0, _assign.evaluateDisplayObjectExpressions)(layer.props); // set defaults
 
-      var angle = Math.random() * (max - min) + min;
-      this.rotation = this.rotationModifier = angle * _utils.RAD;
-    } // no rotation modification
-    else {
-        this.rotation = this.rotationModifier = 0;
-      } // if there's a constant rotation applied, then
-  // this should be every frame. otherwise, do it
-  // once any stop
+            phase = 'applying defaults';
+            (0, _utils.setDefaults)(layer, 'props', GROUP_DEFAULTS); // prepare data
 
+            phase = 'assigning object props';
+            (0, _assign.assignDisplayObjectProps)(group, layer.props); // setup animations, if any
 
-  if (!!rotationSpeed) {
-    this.rotationModifier = undefined;
-  }
-};
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../assign":"animation/assign.js","../../utils":"utils.js","../resources/resolveImages":"animation/resources/resolveImages.js","./animation":"animation/generators/animation.js"}],"animation/generators/index.js":[function(require,module,exports) {
+            phase = 'creating animations';
+            animation = (0, _animation.default)(animator, path, composition, layer, group); // add to the view
+
+            container.zIndex = group.zIndex;
+            container.addChild(group); // set some default values
+
+            group.pivot.x = 0;
+            group.pivot.y = 0; // attach the update function
+
+            return _context.abrupt("return", [{
+              displayObject: container,
+              data: layer,
+              update: update,
+              animation: animation
+            }]);
+
+          case 26:
+            _context.prev = 26;
+            _context.t0 = _context["catch"](2);
+            console.error("Failed to create group ".concat(path, " while ").concat(phase));
+            throw _context.t0;
+
+          case 30:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, null, [[2, 26]]);
+  }));
+  return _createGroup.apply(this, arguments);
+}
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils.js",".":"animation/generators/index.js"}],"animation/generators/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -73471,6 +73774,8 @@ var _sprite = _interopRequireDefault(require("./sprite"));
 
 var _emitter = _interopRequireDefault(require("./emitter"));
 
+var _group = _interopRequireDefault(require("./group"));
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -73490,7 +73795,7 @@ function createInstance(_x, _x2, _x3) {
 
 function _createInstance() {
   _createInstance = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, path, data) {
-    var instance, container, pending, _iterator, _step, layer, type, sprite, emitter, plugin, custom, composite, masks, _iterator2, _step2, composition, _iterator4, _step4, _layer, role, _i, _masks, mask, _data, targets, _iterator3, _step3, ref, target;
+    var instance, container, pending, _iterator, _step, layer, type, sprite, group, emitter, plugin, custom, composite, masks, _iterator2, _step2, composition, _iterator4, _step4, _layer, role, _i, _masks, mask, _data, targets, _iterator3, _step3, ref, target;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -73519,22 +73824,26 @@ function _createInstance() {
                   sprite = (0, _sprite.default)(animator, path, data, layer);
                   pending.push(sprite);
                 } // particle emitters
-                else if (type === 'emitter') {
-                    emitter = (0, _emitter.default)(animator, path, data, layer);
-                    pending.push(emitter);
-                  } // not a valid type
-                  else {
-                      // check for plugins
-                      plugin = animator.plugins[type];
+                else if (type === 'group') {
+                    group = (0, _group.default)(animator, path, data, layer);
+                    pending.push(group);
+                  } // particle emitters
+                  else if (type === 'emitter') {
+                      emitter = (0, _emitter.default)(animator, path, data, layer);
+                      pending.push(emitter);
+                    } // not a valid type
+                    else {
+                        // check for plugins
+                        plugin = animator.plugins[type];
 
-                      if (plugin) {
-                        custom = plugin(animator, path, data, layer);
-                        pending.push(custom);
-                      } // unable to create this type
-                      else {
-                          console.error("[compose] Unknown layer type \"".concat(type, "\""));
-                        }
-                    }
+                        if (plugin) {
+                          custom = plugin(animator, path, data, layer);
+                          pending.push(custom);
+                        } // unable to create this type
+                        else {
+                            console.error("[compose] Unknown layer type \"".concat(type, "\""));
+                          }
+                      }
               } // wait for finished work
 
             } catch (err) {
@@ -73635,7 +73944,7 @@ function _createInstance() {
   }));
   return _createInstance.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter.js"}],"animation/index.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js"}],"animation/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -73908,7 +74217,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53381" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49411" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

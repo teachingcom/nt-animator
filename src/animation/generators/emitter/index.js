@@ -1,10 +1,15 @@
 import * as PIXI from 'pixi.js';
 import * as Particles from 'pixi-particles';
-import { assignIf, toColor, evaluateDisplayObjectExpressions, assignDisplayObjectProps } from "../assign";
-import { isNumber, noop, map, setDefaults, isString, isArray, RAD } from "../../utils";
+import { assignIf, toColor, evaluateDisplayObjectExpressions, assignDisplayObjectProps } from "../../assign";
+import { isNumber, noop, map, setDefaults, isString, isArray, RAD } from "../../../utils";
+import defineEmitterBounds from './bounds';
 
-import resolveImages from "../resources/resolveImages";
-import createAnimation from './animation';
+// apply PIXI rendering overrides
+import './overrides';
+
+import createAnimation from '../animation';
+import resolveImages from "../../resources/resolveImages";
+import createTextureFromImage from '../../resources/createTextureFromImage';
 
 // emitter property mappings
 const MAPPINGS = {
@@ -46,7 +51,15 @@ export default async function createEmitter(animator, path, composition, layer) 
 
 		// create textures for each sprite
 		phase = 'generating textures';
-		const textures = map(images, img => PIXI.Texture.from(img));
+		let textures;
+		try {
+			textures = map(images, createTextureFromImage);
+		}
+		// had a problem
+		catch (ex) {
+			console.error(`Failed to create a texture for ${path}`, composition);
+			throw ex;
+		}
 		
 		// create the instance of the sprite
 		phase = 'configuring emitter';
@@ -139,9 +152,9 @@ export default async function createEmitter(animator, path, composition, layer) 
 		if (!emit.noRotation) {
 
 			// has a random start rotation range
-			if (isNumber(emit.startRotation)) {
-				config.hasDefinedStartRotation = true;
-				config.definedStartRotation = emit.startRotation;
+			if (isNumber(emit.rotationOffset)) {
+				config.hasDefinedRotationOffset = true;
+				config.definedRotationOffset = emit.rotationOffset * RAD;
 			}
 			// if it's a range
 			else if (isArray(emit.startRotation)) {
@@ -157,9 +170,7 @@ export default async function createEmitter(animator, path, composition, layer) 
 
 		// check for emission bounds
 		phase = 'defining emitter bounds';
-
-		// is a radial spawn
-		defineBounds(config, emit);
+		defineEmitterBounds(config, emit);
 
 		// create the emitter
 		phase = 'creating emitter instance';
@@ -197,173 +208,3 @@ export default async function createEmitter(animator, path, composition, layer) 
 }
 
 
-// defines generator spawn points
-function defineBounds(config, params) {
-
-	// is a circle
-	if (!!params.circle)
-		defineCircleBounds(config, params.circle);
-
-	// is a rectangle
-	else if (!!params.rect || !!params.rectangle || !!params.box)
-		defineRectangleBounds(config, params.rect || params.rectangle || params.box);
-}
-
-
-// creates a circular generation point
-function defineCircleBounds(config, circle) {
-	let x, y, r;
-
-	// all three params provided
-	if (circle.length === 3) {
-		x = circle[0];
-		y = circle[1];
-		r = circle[2];
-	}
-	// using a shorthand array
-	else if (circle.length === 2) {
-		r = circle[0];
-		x = circle[1];
-		y = 0;
-	}
-	// using a shorthand array
-	else if (circle.length === 1) {
-		r = circle[0];
-		x = 0;
-		y = 0;
-	}
-	// just a single number
-	else if (isNumber(circle)) {
-		x = 0;
-		y = 0;
-		r = circle;
-	}
-	// no matches
-	else return;
-
-	// update the spawn type
-	config.spawnType = 'circle';
-	config.spawnCircle = { x, y, r };
-}
-
-// creates a rectangular point
-// last param is optional, otherwise creates a box
-function defineRectangleBounds(config, rect) {
-	let x, y, w, h;
-	
-	// parameter options
-	if (rect.length === 4) {
-		w = rect[0];
-		h = rect[1];
-		x = rect[2];
-		y = rect[3];
-	}
-	else if (rect.length === 3) {
-		w = rect[0];
-		h = rect[1];
-		x = rect[2];
-		y = 0;
-	}
-	else if (rect.length === 2) {
-		w = rect[0];
-		h = rect[1];
-		x = 0;
-		y = 0;
-	}
-	else if (rect.length === 1) {
-		w = h = rect[0];
-		x = 0;
-		y = 0;
-	}
-	else  if (isNumber(rect)) {
-		x = 0;
-		y = 0;
-		w = h = rect;
-	}
-	// no matches
-	else return;
-
-	// create the rect
-	config.spawnType = 'rect';
-	config.spawnRect = {
-		w, h,
-		x: x - (w / 2),
-		y: y - (h / 2),
-	};
-}
-
-
-
-
-// NOTE: this overrides default PIXI behavior for particles
-// There are several properties about particles that cannot be
-// adjusted using the configuration. This overrides the update process
-// to use the normal update sequence, but then apply additional
-// modifiers
-// Particles traveling to the left are flipped upside down since their
-// "direction" is technically 180 degrees. This this change allows for
-// sprites to have their images flipped or rotated based on a starting
-// value. 
-const __override_update__ = Particles.Particle.prototype.update;
-Particles.Particle.prototype.update = function (...args) {
-	
-	// perform normal updateialzation
-	__override_update__.apply(this, args);
-
-	// apply the default starting rotation
-	if (this.rotationModifier)
-		this.rotation += this.rotationModifier;
-
-	// allow sprite flipping on x axis
-	if (this.emitter.config.flipParticleX && this.scale.x > 0)
-		this.scale.x *= -1;
-
-	// allow sprite flipping on y axis
-	if (this.emitter.config.flipParticleY && this.scale.y > 0)
-		this.scale.y *= -1;
-	
-};
-
-
-/** NOTE: This will override default PIXI Particle behavior
- * When creating a new particle this will define random start
- * rotations for particles, if needed
- */
-const DEFAULT_RANDOM_ROTATIONS = [ 0, 360 ];
-const __override_init__ = Particles.Particle.prototype.init;
-Particles.Particle.prototype.init = function (...args) {
-	
-	// perform normal updateialzation
-	__override_init__.apply(this, args);
-
-	// apply the default starting rotation
-	const {
-		rotationSpeed,
-		randomStartRotation,
-		hasDefinedStartRotation,
-		definedStartRotation
-	} = this.emitter.config;
-	
-	// has a defined start rotation
-	if (hasDefinedStartRotation) {
-		this.rotation = this.rotationModifier = definedStartRotation;
-	}
-	// has a random range of start rotations
-	else if (randomStartRotation) {
-		const [min, max] = randomStartRotation || DEFAULT_RANDOM_ROTATIONS;
-		const angle = (Math.random() * (max - min)) + min;
-		this.rotation = this.rotationModifier = angle * RAD;
-	}
-	// no rotation modification
-	else {
-		this.rotation = this.rotationModifier = 0;
-	}
-
-	// if there's a constant rotation applied, then
-	// this should be every frame. otherwise, do it
-	// once any stop
-	if (!!rotationSpeed) {
-		this.rotationModifier = undefined;
-	}
-
-};

@@ -6,6 +6,7 @@ import { appendFunc, noop, isString } from '../../utils';
 // types
 import createSprite from './sprite';
 import createEmitter from './emitter';
+import createGroup from './group';
 
 // creates an instance of a car
 export default async function createInstance(animator, path, data) {
@@ -31,6 +32,11 @@ export default async function createInstance(animator, path, data) {
 		if (type === 'sprite') {
 			const sprite = createSprite(animator, path, data, layer);
 			pending.push(sprite);
+		}
+		// particle emitters
+		else if (type === 'group') {
+			const group = createGroup(animator, path, data, layer);
+			pending.push(group);
 		}
 		// particle emitters
 		else if (type === 'emitter') {
