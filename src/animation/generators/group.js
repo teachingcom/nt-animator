@@ -3,7 +3,7 @@ import * as PIXI from 'pixi.js';
 import createAnimation from './animation';
 
 import { assignDisplayObjectProps, evaluateDisplayObjectExpressions, applyDynamicProperties } from '../assign';
-import { setDefaults, noop, map, isArray } from '../../utils';
+import { setDefaults, noop } from '../../utils';
 
 // for creating child instances
 import createInstance from '.';
@@ -34,8 +34,10 @@ export default async function createGroup(animator, path, composition, layer) {
 		// because any animations that modify scale will interfere
 		// with scaling done to fit within responsive containers
 		const container = new PIXI.Container();
+		container.role = layer.role;
 		
-		// create the instance of the sprite
+		// create the instance of the group (each group should
+		// have it's own compose prop)
 		phase = 'creating group contents';
 		const group = await createInstance(animator, path, layer);
 		

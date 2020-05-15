@@ -1,5 +1,5 @@
 import * as Particles from 'pixi-particles';
-import { RAD } from '../../utils';
+import { RAD } from '../../../utils';
 
 // NOTE: this overrides default PIXI behavior for particles
 // There are several properties about particles that cannot be
@@ -17,8 +17,9 @@ Particles.Particle.prototype.update = function (...args) {
 	__override_update__.apply(this, args);
 
 	// apply the default starting rotation
-	if (this.rotationModifier)
+	if (this.rotationModifier) {
 		this.rotation += this.rotationModifier;
+	}
 
 	// allow sprite flipping on x axis
 	if (this.emitter.config.flipParticleX && this.scale.x > 0)
@@ -46,6 +47,7 @@ Particles.Particle.prototype.init = function (...args) {
 	const {
 		rotationSpeed,
 		randomStartRotation,
+		hasRandomStartRotation,
 		hasDefinedRotationOffset,
 		definedRotationOffset
 	} = this.emitter.config;
@@ -55,7 +57,7 @@ Particles.Particle.prototype.init = function (...args) {
 		this.rotation = this.rotationModifier = definedRotationOffset;
 	}
 	// has a random range of start rotations
-	else if (randomStartRotation) {
+	else if (hasRandomStartRotation) {
 		const [min, max] = randomStartRotation || DEFAULT_RANDOM_ROTATIONS;
 		const angle = (Math.random() * (max - min)) + min;
 		this.rotation = this.rotationModifier = angle * RAD;

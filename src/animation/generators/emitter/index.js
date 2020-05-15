@@ -1,7 +1,8 @@
 import * as PIXI from 'pixi.js';
 import * as Particles from 'pixi-particles';
 import { assignIf, toColor, evaluateDisplayObjectExpressions, assignDisplayObjectProps } from "../../assign";
-import { isNumber, noop, map, setDefaults, isString, isArray, RAD } from "../../../utils";
+import { isNumber, noop, setDefaults, isString, isArray, RAD } from "../../../utils";
+import { map } from "../../../utils/collection";
 import defineEmitterBounds from './bounds';
 
 // apply PIXI rendering overrides
@@ -105,7 +106,18 @@ export default async function createEmitter(animator, path, composition, layer) 
 			}
 			// otherwise, just create a simple start/stop
 			else {
-				let [start, stop] = assign;
+				let start;
+				let stop;
+
+				// multi value
+				if (isArray(assign)) {
+					start = assign[0];
+					stop = assign[1];
+				}
+				// single value
+				else {
+					start = stop = assign;
+				}
 
 				// conversion, if any
 				if (mapping.converter) {
@@ -130,7 +142,10 @@ export default async function createEmitter(animator, path, composition, layer) 
 		assignIf(emit.frequency, isNumber, config, (t, v) => t.frequency = 1 / v);
 		assignIf(emit.freq, isNumber, config, (t, v) => t.frequency = 1 / v);
 		assignIf(emit.chance, isNumber, config, (t, v) => t.spawnChance = v);
-		assignIf(emit.type, isString, config, (t, v) => t.spawnType = v);
+		assignIf(emit.duration, isNumber, config, (t, v) => t.emitterLifetime = v / 1000);
+		
+		// this is established using shorthands for bounds
+		// assignIf(emit.type, isString, config, (t, v) => t.spawnType = v);
 		
 		// as it turns out, the library will look up the correct enum on its own
 		assignIf(emit.blend, isString, config, (t, v) => t.blendMode = v);
@@ -143,21 +158,22 @@ export default async function createEmitter(animator, path, composition, layer) 
 		config.flipParticleY = !!emit.flipParticleY;
 
 		// if rotation is disabled
-		if (emit.noRotation) {
+		if (config.noRotation) {
 			config.rotationSpeed = undefined;
 		}
 
 		// NOTE: Check the end of the file for overrides to Particle behavior
 		// default to random starting rotations if not overridden
-		if (!emit.noRotation) {
+		else {
 
 			// has a random start rotation range
-			if (isNumber(emit.rotationOffset)) {
+			if (isNumber(emit.startRotation)) {
 				config.hasDefinedRotationOffset = true;
-				config.definedRotationOffset = emit.rotationOffset * RAD;
+				config.definedRotationOffset = emit.startRotation * RAD;
 			}
 			// if it's a range
 			else if (isArray(emit.startRotation)) {
+				config.hasRandomStartRotation = true;
 				config.randomStartRotation = emit.randomStartRotation;
 			}
 		}
@@ -179,6 +195,7 @@ export default async function createEmitter(animator, path, composition, layer) 
 		// because any animations that modify scale will interfere
 		// with scaling done to fit within responsive containers
 		const container = new PIXI.Container();
+		container.role = layer.role;
 
 		// create the particle generator
 		const generator = new PIXI.Container();

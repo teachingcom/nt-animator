@@ -4,8 +4,9 @@ import createAnimation from './animation';
 import resolveImages from '../resources/resolveImages';
 
 import { assignDisplayObjectProps, evaluateDisplayObjectExpressions, applyDynamicProperties } from '../assign';
-import { setDefaults, noop, map } from '../../utils';
+import { setDefaults, noop } from '../../utils';
 import createTextureFromImage from '../resources/createTextureFromImage';
+import { map } from '../../utils/collection';
 
 // default parameters to create a sprite
 const SPRITE_DEFAULTS = {
@@ -33,6 +34,7 @@ export default async function createSprite(animator, path, composition, layer) {
 		// because any animations that modify scale will interfere
 		// with scaling done to fit within responsive containers
 		const container = new PIXI.Container();
+		container.role = layer.role;
 
 		// gather all required images
 		phase = 'resolving images';

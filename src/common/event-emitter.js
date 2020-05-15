@@ -26,7 +26,10 @@ export class EventEmitter {
 			for (let i = 0; i < length; i++) {
 				try {
 					const handler = events[i];
-					handler(...args);
+					if (!handler) {
+						console.warn(`Missing handler found for event ${event}`);
+					}
+					else handler(...args);
 				}
 				catch (ex) {
 					console.error(ex);

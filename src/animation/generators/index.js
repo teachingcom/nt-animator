@@ -1,22 +1,25 @@
 import * as PIXI from 'pixi.js';
 import cloneDeep from 'clone-deep';
 import { inheritFrom } from '../utils';
-import { appendFunc, noop, isString } from '../../utils';
+import { appendFunc, noop } from '../../utils';
 
 // types
 import createSprite from './sprite';
 import createEmitter from './emitter';
 import createGroup from './group';
+import createMask from './mask';
+import { flatten } from '../../utils/collection';
 
 // creates an instance of a car
-export default async function createInstance(animator, path, data) {
-	
+export default async function createInstance(animator, path, data, relativeTo) {
+
 	// format the path
 	path = path.replace(/^\/*/, '');
 	
 	// unpack all data
 	const instance = cloneDeep(data);
 	inheritFrom(animator, data, instance, 'base');
+	delete data.base;
 	
 	// create the instance container
 	const container = new PIXI.Container();
@@ -24,8 +27,16 @@ export default async function createInstance(animator, path, data) {
 	
 	// kick off creating each element
 	const pending = [ ];
-	for (const layer of instance.compose) {
-		inheritFrom(animator, data, layer, 'base');
+
+	// do this in reverse so layering, by default, matches
+	// the contents of the file
+	for (let i = instance.compose.length; i-- > 0;) {
+		const layer = instance.compose[i];
+		inheritFrom(animator, relativeTo || data, layer, 'base');
+		delete layer.base;
+
+		// check if hidden
+		if (!!(layer.hide || layer.hidden)) continue;
 		
 		// sprite layers
 		const { type } = layer;
@@ -33,10 +44,15 @@ export default async function createInstance(animator, path, data) {
 			const sprite = createSprite(animator, path, data, layer);
 			pending.push(sprite);
 		}
-		// particle emitters
+		// object groups
 		else if (type === 'group') {
 			const group = createGroup(animator, path, data, layer);
 			pending.push(group);
+		}
+		// masking effects
+		else if (type === 'mask') {
+			const mask = createMask(animator, path, data, layer);
+			pending.push(mask);
 		}
 		// particle emitters
 		else if (type === 'emitter') {
@@ -62,55 +78,50 @@ export default async function createInstance(animator, path, data) {
 
 	// wait for finished work
 	const composite = await Promise.all(pending);
+	const layers = flatten(composite);
 
-	// a few additional tracking options
-	container.instances = { };
+	// append each layer
+	for (let i = layers.length; i-- > 0;) {
+		const layer = layers[i];
 
-	// tracking masks, if any
-	const masks = [ ];
+		// add to the view
+		container.update = appendFunc(container.update, layer.update);
+		container.addChildAt(layer.displayObject, 0);
 
-	// with all results, create the final object
-	for (const composition of composite) {
+		// if it's a mask, then apply to previous layers
+		if (layer.displayObject.isMask) {
+			let didSetMask = false;
 
-		// add each element
-		for (const layer of composition) {
-			container.update = appendFunc(container.update, layer.update);
-			container.addChild(layer.displayObject);
+			// loop backwards and apply the mask
+			for (let j = i + 1; j < layers.length; j++) {
+				const target = layers[j];
 
-			// capture masks
-			if ('masks' in layer.data) {
-				masks.push(layer);
+				// if the z-index for this layer is
+				// above the mask, then ignore by default
+				// TODO: would we like to add a property to allow
+				// masks to work from the bottom?
+				if ((target.displayObject.zIndex || 0) > (layer.displayObject.zIndex || 0))
+					continue;
+
+				// if ignoring the mask, don't bother
+				if (!!target.data.ignoreMask || !!target.data.breakMask)
+					continue;
+
+				// apply the mask
+				target.displayObject.mask = layer.displayObject;
+				didSetMask = true;
 			}
 
-			// set named instances, if fund
-			const { role } = layer.data;
-			if (role) {
-
-				// warn of duplicate roles
-				if (container.instances[role]) {
-					console.error(`Duplicate layer role found "${role}" for ${path}`);
-				}
-
-				// save for later
-				container.instances[role] = layer;
+			// if there's an idle mask
+			if (!didSetMask) {
+				console.warn(`Unused mask created for ${path}. Mask will be hidden`);
+				layer.displayObject.visible = false;
 			}
 
 		}
+
 	}
 
-	// TODO: this works, but it doesn't work with
-	// alpha channels (not sure why), though it does seem
-	// like it's supported
-	for (const mask of masks) {
-		const { data } = mask;
-		const targets = isString(data.masks) ? [data.masks] : data.masks;
-		for (const ref of targets) {
-			const target = container.instances[ref];
-			if (target) {
-				target.displayObject.mask = mask.displayObject;
-			}
-		}
-	}
 
 	// update based on ordering
 	container.sortChildren();

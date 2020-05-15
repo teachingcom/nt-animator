@@ -1,8 +1,9 @@
 import * as PIXI from 'pixi.js';
 import * as pop from 'popmotion';
-import { isString, isNumber, isArray, TAU, RAD, map, noop, appendFunc } from '../utils';
+import { isString, isNumber, isArray, RAD, noop, appendFunc, isSet } from '../utils';
 import { evaluateExpression, createDynamicExpression, isDynamic } from './expressions';
 import ResponsiveStage from '../pixi/stage';
+import { map } from '../utils/collection';
 
 const DYNAMIC_PROPERTY_DEFAULTS = {
 	x: 0,

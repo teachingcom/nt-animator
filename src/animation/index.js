@@ -4,7 +4,6 @@ import { parsePath, resolvePath } from "./path";
 import createInstance from "./generators";
 import getSprite from "./resources/getSprite";
 import getSpritesheet from "./resources/getSpritesheet";
-import { isString } from '../utils';
 
 /** handles creating PIXI animations using defined files */
 export class Animator extends EventEmitter {
@@ -53,8 +52,8 @@ export class Animator extends EventEmitter {
 	 * @type {object} composition data
 	 * @type {string} the relative path for the resource
 	 */
-	compose = async (data, resource) => {
-		const instance = await createInstance(this, resource, data);
+	compose = async (data, resource, relativeTo) => {
+		const instance = await createInstance(this, resource, data, relativeTo);
 		instance.type = data.type;
 		instance.path = resource;
 		return instance;
