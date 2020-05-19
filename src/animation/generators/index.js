@@ -9,6 +9,7 @@ import createEmitter from './emitter';
 import createGroup from './group';
 import createMask from './mask';
 import { flatten } from '../../utils/collection';
+import createRepeater from './repeater';
 
 // creates an instance of a car
 export default async function createInstance(animator, path, data, relativeTo) {
@@ -44,6 +45,16 @@ export default async function createInstance(animator, path, data, relativeTo) {
 			const sprite = createSprite(animator, path, data, layer);
 			pending.push(sprite);
 		}
+		// particle emitters
+		else if (type === 'emitter') {
+			const emitter = createEmitter(animator, path, data, layer);
+			pending.push(emitter);
+		}
+		// repeating composition
+		else if (type === 'repeater') {
+			const repeated = createRepeater(animator, path, data, layer);
+			pending.push(repeated);
+		}
 		// object groups
 		else if (type === 'group') {
 			const group = createGroup(animator, path, data, layer);
@@ -53,11 +64,6 @@ export default async function createInstance(animator, path, data, relativeTo) {
 		else if (type === 'mask') {
 			const mask = createMask(animator, path, data, layer);
 			pending.push(mask);
-		}
-		// particle emitters
-		else if (type === 'emitter') {
-			const emitter = createEmitter(animator, path, data, layer);
-			pending.push(emitter);
 		}
 		// not a valid type
 		else {

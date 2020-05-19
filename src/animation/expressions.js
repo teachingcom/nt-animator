@@ -1,5 +1,13 @@
 import { isArray, isString } from "../utils";
 
+// defaults to standard Math random function
+let randomizer = Math;
+
+/** assigns a randomizer to use for the random expression */
+export function setRandomizer(val) {
+	randomizer = val;
+}
+
 /** expression types */
 const EXPRESSIONS = {
 	':rnd': getRandom,
@@ -16,7 +24,15 @@ const DYNAMICS = {
 
 /** returns a random number in a range */
 export function getRandom(min, max, toInt = true) {
-	const value = (Math.random() * (max - min)) + min;
+
+	// single value provided
+	if (isNaN(max)) {
+		max = min;
+		min = 0;
+	}
+
+	// randomize
+	const value = (randomizer.random() * (max - min)) + min;
 	return toInt ? 0|value : value;
 }
 
@@ -81,7 +97,7 @@ export function evaluateExpression(expression, ...args) {
 	}
 
 	try {
-		return handler(...rest);
+		return handler.apply(this, rest);
 	}
 	catch (ex) {
 		console.error(`Failed to evaluate expression ${token} with ${rest.join(', ')}`);

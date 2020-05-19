@@ -1470,8 +1470,8 @@ var _objectAssign = _interopRequireDefault(require("object-assign"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /*!
- * @pixi/polyfill - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/polyfill - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/polyfill is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -1752,8 +1752,8 @@ var _ismobilejs = _interopRequireDefault(require("ismobilejs"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /*!
- * @pixi/settings - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/settings - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/settings is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -3076,10 +3076,10 @@ earcut.flatten = function (data) {
     return result;
 };
 
-},{}],"../node_modules/punycode/punycode.js":[function(require,module,exports) {
+},{}],"../node_modules/node-libs-browser/node_modules/punycode/punycode.js":[function(require,module,exports) {
 var global = arguments[3];
 var define;
-/*! https://mths.be/punycode v1.3.2 by @mathias */
+/*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
 
 	/** Detect free variables */
@@ -3145,7 +3145,7 @@ var define;
 	 * @returns {Error} Throws a `RangeError` with the applicable error message.
 	 */
 	function error(type) {
-		throw RangeError(errors[type]);
+		throw new RangeError(errors[type]);
 	}
 
 	/**
@@ -3292,7 +3292,7 @@ var define;
 
 	/**
 	 * Bias adaptation function as per section 3.4 of RFC 3492.
-	 * http://tools.ietf.org/html/rfc3492#section-3.4
+	 * https://tools.ietf.org/html/rfc3492#section-3.4
 	 * @private
 	 */
 	function adapt(delta, numPoints, firstTime) {
@@ -3567,7 +3567,7 @@ var define;
 		 * @memberOf punycode
 		 * @type String
 		 */
-		'version': '1.3.2',
+		'version': '1.4.1',
 		/**
 		 * An object of methods to convert from JavaScript's internal character
 		 * representation (UCS-2) to Unicode code points, and back.
@@ -3597,14 +3597,17 @@ var define;
 			return punycode;
 		});
 	} else if (freeExports && freeModule) {
-		if (module.exports == freeExports) { // in Node.js or RingoJS v0.8.0+
+		if (module.exports == freeExports) {
+			// in Node.js, io.js, or RingoJS v0.8.0+
 			freeModule.exports = punycode;
-		} else { // in Narwhal or RingoJS v0.7.0-
+		} else {
+			// in Narwhal or RingoJS v0.7.0-
 			for (key in punycode) {
 				punycode.hasOwnProperty(key) && (freeExports[key] = punycode[key]);
 			}
 		}
-	} else { // in Rhino or a web browser
+	} else {
+		// in Rhino or a web browser
 		root.punycode = punycode;
 	}
 
@@ -4542,7 +4545,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"punycode":"../node_modules/punycode/punycode.js","./util":"../node_modules/url/util.js","querystring":"../node_modules/querystring-es3/index.js"}],"../node_modules/@pixi/constants/lib/constants.es.js":[function(require,module,exports) {
+},{"punycode":"../node_modules/node-libs-browser/node_modules/punycode/punycode.js","./util":"../node_modules/url/util.js","querystring":"../node_modules/querystring-es3/index.js"}],"../node_modules/@pixi/constants/lib/constants.es.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4551,8 +4554,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.WRAP_MODES = exports.TYPES = exports.TARGETS = exports.SCALE_MODES = exports.RENDERER_TYPE = exports.PRECISION = exports.MIPMAP_MODES = exports.MASK_TYPES = exports.GC_MODES = exports.FORMATS = exports.ENV = exports.DRAW_MODES = exports.BLEND_MODES = exports.ALPHA_MODES = void 0;
 
 /*!
- * @pixi/constants - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/constants - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/constants is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -5059,8 +5062,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /*!
- * @pixi/utils - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/utils - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/utils is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -5091,7 +5094,7 @@ _settings.settings.RETINA_PREFIX = /@([0-9\.]+)x/;
 
 _settings.settings.FAIL_IF_MAJOR_PERFORMANCE_CAVEAT = true;
 var saidHello = false;
-var VERSION = '5.2.3';
+var VERSION = '5.2.4';
 /**
  * Skips the hello message of renderers that are created after this is run.
  *
@@ -6070,8 +6073,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.groupD8 = exports.Transform = exports.SHAPES = exports.RoundedRectangle = exports.Rectangle = exports.RAD_TO_DEG = exports.Polygon = exports.Point = exports.PI_2 = exports.ObservablePoint = exports.Matrix = exports.Ellipse = exports.DEG_TO_RAD = exports.Circle = void 0;
 
 /*!
- * @pixi/math - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/math - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/math is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -8410,8 +8413,8 @@ var _math = require("@pixi/math");
 var _utils = require("@pixi/utils");
 
 /*!
- * @pixi/display - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/display - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/display is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -10208,8 +10211,8 @@ var _utils = require("@pixi/utils");
 var _display = require("@pixi/display");
 
 /*!
- * @pixi/accessibility - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/accessibility - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/accessibility is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -10870,8 +10873,8 @@ exports.UPDATE_PRIORITY = exports.TickerPlugin = exports.Ticker = void 0;
 var _settings = require("@pixi/settings");
 
 /*!
- * @pixi/ticker - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/ticker - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/ticker is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -11862,8 +11865,8 @@ var _display = require("@pixi/display");
 var _utils = require("@pixi/utils");
 
 /*!
- * @pixi/interaction - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/interaction - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/interaction is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -14366,8 +14369,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.Runner = void 0;
 
 /*!
- * @pixi/runner - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/runner - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/runner is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -14620,8 +14623,8 @@ var _math = require("@pixi/math");
 var _display = require("@pixi/display");
 
 /*!
- * @pixi/core - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/core - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/core is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -26556,8 +26559,8 @@ var _display = require("@pixi/display");
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/app - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/app - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/app is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -26780,8 +26783,8 @@ var _utils = require("@pixi/utils");
 var _math = require("@pixi/math");
 
 /*!
- * @pixi/extract - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/extract - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/extract is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -29570,8 +29573,8 @@ var _utils = require("@pixi/utils");
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/loaders - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/loaders - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/loaders is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -29894,8 +29897,8 @@ var _core = require("@pixi/core");
 var _math = require("@pixi/math");
 
 /*!
- * @pixi/particles - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/particles - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/particles is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -30758,8 +30761,8 @@ var _constants = require("@pixi/constants");
 var _display = require("@pixi/display");
 
 /*!
- * @pixi/graphics - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/graphics - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/graphics is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -34153,8 +34156,8 @@ var _display = require("@pixi/display");
 var _settings = require("@pixi/settings");
 
 /*!
- * @pixi/sprite - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/sprite - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/sprite is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -34798,8 +34801,8 @@ var _math = require("@pixi/math");
 var _utils = require("@pixi/utils");
 
 /*!
- * @pixi/text - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/text - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/text is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -37039,8 +37042,8 @@ var _display = require("@pixi/display");
 var _text = require("@pixi/text");
 
 /*!
- * @pixi/prepare - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/prepare - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/prepare is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -37736,8 +37739,8 @@ var _utils = require("@pixi/utils");
 var _loaders = require("@pixi/loaders");
 
 /*!
- * @pixi/spritesheet - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/spritesheet - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/spritesheet is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -38112,8 +38115,8 @@ var _sprite = require("@pixi/sprite");
 var _constants = require("@pixi/constants");
 
 /*!
- * @pixi/sprite-tiling - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/sprite-tiling - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/sprite-tiling is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -38606,8 +38609,8 @@ var _utils = require("@pixi/utils");
 var _loaders = require("@pixi/loaders");
 
 /*!
- * @pixi/text-bitmap - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/text-bitmap - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/text-bitmap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -39390,8 +39393,8 @@ exports.AlphaFilter = void 0;
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/filter-alpha - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/filter-alpha - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/filter-alpha is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -39466,8 +39469,8 @@ var _core = require("@pixi/core");
 var _settings = require("@pixi/settings");
 
 /*!
- * @pixi/filter-blur - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/filter-blur - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/filter-blur is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -39852,8 +39855,8 @@ exports.ColorMatrixFilter = void 0;
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/filter-color-matrix - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/filter-color-matrix - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/filter-color-matrix is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -40352,8 +40355,8 @@ var _core = require("@pixi/core");
 var _math = require("@pixi/math");
 
 /*!
- * @pixi/filter-displacement - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/filter-displacement - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/filter-displacement is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -40476,8 +40479,8 @@ exports.FXAAFilter = void 0;
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/filter-fxaa - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/filter-fxaa - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/filter-fxaa is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -40520,8 +40523,8 @@ exports.NoiseFilter = void 0;
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/filter-noise - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/filter-noise - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/filter-noise is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -40615,8 +40618,8 @@ var _utils = require("@pixi/utils");
 var _settings = require("@pixi/settings");
 
 /*!
- * @pixi/mixin-cache-as-bitmap - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/mixin-cache-as-bitmap - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/mixin-cache-as-bitmap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -40982,8 +40985,8 @@ _display.DisplayObject.prototype._cacheAsBitmapDestroy = function _cacheAsBitmap
 var _display = require("@pixi/display");
 
 /*!
- * @pixi/mixin-get-child-by-name - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/mixin-get-child-by-name - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/mixin-get-child-by-name is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -41022,8 +41025,8 @@ var _display = require("@pixi/display");
 var _math = require("@pixi/math");
 
 /*!
- * @pixi/mixin-get-global-position - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/mixin-get-global-position - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/mixin-get-global-position is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -41075,8 +41078,8 @@ var _settings = require("@pixi/settings");
 var _utils = require("@pixi/utils");
 
 /*!
- * @pixi/mesh - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/mesh - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/mesh is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -41847,8 +41850,8 @@ var _constants = require("@pixi/constants");
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/mesh-extras - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/mesh-extras - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/mesh-extras is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -42623,8 +42626,8 @@ var _sprite = require("@pixi/sprite");
 var _ticker = require("@pixi/ticker");
 
 /*!
- * @pixi/sprite-animated - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * @pixi/sprite-animated - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * @pixi/sprite-animated is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -43438,8 +43441,8 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 /*!
- * pixi.js - v5.2.3
- * Compiled Fri, 24 Apr 2020 00:55:22 UTC
+ * pixi.js - v5.2.4
+ * Compiled Sun, 03 May 2020 22:38:52 UTC
  *
  * pixi.js is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -44691,7 +44694,7 @@ _app.Application.registerPlugin(_loaders.AppLoaderPlugin);
  */
 
 
-var VERSION = '5.2.3';
+var VERSION = '5.2.4';
 /**
  * @namespace PIXI
  */
@@ -47376,7 +47379,468 @@ function resolvePath(data, parts) {
 
   return block;
 }
-},{"../utils":"utils/index.js"}],"../node_modules/lodash/lodash.js":[function(require,module,exports) {
+},{"../utils":"utils/index.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+module.exports = _arrayWithHoles;
+},{}],"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js":[function(require,module,exports) {
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+module.exports = _iterableToArrayLimit;
+},{}],"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":[function(require,module,exports) {
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+
+  return arr2;
+}
+
+module.exports = _arrayLikeToArray;
+},{}],"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js":[function(require,module,exports) {
+var arrayLikeToArray = require("./arrayLikeToArray");
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+
+module.exports = _unsupportedIterableToArray;
+},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/nonIterableRest.js":[function(require,module,exports) {
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableRest;
+},{}],"../node_modules/@babel/runtime/helpers/slicedToArray.js":[function(require,module,exports) {
+var arrayWithHoles = require("./arrayWithHoles");
+
+var iterableToArrayLimit = require("./iterableToArrayLimit");
+
+var unsupportedIterableToArray = require("./unsupportedIterableToArray");
+
+var nonIterableRest = require("./nonIterableRest");
+
+function _slicedToArray(arr, i) {
+  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
+}
+
+module.exports = _slicedToArray;
+},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArrayLimit":"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"../node_modules/json-stringify-safe/stringify.js":[function(require,module,exports) {
+exports = module.exports = stringify
+exports.getSerialize = serializer
+
+function stringify(obj, replacer, spaces, cycleReplacer) {
+  return JSON.stringify(obj, serializer(replacer, cycleReplacer), spaces)
+}
+
+function serializer(replacer, cycleReplacer) {
+  var stack = [], keys = []
+
+  if (cycleReplacer == null) cycleReplacer = function(key, value) {
+    if (stack[0] === value) return "[Circular ~]"
+    return "[Circular ~." + keys.slice(0, stack.indexOf(value)).join(".") + "]"
+  }
+
+  return function(key, value) {
+    if (stack.length > 0) {
+      var thisPos = stack.indexOf(this)
+      ~thisPos ? stack.splice(thisPos + 1) : stack.push(this)
+      ~thisPos ? keys.splice(thisPos, Infinity, key) : keys.push(key)
+      if (~stack.indexOf(value)) value = cycleReplacer.call(this, key, value)
+    }
+    else stack.push(value)
+
+    return replacer == null ? value : replacer.call(this, key, value)
+  }
+}
+
+},{}],"../node_modules/random-seed/index.js":[function(require,module,exports) {
+/*
+ * random-seed
+ * https://github.com/skratchdot/random-seed
+ *
+ * This code was originally written by Steve Gibson and can be found here:
+ *
+ * https://www.grc.com/otg/uheprng.htm
+ *
+ * It was slightly modified for use in node, to pass jshint, and a few additional
+ * helper functions were added.
+ *
+ * Copyright (c) 2013 skratchdot
+ * Dual Licensed under the MIT license and the original GRC copyright/license
+ * included below.
+ */
+
+/*	============================================================================
+									Gibson Research Corporation
+				UHEPRNG - Ultra High Entropy Pseudo-Random Number Generator
+	============================================================================
+	LICENSE AND COPYRIGHT:  THIS CODE IS HEREBY RELEASED INTO THE PUBLIC DOMAIN
+	Gibson Research Corporation releases and disclaims ALL RIGHTS AND TITLE IN
+	THIS CODE OR ANY DERIVATIVES. Anyone may be freely use it for any purpose.
+	============================================================================
+	This is GRC's cryptographically strong PRNG (pseudo-random number generator)
+	for JavaScript. It is driven by 1536 bits of entropy, stored in an array of
+	48, 32-bit JavaScript variables.  Since many applications of this generator,
+	including ours with the "Off The Grid" Latin Square generator, may require
+	the deteriministic re-generation of a sequence of PRNs, this PRNG's initial
+	entropic state can be read and written as a static whole, and incrementally
+	evolved by pouring new source entropy into the generator's internal state.
+	----------------------------------------------------------------------------
+	ENDLESS THANKS are due Johannes Baagoe for his careful development of highly
+	robust JavaScript implementations of JS PRNGs.  This work was based upon his
+	JavaScript "Alea" PRNG which is based upon the extremely robust Multiply-
+	With-Carry (MWC) PRNG invented by George Marsaglia. MWC Algorithm References:
+	http://www.GRC.com/otg/Marsaglia_PRNGs.pdf
+	http://www.GRC.com/otg/Marsaglia_MWC_Generators.pdf
+	----------------------------------------------------------------------------
+	The quality of this algorithm's pseudo-random numbers have been verified by
+	multiple independent researchers. It handily passes the fermilab.ch tests as
+	well as the "diehard" and "dieharder" test suites.  For individuals wishing
+	to further verify the quality of this algorithm's pseudo-random numbers, a
+	256-megabyte file of this algorithm's output may be downloaded from GRC.com,
+	and a Microsoft Windows scripting host (WSH) version of this algorithm may be
+	downloaded and run from the Windows command prompt to generate unique files
+	of any size:
+	The Fermilab "ENT" tests: http://fourmilab.ch/random/
+	The 256-megabyte sample PRN file at GRC: https://www.GRC.com/otg/uheprng.bin
+	The Windows scripting host version: https://www.GRC.com/otg/wsh-uheprng.js
+	----------------------------------------------------------------------------
+	Qualifying MWC multipliers are: 187884, 686118, 898134, 1104375, 1250205,
+	1460910 and 1768863. (We use the largest one that's < 2^21)
+	============================================================================ */
+'use strict';
+
+var stringify = require('json-stringify-safe');
+/*	============================================================================
+This is based upon Johannes Baagoe's carefully designed and efficient hash
+function for use with JavaScript.  It has a proven "avalanche" effect such
+that every bit of the input affects every bit of the output 50% of the time,
+which is good.	See: http://baagoe.com/en/RandomMusings/hash/avalanche.xhtml
+============================================================================
+*/
+
+
+var Mash = function () {
+  var n = 0xefc8249d;
+
+  var mash = function (data) {
+    if (data) {
+      data = data.toString();
+
+      for (var i = 0; i < data.length; i++) {
+        n += data.charCodeAt(i);
+        var h = 0.02519603282416938 * n;
+        n = h >>> 0;
+        h -= n;
+        h *= n;
+        n = h >>> 0;
+        h -= n;
+        n += h * 0x100000000; // 2^32
+      }
+
+      return (n >>> 0) * 2.3283064365386963e-10; // 2^-32
+    } else {
+      n = 0xefc8249d;
+    }
+  };
+
+  return mash;
+};
+
+var uheprng = function (seed) {
+  return function () {
+    var o = 48; // set the 'order' number of ENTROPY-holding 32-bit values
+
+    var c = 1; // init the 'carry' used by the multiply-with-carry (MWC) algorithm
+
+    var p = o; // init the 'phase' (max-1) of the intermediate variable pointer
+
+    var s = new Array(o); // declare our intermediate variables array
+
+    var i; // general purpose local
+
+    var j; // general purpose local
+
+    var k = 0; // general purpose local
+    // when our "uheprng" is initially invoked our PRNG state is initialized from the
+    // browser's own local PRNG. This is okay since although its generator might not
+    // be wonderful, it's useful for establishing large startup entropy for our usage.
+
+    var mash = new Mash(); // get a pointer to our high-performance "Mash" hash
+    // fill the array with initial mash hash values
+
+    for (i = 0; i < o; i++) {
+      s[i] = mash(Math.random());
+    } // this PRIVATE (internal access only) function is the heart of the multiply-with-carry
+    // (MWC) PRNG algorithm. When called it returns a pseudo-random number in the form of a
+    // 32-bit JavaScript fraction (0.0 to <1.0) it is a PRIVATE function used by the default
+    // [0-1] return function, and by the random 'string(n)' function which returns 'n'
+    // characters from 33 to 126.
+
+
+    var rawprng = function () {
+      if (++p >= o) {
+        p = 0;
+      }
+
+      var t = 1768863 * s[p] + c * 2.3283064365386963e-10; // 2^-32
+
+      return s[p] = t - (c = t | 0);
+    }; // this EXPORTED function is the default function returned by this library.
+    // The values returned are integers in the range from 0 to range-1. We first
+    // obtain two 32-bit fractions (from rawprng) to synthesize a single high
+    // resolution 53-bit prng (0 to <1), then we multiply this by the caller's
+    // "range" param and take the "floor" to return a equally probable integer.
+
+
+    var random = function (range) {
+      return Math.floor(range * (rawprng() + (rawprng() * 0x200000 | 0) * 1.1102230246251565e-16)); // 2^-53
+    }; // this EXPORTED function 'string(n)' returns a pseudo-random string of
+    // 'n' printable characters ranging from chr(33) to chr(126) inclusive.
+
+
+    random.string = function (count) {
+      var i;
+      var s = '';
+
+      for (i = 0; i < count; i++) {
+        s += String.fromCharCode(33 + random(94));
+      }
+
+      return s;
+    }; // this PRIVATE "hash" function is used to evolve the generator's internal
+    // entropy state. It is also called by the EXPORTED addEntropy() function
+    // which is used to pour entropy into the PRNG.
+
+
+    var hash = function () {
+      var args = Array.prototype.slice.call(arguments);
+
+      for (i = 0; i < args.length; i++) {
+        for (j = 0; j < o; j++) {
+          s[j] -= mash(args[i]);
+
+          if (s[j] < 0) {
+            s[j] += 1;
+          }
+        }
+      }
+    }; // this EXPORTED "clean string" function removes leading and trailing spaces and non-printing
+    // control characters, including any embedded carriage-return (CR) and line-feed (LF) characters,
+    // from any string it is handed. this is also used by the 'hashstring' function (below) to help
+    // users always obtain the same EFFECTIVE uheprng seeding key.
+
+
+    random.cleanString = function (inStr) {
+      inStr = inStr.replace(/(^\s*)|(\s*$)/gi, ''); // remove any/all leading spaces
+
+      inStr = inStr.replace(/[\x00-\x1F]/gi, ''); // remove any/all control characters
+
+      inStr = inStr.replace(/\n /, '\n'); // remove any/all trailing spaces
+
+      return inStr; // return the cleaned up result
+    }; // this EXPORTED "hash string" function hashes the provided character string after first removing
+    // any leading or trailing spaces and ignoring any embedded carriage returns (CR) or Line Feeds (LF)
+
+
+    random.hashString = function (inStr) {
+      inStr = random.cleanString(inStr);
+      mash(inStr); // use the string to evolve the 'mash' state
+
+      for (i = 0; i < inStr.length; i++) {
+        // scan through the characters in our string
+        k = inStr.charCodeAt(i); // get the character code at the location
+
+        for (j = 0; j < o; j++) {
+          //	"mash" it into the UHEPRNG state
+          s[j] -= mash(k);
+
+          if (s[j] < 0) {
+            s[j] += 1;
+          }
+        }
+      }
+    }; // this EXPORTED function allows you to seed the random generator.
+
+
+    random.seed = function (seed) {
+      if (typeof seed === 'undefined' || seed === null) {
+        seed = Math.random();
+      }
+
+      if (typeof seed !== 'string') {
+        seed = stringify(seed, function (key, value) {
+          if (typeof value === 'function') {
+            return value.toString();
+          }
+
+          return value;
+        });
+      }
+
+      random.initState();
+      random.hashString(seed);
+    }; // this handy exported function is used to add entropy to our uheprng at any time
+
+
+    random.addEntropy = function ()
+    /* accept zero or more arguments */
+    {
+      var args = [];
+
+      for (i = 0; i < arguments.length; i++) {
+        args.push(arguments[i]);
+      }
+
+      hash(k++ + new Date().getTime() + args.join('') + Math.random());
+    }; // if we want to provide a deterministic startup context for our PRNG,
+    // but without directly setting the internal state variables, this allows
+    // us to initialize the mash hash and PRNG's internal state before providing
+    // some hashing input
+
+
+    random.initState = function () {
+      mash(); // pass a null arg to force mash hash to init
+
+      for (i = 0; i < o; i++) {
+        s[i] = mash(' '); // fill the array with initial mash hash values
+      }
+
+      c = 1; // init our multiply-with-carry carry
+
+      p = o; // init our phase
+    }; // we use this (optional) exported function to signal the JavaScript interpreter
+    // that we're finished using the "Mash" hash function so that it can free up the
+    // local "instance variables" is will have been maintaining.  It's not strictly
+    // necessary, of course, but it's good JavaScript citizenship.
+
+
+    random.done = function () {
+      mash = null;
+    }; // if we called "uheprng" with a seed value, then execute random.seed() before returning
+
+
+    if (typeof seed !== 'undefined') {
+      random.seed(seed);
+    } // Returns a random integer between 0 (inclusive) and range (exclusive)
+
+
+    random.range = function (range) {
+      return random(range);
+    }; // Returns a random float between 0 (inclusive) and 1 (exclusive)
+
+
+    random.random = function () {
+      return random(Number.MAX_VALUE - 1) / Number.MAX_VALUE;
+    }; // Returns a random float between min (inclusive) and max (exclusive)
+
+
+    random.floatBetween = function (min, max) {
+      return random.random() * (max - min) + min;
+    }; // Returns a random integer between min (inclusive) and max (inclusive)
+
+
+    random.intBetween = function (min, max) {
+      return Math.floor(random.random() * (max - min + 1)) + min;
+    }; // when our main outer "uheprng" function is called, after setting up our
+    // initial variables and entropic state, we return an "instance pointer"
+    // to the internal anonymous function which can then be used to access
+    // the uheprng's various exported functions.  As with the ".done" function
+    // above, we should set the returned value to 'null' once we're finished
+    // using any of these functions.
+
+
+    return random;
+  }();
+}; // Modification for use in node:
+
+
+uheprng.create = function (seed) {
+  return new uheprng(seed);
+};
+
+module.exports = uheprng;
+},{"json-stringify-safe":"../node_modules/json-stringify-safe/stringify.js"}],"animation/rng.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _randomSeed = _interopRequireDefault(require("random-seed"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Random = function Random(_seed) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, Random);
+  (0, _defineProperty2.default)(this, "activate", function (seed) {
+    _this.seed = seed;
+    _this.rng = _randomSeed.default.create(seed);
+  });
+  (0, _defineProperty2.default)(this, "random", function () {
+    return _this.rng.random();
+  });
+  (0, _defineProperty2.default)(this, "int", function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    var _ref = args.length === 1 ? [0, args[1]] : args,
+        _ref2 = (0, _slicedToArray2.default)(_ref, 2),
+        min = _ref2[0],
+        max = _ref2[1];
+
+    return _this.rng.intBetween(min, max);
+  });
+  this.activate(_seed);
+};
+
+exports.default = Random;
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","random-seed":"../node_modules/random-seed/index.js"}],"../node_modules/lodash/lodash.js":[function(require,module,exports) {
 var global = arguments[3];
 var Buffer = require("buffer").Buffer;
 var define;
@@ -64620,6 +65084,7 @@ exports.__param = __param;
 exports.__metadata = __metadata;
 exports.__awaiter = __awaiter;
 exports.__generator = __generator;
+exports.__createBinding = __createBinding;
 exports.__exportStar = __exportStar;
 exports.__values = __values;
 exports.__read = __read;
@@ -64637,18 +65102,18 @@ exports.__classPrivateFieldSet = __classPrivateFieldSet;
 exports.__assign = void 0;
 
 /*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
+Copyright (c) Microsoft Corporation.
 
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
 
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
 
 /* global Reflect, Promise */
@@ -64860,8 +65325,13 @@ function __generator(thisArg, body) {
   }
 }
 
+function __createBinding(o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  o[k2] = m[k];
+}
+
 function __exportStar(m, exports) {
-  for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+  for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 
 function __values(o) {
@@ -67378,7 +67848,7 @@ Object.defineProperty(exports, "styler", {
     return _stylefire.default;
   }
 });
-exports.easing = exports.valueTypes = exports.ValueReaction = exports.Action = exports.svg = exports.css = exports.transform = exports.calc = exports.stagger = exports.schedule = exports.parallel = exports.merge = exports.delay = exports.crossfade = exports.composite = exports.chain = exports.multitouch = exports.mouse = exports.pointer = exports.listen = exports.tween = exports.timeline = exports.spring = exports.physics = exports.everyFrame = exports.keyframes = exports.inertia = exports.decay = exports.value = exports.multicast = exports.action = void 0;
+exports.easing = exports.valueTypes = exports.value = exports.tween = exports.transform = exports.timeline = exports.svg = exports.stagger = exports.spring = exports.schedule = exports.pointer = exports.physics = exports.parallel = exports.multitouch = exports.multicast = exports.mouse = exports.merge = exports.listen = exports.keyframes = exports.inertia = exports.everyFrame = exports.delay = exports.decay = exports.css = exports.crossfade = exports.composite = exports.chain = exports.calc = exports.action = exports.ValueReaction = exports.Action = void 0;
 
 var _tslib = require("tslib");
 
@@ -67414,8 +67884,8 @@ var Chainable = /*#__PURE__*/function () {
   }
 
   Chainable.prototype.applyMiddleware = function (middleware) {
-    return this.create((0, _tslib.__assign)({}, this.props, {
-      middleware: this.props.middleware ? [middleware].concat(this.props.middleware) : [middleware]
+    return this.create((0, _tslib.__assign)((0, _tslib.__assign)({}, this.props), {
+      middleware: this.props.middleware ? (0, _tslib.__spreadArrays)([middleware], this.props.middleware) : [middleware]
     }));
   };
 
@@ -67455,11 +67925,10 @@ var Chainable = /*#__PURE__*/function () {
 
 var Observer = /*#__PURE__*/function () {
   function Observer(_a, observer) {
-    var middleware = _a.middleware,
-        onComplete = _a.onComplete;
-
     var _this = this;
 
+    var middleware = _a.middleware,
+        onComplete = _a.onComplete;
     this.isActive = true;
 
     this.update = function (v) {
@@ -67543,7 +68012,7 @@ var Action = /*#__PURE__*/function (_super) {
       subscription.stop();
     });
     var api = init(observer);
-    subscription = api ? (0, _tslib.__assign)({}, subscription, api) : subscription;
+    subscription = api ? (0, _tslib.__assign)((0, _tslib.__assign)({}, subscription), api) : subscription;
 
     if (observerCandidate.registerParent) {
       observerCandidate.registerParent(subscription);
@@ -67641,16 +68110,17 @@ var multicast = function () {
 
 exports.multicast = multicast;
 
-var stepProgress = function (steps, progress$$1) {
+var stepProgress = function (steps, progress) {
   var segment = 1 / (steps - 1);
   var subsegment = 1 / (2 * (steps - 1));
-  var percentProgressOfTarget = Math.min(progress$$1, 1);
+  var percentProgressOfTarget = Math.min(progress, 1);
   var subsegmentProgressOfTarget = percentProgressOfTarget / subsegment;
   var segmentProgressOfTarget = Math.floor((subsegmentProgressOfTarget + 1) / 2);
   return segmentProgressOfTarget * segment;
 };
 
 var calc = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   angle: _popcorn.angle,
   degreesToRadians: _popcorn.degreesToRadians,
   distance: _popcorn.distance,
@@ -67707,7 +68177,7 @@ var ValueReaction = /*#__PURE__*/function (_super) {
       };
     } else if (isValueList(_this.current)) {
       _this.updateCurrent = function (v) {
-        return _this.current = v.slice();
+        return _this.current = (0, _tslib.__spreadArrays)(v);
       };
 
       _this.getVelocityOfCurrent = function () {
@@ -68021,7 +68491,7 @@ var createUnitAction = function (action, _a) {
   var unitType = findUnitType(from) || findUnitType(to);
   var transform = unitType.transform,
       parse = unitType.parse;
-  return action((0, _tslib.__assign)({}, props, {
+  return action((0, _tslib.__assign)((0, _tslib.__assign)({}, props), {
     from: typeof from === 'string' ? parse(from) : from,
     to: typeof to === 'string' ? parse(to) : to
   })).pipe(transform);
@@ -68032,7 +68502,7 @@ var createMixerAction = function (mixer) {
     var from = _a.from,
         to = _a.to,
         props = (0, _tslib.__rest)(_a, ["from", "to"]);
-    return action((0, _tslib.__assign)({}, props, {
+    return action((0, _tslib.__assign)((0, _tslib.__assign)({}, props), {
       from: 0,
       to: 1
     })).pipe(mixer(from, to));
@@ -68098,8 +68568,9 @@ var decay = function (props) {
         modifyTarget = props.modifyTarget;
     var elapsed = 0;
     var amplitude = power * velocity;
-    var idealTarget = Math.round(from + amplitude);
+    var idealTarget = from + amplitude;
     var target = typeof modifyTarget === 'undefined' ? idealTarget : modifyTarget(idealTarget);
+    if (target !== idealTarget) amplitude = target - from;
 
     var process = _framesync.default.update(function (_a) {
       var frameDelta = _a.delta;
@@ -68234,32 +68705,22 @@ var inertia = function (_a) {
   return action(function (_a) {
     var update = _a.update,
         complete = _a.complete;
-    var current = value(from);
+    var prev = from;
+    var current = from;
     var activeAnimation;
-    var isSpring = false;
-
-    var isLessThanMin = function (v) {
-      return min !== undefined && v <= min;
-    };
-
-    var isMoreThanMax = function (v) {
-      return max !== undefined && v >= max;
-    };
 
     var isOutOfBounds = function (v) {
-      return isLessThanMin(v) || isMoreThanMax(v);
+      return min !== undefined && v < min || max !== undefined && v > max;
     };
 
-    var isTravellingAwayFromBounds = function (v, currentVelocity) {
-      return isLessThanMin(v) && currentVelocity < 0 || isMoreThanMax(v) && currentVelocity > 0;
+    var boundaryNearest = function (v) {
+      return Math.abs(min - v) < Math.abs(max - v) ? min : max;
     };
 
     var startAnimation = function (animation, next) {
       activeAnimation && activeAnimation.stop();
       activeAnimation = animation.start({
-        update: function (v) {
-          return current.update(v);
-        },
+        update: update,
         complete: function () {
           if (next) {
             next();
@@ -68272,55 +68733,58 @@ var inertia = function (_a) {
     };
 
     var startSpring = function (props) {
-      isSpring = true;
-      startAnimation(vectorSpring((0, _tslib.__assign)({}, props, {
-        to: isLessThanMin(props.from) ? min : max,
+      startAnimation(spring((0, _tslib.__assign)((0, _tslib.__assign)({}, props), {
         stiffness: bounceStiffness,
         damping: bounceDamping,
         restDelta: restDelta
       })));
     };
 
-    current.subscribe(function (v) {
-      update(v);
-      var currentVelocity = current.getVelocity();
-
-      if (activeAnimation && !isSpring && isTravellingAwayFromBounds(v, currentVelocity)) {
-        startSpring({
-          from: v,
-          velocity: currentVelocity
-        });
-      }
-    });
-
     if (isOutOfBounds(from)) {
       startSpring({
         from: from,
-        velocity: velocity
+        velocity: velocity,
+        to: boundaryNearest(from)
       });
-    } else if (velocity !== 0) {
-      var animation = vectorDecay({
+    } else {
+      var to = power * velocity + from;
+
+      if (typeof modifyTarget !== 'undefined') {
+        to = modifyTarget(to);
+        modifyTarget = void 0;
+        velocity = (to - from) / power;
+      }
+
+      var animation = decay({
         from: from,
         velocity: velocity,
         timeConstant: timeConstant,
         power: power,
-        restDelta: isOutOfBounds(from) ? 20 : restDelta,
+        restDelta: restDelta,
         modifyTarget: modifyTarget
       });
-      startAnimation(animation, function () {
-        var v = current.get();
+      var next = void 0;
 
-        if (isOutOfBounds(v)) {
-          startSpring({
-            from: v,
-            velocity: current.getVelocity()
+      if (isOutOfBounds(to)) {
+        var boundary_1 = boundaryNearest(to);
+        var heading_1 = boundary_1 == min ? -1 : 1;
+        animation = animation.while(function (v) {
+          prev = current;
+          velocity = (0, _popcorn.velocityPerSecond)(v - prev, (0, _framesync.getFrameData)().delta);
+          current = v;
+          return boundary_1 - v * heading_1 > 0;
+        });
+
+        next = function () {
+          return startSpring({
+            from: current,
+            to: boundary_1,
+            velocity: velocity
           });
-        } else {
-          complete();
-        }
-      });
-    } else {
-      complete();
+        };
+      }
+
+      startAnimation(animation, next);
     }
 
     return {
@@ -68382,8 +68846,8 @@ var scrubber = function (_a) {
   return action(function (_a) {
     var update = _a.update;
     return {
-      seek: function (progress$$1) {
-        return update(progress$$1);
+      seek: function (progress) {
+        return update(progress);
       }
     };
   }).pipe(ease, function (v) {
@@ -68442,11 +68906,11 @@ var tween = function (props) {
     var isActive = false;
 
     var reverseAnimation = function (reverseEase) {
+      var _a;
+
       if (reverseEase === void 0) {
         reverseEase = false;
       }
-
-      var _a;
 
       _a = [to, from], from = _a[0], to = _a[1];
       playhead = vectorScrubber({
@@ -68544,9 +69008,9 @@ var tween = function (props) {
 exports.tween = tween;
 var clampProgress$1 = /*#__PURE__*/(0, _popcorn.clamp)(0, 1);
 
-var defaultEasings = function (values, easing$$1) {
+var defaultEasings = function (values, easing) {
   return values.map(function () {
-    return easing$$1 || easing.easeOut;
+    return easing || easing.easeOut;
   }).splice(0, values.length - 1);
 };
 
@@ -68593,14 +69057,14 @@ var keyframes = function (_a) {
       tweenProps = (0, _tslib.__rest)(_a, ["easings", "ease", "times", "values"]);
   easings = Array.isArray(easings) ? easings : defaultEasings(values, easings);
   times = times || defaultTimings(values);
-  var scrubbers = easings.map(function (easing$$1, i) {
+  var scrubbers = easings.map(function (easing, i) {
     return vectorScrubber({
       from: values[i],
       to: values[i + 1],
-      ease: easing$$1
+      ease: easing
     });
   });
-  return tween((0, _tslib.__assign)({}, tweenProps, {
+  return tween((0, _tslib.__assign)((0, _tslib.__assign)({}, tweenProps), {
     ease: ease
   })).applyMiddleware(function (update) {
     return interpolateScrubbers(times, scrubbers, update);
@@ -68709,8 +69173,8 @@ var flattenTimings = function (instructions) {
 
     if (i !== numSegments - 1) {
       var duration = item.duration || DEFAULT_DURATION;
-      offset += staggerDelay;
-      flatInstructions.push("-" + (duration - offset));
+      offset = staggerDelay;
+      flatInstructions.push("" + (offset - duration));
     }
   });
   return flatInstructions;
@@ -68778,7 +69242,7 @@ var timeline = function (instructions, _a) {
     } else if (typeof instruction === 'number') {
       playhead = instruction;
     } else {
-      var def = (0, _tslib.__assign)({}, instruction, {
+      var def = (0, _tslib.__assign)((0, _tslib.__assign)({}, instruction), {
         at: playhead
       });
       def.duration = def.duration === undefined ? DEFAULT_DURATION : def.duration;
@@ -68812,7 +69276,7 @@ var timeline = function (instructions, _a) {
         times: [],
         values: []
       });
-      trackKeyframes[key] = keyframes((0, _tslib.__assign)({}, keyframeProps, {
+      trackKeyframes[key] = keyframes((0, _tslib.__assign)((0, _tslib.__assign)({}, keyframeProps), {
         duration: duration || calculatedDuration,
         ease: ease,
         elapsed: elapsed,
@@ -69081,7 +69545,7 @@ exports.chain = chain;
 var crossfade = function (a, b) {
   return action(function (observer) {
     var balance = 0;
-    var fadable = parallel$1(a, b).start((0, _tslib.__assign)({}, observer, {
+    var fadable = parallel$1(a, b).start((0, _tslib.__assign)((0, _tslib.__assign)({}, observer), {
       update: function (_a) {
         var va = _a[0],
             vb = _a[1];
@@ -69214,6 +69678,7 @@ var transformMap = function (childTransformers) {
 };
 
 var transformers = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   applyOffset: _popcorn.applyOffset,
   clamp: _popcorn.clamp,
   conditional: _popcorn.conditional,
@@ -69280,18 +69745,6 @@ function set (obj, path, value) {
   return value;
 }
 
-},{}],"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":[function(require,module,exports) {
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) {
-    arr2[i] = arr[i];
-  }
-
-  return arr2;
-}
-
-module.exports = _arrayLikeToArray;
 },{}],"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js":[function(require,module,exports) {
 var arrayLikeToArray = require("./arrayLikeToArray");
 
@@ -69306,20 +69759,7 @@ function _iterableToArray(iter) {
 }
 
 module.exports = _iterableToArray;
-},{}],"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js":[function(require,module,exports) {
-var arrayLikeToArray = require("./arrayLikeToArray");
-
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return arrayLikeToArray(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(n);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
-}
-
-module.exports = _unsupportedIterableToArray;
-},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/nonIterableSpread.js":[function(require,module,exports) {
+},{}],"../node_modules/@babel/runtime/helpers/nonIterableSpread.js":[function(require,module,exports) {
 function _nonIterableSpread() {
   throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }
@@ -69339,67 +69779,13 @@ function _toConsumableArray(arr) {
 }
 
 module.exports = _toConsumableArray;
-},{"./arrayWithoutHoles":"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js","./iterableToArray":"../node_modules/@babel/runtime/helpers/iterableToArray.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableSpread":"../node_modules/@babel/runtime/helpers/nonIterableSpread.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
-
-module.exports = _arrayWithHoles;
-},{}],"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js":[function(require,module,exports) {
-function _iterableToArrayLimit(arr, i) {
-  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
-  var _arr = [];
-  var _n = true;
-  var _d = false;
-  var _e = undefined;
-
-  try {
-    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-      _arr.push(_s.value);
-
-      if (i && _arr.length === i) break;
-    }
-  } catch (err) {
-    _d = true;
-    _e = err;
-  } finally {
-    try {
-      if (!_n && _i["return"] != null) _i["return"]();
-    } finally {
-      if (_d) throw _e;
-    }
-  }
-
-  return _arr;
-}
-
-module.exports = _iterableToArrayLimit;
-},{}],"../node_modules/@babel/runtime/helpers/nonIterableRest.js":[function(require,module,exports) {
-function _nonIterableRest() {
-  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}
-
-module.exports = _nonIterableRest;
-},{}],"../node_modules/@babel/runtime/helpers/slicedToArray.js":[function(require,module,exports) {
-var arrayWithHoles = require("./arrayWithHoles");
-
-var iterableToArrayLimit = require("./iterableToArrayLimit");
-
-var unsupportedIterableToArray = require("./unsupportedIterableToArray");
-
-var nonIterableRest = require("./nonIterableRest");
-
-function _slicedToArray(arr, i) {
-  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
-}
-
-module.exports = _slicedToArray;
-},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArrayLimit":"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"animation/expressions.js":[function(require,module,exports) {
+},{"./arrayWithoutHoles":"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js","./iterableToArray":"../node_modules/@babel/runtime/helpers/iterableToArray.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableSpread":"../node_modules/@babel/runtime/helpers/nonIterableSpread.js"}],"animation/expressions.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.setRandomizer = setRandomizer;
 exports.getRandom = getRandom;
 exports.addTo = addTo;
 exports.subtractBy = subtractBy;
@@ -69413,15 +69799,22 @@ exports.isDynamic = isDynamic;
 exports.evaluateExpression = evaluateExpression;
 exports.createDynamicExpression = createDynamicExpression;
 
-var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
-
 var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 
 var _utils = require("../utils");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// defaults to standard Math random function
+var randomizer = Math;
+/** assigns a randomizer to use for the random expression */
+
+function setRandomizer(val) {
+  randomizer = val;
+}
 /** expression types */
+
+
 var EXPRESSIONS = {
   ':rnd': getRandom,
   ':+': addTo,
@@ -69437,7 +69830,15 @@ var DYNAMICS = {
 
 function getRandom(min, max) {
   var toInt = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-  var value = Math.random() * (max - min) + min;
+
+  // single value provided
+  if (isNaN(max)) {
+    max = min;
+    min = 0;
+  } // randomize
+
+
+  var value = randomizer.random() * (max - min) + min;
   return toInt ? 0 | value : value;
 }
 
@@ -69512,7 +69913,7 @@ function evaluateExpression(expression) {
   }
 
   try {
-    return handler.apply(void 0, (0, _toConsumableArray2.default)(rest));
+    return handler.apply(this, rest);
   } catch (ex) {
     console.error("Failed to evaluate expression ".concat(token, " with ").concat(rest.join(', ')));
     throw ex;
@@ -69548,7 +69949,7 @@ function createDynamicExpression(prop, source) {
     return handler.apply(null, args);
   };
 }
-},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js"}],"../node_modules/@babel/runtime/helpers/superPropBase.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js"}],"../node_modules/@babel/runtime/helpers/superPropBase.js":[function(require,module,exports) {
 var getPrototypeOf = require("./getPrototypeOf");
 
 function _superPropBase(object, property) {
@@ -69619,7 +70020,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _createSuper(Derived) { return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (_isNativeReflectConstruct()) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
@@ -69790,7 +70191,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _createSuper(Derived) { return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (_isNativeReflectConstruct()) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
@@ -69886,7 +70287,7 @@ var _ = require(".");
 
 function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
@@ -70343,7 +70744,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
@@ -70620,7 +71021,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
@@ -70941,7 +71342,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.GetTextureFromString = GetTextureFromString;
-exports.PropertyNode = exports.PropertyList = exports.PolygonalChain = exports.AnimatedParticle = exports.PathParticle = exports.Emitter = exports.Particle = exports.ParticleUtils = void 0;
+exports.PropertyNode = exports.PropertyList = exports.PolygonalChain = exports.PathParticle = exports.ParticleUtils = exports.Particle = exports.Emitter = exports.AnimatedParticle = void 0;
 
 var pixi = _interopRequireWildcard(require("pixi.js"));
 
@@ -70950,8 +71351,8 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 /*!
- * pixi-particles - v4.2.0
- * Compiled Sat, 26 Oct 2019 14:40:23 UTC
+ * pixi-particles - v4.2.1
+ * Compiled Sat, 02 May 2020 01:25:39 UTC
  *
  * pixi-particles is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -70975,7 +71376,7 @@ function () {
     this.isStepped = false;
 
     if (ease) {
-      this.ease = typeof ease == "function" ? ease : ParticleUtils.generateEase(ease);
+      this.ease = typeof ease === 'function' ? ease : ParticleUtils.generateEase(ease);
     } else {
       this.ease = null;
     }
@@ -70990,17 +71391,18 @@ function () {
    * @param data.ease Custom ease for this list.
    * @return The first node in the list
    */
+  // eslint-disable-next-line max-len
 
 
   PropertyNode.createList = function (data) {
-    if ("list" in data) {
+    if ('list' in data) {
       var array = data.list;
-      var node = void 0,
-          first = void 0;
+      var node = void 0;
       var _a = array[0],
           value = _a.value,
-          time = _a.time;
-      first = node = new PropertyNode(typeof value === 'string' ? ParticleUtils.hexToRGB(value) : value, time, data.ease); //only set up subsequent nodes if there are a bunch or the 2nd one is different from the first
+          time = _a.time; // eslint-disable-next-line max-len
+
+      var first = node = new PropertyNode(typeof value === 'string' ? ParticleUtils.hexToRGB(value) : value, time, data.ease); // only set up subsequent nodes if there are a bunch or the 2nd one is different from the first
 
       if (array.length > 2 || array.length === 2 && array[1].value !== value) {
         for (var i = 1; i < array.length; ++i) {
@@ -71014,13 +71416,16 @@ function () {
 
       first.isStepped = !!data.isStepped;
       return first;
-    } else {
-      //Handle deprecated version here
-      var start = new PropertyNode(typeof data.start === 'string' ? ParticleUtils.hexToRGB(data.start) : data.start, 0); //only set up a next value if it is different from the starting value
+    } // Handle deprecated version here
 
-      if (data.end !== data.start) start.next = new PropertyNode(typeof data.end === 'string' ? ParticleUtils.hexToRGB(data.end) : data.end, 1);
-      return start;
+
+    var start = new PropertyNode(typeof data.start === 'string' ? ParticleUtils.hexToRGB(data.start) : data.start, 0); // only set up a next value if it is different from the starting value
+
+    if (data.end !== data.start) {
+      start.next = new PropertyNode(typeof data.end === 'string' ? ParticleUtils.hexToRGB(data.end) : data.end, 1);
     }
+
+    return start;
   };
 
   return PropertyNode;
@@ -71036,7 +71441,7 @@ var TextureFromString; // to avoid Rollup transforming our import, save pixi nam
 
 var pixiNS = pixi;
 
-if (parseInt(/^(\d+)\./.exec(pixi.VERSION)[1]) < 5) {
+if (parseInt(/^(\d+)\./.exec(pixi.VERSION)[1], 10) < 5) {
   TextureFromString = pixiNS.Texture.fromImage;
 } else {
   TextureFromString = pixiNS.Texture.from;
@@ -71086,10 +71491,10 @@ exports.ParticleUtils = ParticleUtils;
    */
 
   function combineRGBComponents(r, g, b
-  /*, a*/
+  /* , a*/
   ) {
     return (
-      /*a << 24 |*/
+      /* a << 24 |*/
       r << 16 | g << 8 | b
     );
   }
@@ -71140,22 +71545,33 @@ exports.ParticleUtils = ParticleUtils;
    */
 
   function hexToRGB(color, output) {
-    if (!output) output = {};
-    if (color.charAt(0) == "#") color = color.substr(1);else if (color.indexOf("0x") === 0) color = color.substr(2);
+    if (!output) {
+      output = {};
+    }
+
+    if (color.charAt(0) === '#') {
+      color = color.substr(1);
+    } else if (color.indexOf('0x') === 0) {
+      color = color.substr(2);
+    }
+
     var alpha;
 
-    if (color.length == 8) {
+    if (color.length === 8) {
       alpha = color.substr(0, 2);
       color = color.substr(2);
     }
 
-    output.r = parseInt(color.substr(0, 2), 16); //Red
+    output.r = parseInt(color.substr(0, 2), 16); // Red
 
-    output.g = parseInt(color.substr(2, 2), 16); //Green
+    output.g = parseInt(color.substr(2, 2), 16); // Green
 
-    output.b = parseInt(color.substr(4, 2), 16); //Blue
+    output.b = parseInt(color.substr(4, 2), 16); // Blue
 
-    if (alpha) output.a = parseInt(alpha, 16);
+    if (alpha) {
+      output.a = parseInt(alpha, 16);
+    }
+
     return output;
   }
 
@@ -71178,13 +71594,13 @@ exports.ParticleUtils = ParticleUtils;
      * @return {Number} The percentage of the change, 0-1 inclusive (unless your
      *                  ease goes outside those bounds).
      */
+    // eslint-disable-next-line func-names
 
     return function (time) {
-      var t, s;
-      var i = qty * time | 0; //do a quick floor operation
+      var i = qty * time | 0; // do a quick floor operation
 
-      t = (time - i * oneOverQty) * qty;
-      s = segments[i] || segments[qty - 1];
+      var t = (time - i * oneOverQty) * qty;
+      var s = segments[i] || segments[qty - 1];
       return s.s + t * (2 * (1 - t) * (s.cp - s.s) + t * (s.e - s.s));
     };
   }
@@ -71200,7 +71616,9 @@ exports.ParticleUtils = ParticleUtils;
     if (!name) return pixi.BLEND_MODES.NORMAL;
     name = name.toUpperCase();
 
-    while (name.indexOf(" ") >= 0) name = name.replace(" ", "_");
+    while (name.indexOf(' ') >= 0) {
+      name = name.replace(' ', '_');
+    }
 
     return pixi.BLEND_MODES[name] || pixi.BLEND_MODES.NORMAL;
   }
@@ -71220,7 +71638,10 @@ exports.ParticleUtils = ParticleUtils;
       numSteps = 10;
     }
 
-    if (typeof numSteps !== 'number' || numSteps <= 0) numSteps = 10;
+    if (typeof numSteps !== 'number' || numSteps <= 0) {
+      numSteps = 10;
+    }
+
     var first = new PropertyNode(ParticleUtils.hexToRGB(list[0].value), list[0].time);
     first.isStepped = true;
     var currentNode = first;
@@ -71229,12 +71650,12 @@ exports.ParticleUtils = ParticleUtils;
     var next = list[nextIndex];
 
     for (var i = 1; i < numSteps; ++i) {
-      var lerp = i / numSteps; //ensure we are on the right segment, if multiple
+      var lerp = i / numSteps; // ensure we are on the right segment, if multiple
 
       while (lerp > next.time) {
         current = next;
         next = list[++nextIndex];
-      } //convert the lerp value to the segment range
+      } // convert the lerp value to the segment range
 
 
       lerp = (lerp - current.time) / (next.time - current.time);
@@ -71247,8 +71668,8 @@ exports.ParticleUtils = ParticleUtils;
       };
       currentNode.next = new PropertyNode(output, i / numSteps);
       currentNode = currentNode.next;
-    } //we don't need to have a PropertyNode for time of 1, because in a stepped version at that point
-    //the particle has died of old age
+    } // we don't need to have a PropertyNode for time of 1, because in a stepped version at that point
+    // the particle has died of old age
 
 
     return first;
@@ -71294,6 +71715,93 @@ function __extends(d, b) {
   }
 
   d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+function intValueSimple(lerp) {
+  if (this.ease) {
+    lerp = this.ease(lerp);
+  }
+
+  return (this.next.value - this.current.value) * lerp + this.current.value;
+}
+
+function intColorSimple(lerp) {
+  if (this.ease) {
+    lerp = this.ease(lerp);
+  }
+
+  var curVal = this.current.value;
+  var nextVal = this.next.value;
+  var r = (nextVal.r - curVal.r) * lerp + curVal.r;
+  var g = (nextVal.g - curVal.g) * lerp + curVal.g;
+  var b = (nextVal.b - curVal.b) * lerp + curVal.b;
+  return ParticleUtils.combineRGBComponents(r, g, b);
+}
+
+function intValueComplex(lerp) {
+  if (this.ease) {
+    lerp = this.ease(lerp);
+  } // make sure we are on the right segment
+
+
+  while (lerp > this.next.time) {
+    this.current = this.next;
+    this.next = this.next.next;
+  } // convert the lerp value to the segment range
+
+
+  lerp = (lerp - this.current.time) / (this.next.time - this.current.time);
+  return (this.next.value - this.current.value) * lerp + this.current.value;
+}
+
+function intColorComplex(lerp) {
+  if (this.ease) {
+    lerp = this.ease(lerp);
+  } // make sure we are on the right segment
+
+
+  while (lerp > this.next.time) {
+    this.current = this.next;
+    this.next = this.next.next;
+  } // convert the lerp value to the segment range
+
+
+  lerp = (lerp - this.current.time) / (this.next.time - this.current.time);
+  var curVal = this.current.value;
+  var nextVal = this.next.value;
+  var r = (nextVal.r - curVal.r) * lerp + curVal.r;
+  var g = (nextVal.g - curVal.g) * lerp + curVal.g;
+  var b = (nextVal.b - curVal.b) * lerp + curVal.b;
+  return ParticleUtils.combineRGBComponents(r, g, b);
+}
+
+function intValueStepped(lerp) {
+  if (this.ease) {
+    lerp = this.ease(lerp);
+  } // make sure we are on the right segment
+
+
+  while (this.next && lerp > this.next.time) {
+    this.current = this.next;
+    this.next = this.next.next;
+  }
+
+  return this.current.value;
+}
+
+function intColorStepped(lerp) {
+  if (this.ease) {
+    lerp = this.ease(lerp);
+  } // make sure we are on the right segment
+
+
+  while (this.next && lerp > this.next.time) {
+    this.current = this.next;
+    this.next = this.next.next;
+  }
+
+  var curVal = this.current.value;
+  return ParticleUtils.combineRGBComponents(curVal.r, curVal.g, curVal.b);
 }
 /**
  * Singly linked list container for keeping track of interpolated properties for particles.
@@ -71343,81 +71851,12 @@ function () {
 
   return PropertyList;
 }();
-
-exports.PropertyList = PropertyList;
-
-function intValueSimple(lerp) {
-  if (this.ease) lerp = this.ease(lerp);
-  return (this.next.value - this.current.value) * lerp + this.current.value;
-}
-
-function intColorSimple(lerp) {
-  if (this.ease) lerp = this.ease(lerp);
-  var curVal = this.current.value,
-      nextVal = this.next.value;
-  var r = (nextVal.r - curVal.r) * lerp + curVal.r;
-  var g = (nextVal.g - curVal.g) * lerp + curVal.g;
-  var b = (nextVal.b - curVal.b) * lerp + curVal.b;
-  return ParticleUtils.combineRGBComponents(r, g, b);
-}
-
-function intValueComplex(lerp) {
-  if (this.ease) lerp = this.ease(lerp); //make sure we are on the right segment
-
-  while (lerp > this.next.time) {
-    this.current = this.next;
-    this.next = this.next.next;
-  } //convert the lerp value to the segment range
-
-
-  lerp = (lerp - this.current.time) / (this.next.time - this.current.time);
-  return (this.next.value - this.current.value) * lerp + this.current.value;
-}
-
-function intColorComplex(lerp) {
-  if (this.ease) lerp = this.ease(lerp); //make sure we are on the right segment
-
-  while (lerp > this.next.time) {
-    this.current = this.next;
-    this.next = this.next.next;
-  } //convert the lerp value to the segment range
-
-
-  lerp = (lerp - this.current.time) / (this.next.time - this.current.time);
-  var curVal = this.current.value,
-      nextVal = this.next.value;
-  var r = (nextVal.r - curVal.r) * lerp + curVal.r;
-  var g = (nextVal.g - curVal.g) * lerp + curVal.g;
-  var b = (nextVal.b - curVal.b) * lerp + curVal.b;
-  return ParticleUtils.combineRGBComponents(r, g, b);
-}
-
-function intValueStepped(lerp) {
-  if (this.ease) lerp = this.ease(lerp); //make sure we are on the right segment
-
-  while (this.next && lerp > this.next.time) {
-    this.current = this.next;
-    this.next = this.next.next;
-  }
-
-  return this.current.value;
-}
-
-function intColorStepped(lerp) {
-  if (this.ease) lerp = this.ease(lerp); //make sure we are on the right segment
-
-  while (this.next && lerp > this.next.time) {
-    this.current = this.next;
-    this.next = this.next.next;
-  }
-
-  var curVal = this.current.value;
-  return ParticleUtils.combineRGBComponents(curVal.r, curVal.g, curVal.b);
-}
 /**
  * An individual particle image. You shouldn't have to deal with these.
  */
 
+
+exports.PropertyList = PropertyList;
 
 var Particle =
 /** @class */
@@ -71429,11 +71868,11 @@ function (_super) {
 
 
   function Particle(emitter) {
-    var _this = //start off the sprite with a blank texture, since we are going to replace it
-    //later when the particle is initialized.
+    var _this = // start off the sprite with a blank texture, since we are going to replace it
+    // later when the particle is initialized.
     _super.call(this) || this;
 
-    _this.emitter = emitter; //particles should be centered
+    _this.emitter = emitter; // particles should be centered
 
     _this.anchor.x = _this.anchor.y = 0.5;
     _this.velocity = new pixi.Point();
@@ -71459,7 +71898,7 @@ function (_super) {
     _this._doNormalMovement = false;
     _this._oneOverLife = 0;
     _this.next = null;
-    _this.prev = null; //save often used functions on the instance instead of the prototype for better speed
+    _this.prev = null; // save often used functions on the instance instead of the prototype for better speed
 
     _this.init = _this.init;
     _this.Particle_init = Particle.prototype.init;
@@ -71478,8 +71917,8 @@ function (_super) {
 
 
   Particle.prototype.init = function () {
-    //reset the age
-    this.age = 0; //set up the velocity based on the start speed and rotation
+    // reset the age
+    this.age = 0; // set up the velocity based on the start speed and rotation
 
     this.velocity.x = this.speedList.current.value * this.speedMultiplier;
     this.velocity.y = 0;
@@ -71488,30 +71927,30 @@ function (_super) {
     if (this.noRotation) {
       this.rotation = 0;
     } else {
-      //convert rotation to Radians from Degrees
+      // convert rotation to Radians from Degrees
       this.rotation *= ParticleUtils.DEG_TO_RADS;
-    } //convert rotation speed to Radians from Degrees
+    } // convert rotation speed to Radians from Degrees
 
 
     this.rotationSpeed *= ParticleUtils.DEG_TO_RADS;
-    this.rotationAcceleration *= ParticleUtils.DEG_TO_RADS; //set alpha to inital alpha
+    this.rotationAcceleration *= ParticleUtils.DEG_TO_RADS; // set alpha to inital alpha
 
-    this.alpha = this.alphaList.current.value; //set scale to initial scale
+    this.alpha = this.alphaList.current.value; // set scale to initial scale
 
-    this.scale.x = this.scale.y = this.scaleList.current.value; //figure out what we need to interpolate
+    this.scale.x = this.scale.y = this.scaleList.current.value; // figure out what we need to interpolate
 
     this._doAlpha = !!this.alphaList.current.next;
     this._doSpeed = !!this.speedList.current.next;
     this._doScale = !!this.scaleList.current.next;
     this._doColor = !!this.colorList.current.next;
-    this._doAcceleration = this.acceleration.x !== 0 || this.acceleration.y !== 0; //_doNormalMovement can be cancelled by subclasses
+    this._doAcceleration = this.acceleration.x !== 0 || this.acceleration.y !== 0; // _doNormalMovement can be cancelled by subclasses
 
-    this._doNormalMovement = this._doSpeed || this.speedList.current.value !== 0 || this._doAcceleration; //save our lerp helper
+    this._doNormalMovement = this._doSpeed || this.speedList.current.value !== 0 || this._doAcceleration; // save our lerp helper
 
-    this._oneOverLife = 1 / this.maxLife; //set the inital color
+    this._oneOverLife = 1 / this.maxLife; // set the inital color
 
     var color = this.colorList.current.value;
-    this.tint = ParticleUtils.combineRGBComponents(color.r, color.g, color.b); //ensure visibility
+    this.tint = ParticleUtils.combineRGBComponents(color.r, color.g, color.b); // ensure visibility
 
     this.visible = true;
   };
@@ -71535,41 +71974,44 @@ function (_super) {
 
 
   Particle.prototype.update = function (delta) {
-    //increase age
-    this.age += delta; //recycle particle if it is too old
+    // increase age
+    this.age += delta; // recycle particle if it is too old
 
     if (this.age >= this.maxLife || this.age < 0) {
       this.kill();
       return -1;
-    } //determine our interpolation value
+    } // determine our interpolation value
 
 
-    var lerp = this.age * this._oneOverLife; //lifetime / maxLife;
+    var lerp = this.age * this._oneOverLife; // lifetime / maxLife;
 
     if (this.ease) {
-      if (this.ease.length == 4) {
-        //the t, b, c, d parameters that some tween libraries use
-        //(time, initial value, end value, duration)
+      if (this.ease.length === 4) {
+        // the t, b, c, d parameters that some tween libraries use
+        // (time, initial value, end value, duration)
         lerp = this.ease(lerp, 0, 1, 1);
       } else {
-        //the simplified version that we like that takes
-        //one parameter, time from 0-1. TweenJS eases provide this usage.
+        // the simplified version that we like that takes
+        // one parameter, time from 0-1. TweenJS eases provide this usage.
         lerp = this.ease(lerp);
       }
-    } //interpolate alpha
+    } // interpolate alpha
 
 
-    if (this._doAlpha) this.alpha = this.alphaList.interpolate(lerp); //interpolate scale
+    if (this._doAlpha) {
+      this.alpha = this.alphaList.interpolate(lerp);
+    } // interpolate scale
+
 
     if (this._doScale) {
       var scale = this.scaleList.interpolate(lerp) * this.scaleMultiplier;
       this.scale.x = this.scale.y = scale;
-    } //handle movement
+    } // handle movement
 
 
     if (this._doNormalMovement) {
       var deltaX = void 0;
-      var deltaY = void 0; //interpolate speed
+      var deltaY = void 0; // interpolate speed
 
       if (this._doSpeed) {
         var speed = this.speedList.interpolate(lerp) * this.speedMultiplier;
@@ -71584,8 +72026,8 @@ function (_super) {
         this.velocity.y += this.acceleration.y * delta;
 
         if (this.maxSpeed) {
-          var currentSpeed = ParticleUtils.length(this.velocity); //if we are going faster than we should, clamp at the max speed
-          //DO NOT recalculate vector length
+          var currentSpeed = ParticleUtils.length(this.velocity); // if we are going faster than we should, clamp at the max speed
+          // DO NOT recalculate vector length
 
           if (currentSpeed > this.maxSpeed) {
             ParticleUtils.scaleBy(this.velocity, this.maxSpeed / currentSpeed);
@@ -71598,17 +72040,17 @@ function (_super) {
       } else {
         deltaX = this.velocity.x * delta;
         deltaY = this.velocity.y * delta;
-      } //adjust position based on velocity
+      } // adjust position based on velocity
 
 
       this.position.x += deltaX;
       this.position.y += deltaY;
-    } //interpolate color
+    } // interpolate color
 
 
     if (this._doColor) {
       this.tint = this.colorList.interpolate(lerp);
-    } //update rotation
+    } // update rotation
 
 
     if (this.rotationAcceleration !== 0) {
@@ -71638,7 +72080,10 @@ function (_super) {
 
 
   Particle.prototype.destroy = function () {
-    if (this.parent) this.parent.removeChild(this);
+    if (this.parent) {
+      this.parent.removeChild(this);
+    }
+
     this.Sprite_destroy();
     this.emitter = this.velocity = this.colorList = this.scaleList = this.alphaList = this.speedList = this.ease = this.next = this.prev = null;
   };
@@ -71653,19 +72098,25 @@ function (_super) {
 
 
   Particle.parseArt = function (art) {
-    //convert any strings to Textures.
+    // convert any strings to Textures.
     var i;
 
     for (i = art.length; i >= 0; --i) {
-      if (typeof art[i] == "string") art[i] = GetTextureFromString(art[i]);
-    } //particles from different base textures will be slower in WebGL than if they
-    //were from one spritesheet
+      if (typeof art[i] === 'string') {
+        art[i] = GetTextureFromString(art[i]);
+      }
+    } // particles from different base textures will be slower in WebGL than if they
+    // were from one spritesheet
 
 
     if (ParticleUtils.verbose) {
       for (i = art.length - 1; i > 0; --i) {
-        if (art[i].baseTexture != art[i - 1].baseTexture) {
-          if (window.console) console.warn("PixiParticles: using particle textures from different images may hinder performance in WebGL");
+        if (art[i].baseTexture !== art[i - 1].baseTexture) {
+          if (window.console) {
+            // eslint-disable-next-line max-len
+            console.warn('PixiParticles: using particle textures from different images may hinder performance in WebGL');
+          }
+
           break;
         }
       }
@@ -71725,29 +72176,15 @@ function () {
         },
         l: 0
       });
-    } else {
-      if (Array.isArray(data[0])) {
-        // list of segment chains, each defined as a list of points
-        for (var i = 0; i < data.length; ++i) {
-          // loop through the chain, connecting points
-          var chain = data[i];
-          var prevPoint = chain[0];
+    } else if (Array.isArray(data[0])) {
+      // list of segment chains, each defined as a list of points
+      for (var i = 0; i < data.length; ++i) {
+        // loop through the chain, connecting points
+        var chain = data[i];
+        var prevPoint = chain[0];
 
-          for (var j = 1; j < chain.length; ++j) {
-            var second = chain[j];
-            this.segments.push({
-              p1: prevPoint,
-              p2: second,
-              l: 0
-            });
-            prevPoint = second;
-          }
-        }
-      } else {
-        var prevPoint = data[0]; // list of points
-
-        for (var i = 1; i < data.length; ++i) {
-          var second = data[i];
+        for (var j = 1; j < chain.length; ++j) {
+          var second = chain[j];
           this.segments.push({
             p1: prevPoint,
             p2: second,
@@ -71755,6 +72192,18 @@ function () {
           });
           prevPoint = second;
         }
+      }
+    } else {
+      var prevPoint = data[0]; // list of points
+
+      for (var i = 1; i < data.length; ++i) {
+        var second = data[i];
+        this.segments.push({
+          p1: prevPoint,
+          p2: second,
+          l: 0
+        });
+        prevPoint = second;
       }
     } // now go through our segments to calculate the lengths so that we
     // can set up a nice weighted random distribution
@@ -71792,7 +72241,8 @@ function () {
       // which segment we chose
       for (var i = 0; i < this.countingLengths.length; ++i) {
         if (rand < this.countingLengths[i]) {
-          chosenSeg = this.segments[i]; // set lerp equal to the length into that segment (i.e. the remainder after subtracting all the segments before it)
+          chosenSeg = this.segments[i]; // set lerp equal to the length into that segment
+          // (i.e. the remainder after subtracting all the segments before it)
 
           lerp = i === 0 ? rand : rand - this.countingLengths[i - 1];
           break;
@@ -71822,7 +72272,7 @@ var ticker; // to avoid Rollup transforming our import, save pixi namespace in a
 
 var pixiNS$1 = pixi;
 
-if (parseInt(/^(\d+)\./.exec(pixi.VERSION)[1]) < 5) {
+if (parseInt(/^(\d+)\./.exec(pixi.VERSION)[1], 10) < 5) {
   ticker = pixiNS$1.ticker.shared;
 } else {
   ticker = pixiNS$1.Ticker.shared;
@@ -71857,7 +72307,7 @@ function () {
      * A number keeping index of currently applied image. Used to emit arts in order.
      */
     this._currentImageIndex = -1;
-    this._particleConstructor = Particle; //properties for individual particles
+    this._particleConstructor = Particle; // properties for individual particles
 
     this.particleImages = null;
     this.startAlpha = null;
@@ -71877,7 +72327,7 @@ function () {
     this.maxRotationSpeed = 0;
     this.particleBlendMode = 0;
     this.customEase = null;
-    this.extraData = null; //properties for spawning particles
+    this.extraData = null; // properties for spawning particles
 
     this._frequency = 1;
     this.spawnChance = 1;
@@ -71891,7 +72341,7 @@ function () {
     this.spawnPolygonalChain = null;
     this.particlesPerWave = 1;
     this.particleSpacing = 0;
-    this.angleStart = 0; //emitter properties
+    this.angleStart = 0; // emitter properties
 
     this.rotation = 0;
     this.ownerPos = null;
@@ -71912,10 +72362,14 @@ function () {
     this._autoUpdate = false;
     this._currentImageIndex = -1;
     this._destroyWhenComplete = false;
-    this._completeCallback = null; //set the initial parent
+    this._completeCallback = null; // set the initial parent
 
     this.parent = particleParent;
-    if (particleImages && config) this.init(particleImages, config); //save often used functions on the instance instead of the prototype for better speed
+
+    if (particleImages && config) {
+      this.init(particleImages, config);
+    } // save often used functions on the instance instead of the prototype for better speed
+
 
     this.recycle = this.recycle;
     this.update = this.update;
@@ -71949,8 +72403,12 @@ function () {
       return this._frequency;
     },
     set: function (value) {
-      //do some error checking to prevent infinite loops
-      if (typeof value == "number" && value > 0) this._frequency = value;else this._frequency = 1;
+      // do some error checking to prevent infinite loops
+      if (typeof value === 'number' && value > 0) {
+        this._frequency = value;
+      } else {
+        this._frequency = 1;
+      }
     },
     enumerable: true,
     configurable: true
@@ -71965,18 +72423,20 @@ function () {
       return this._particleConstructor;
     },
     set: function (value) {
-      if (value != this._particleConstructor) {
-        this._particleConstructor = value; //clean up existing particles
+      if (value !== this._particleConstructor) {
+        this._particleConstructor = value; // clean up existing particles
 
-        this.cleanup(); //scrap all the particles
+        this.cleanup(); // scrap all the particles
 
         for (var particle = this._poolFirst; particle; particle = particle.next) {
           particle.destroy();
         }
 
-        this._poolFirst = null; //re-initialize the emitter so that the new constructor can do anything it needs to
+        this._poolFirst = null; // re-initialize the emitter so that the new constructor can do anything it needs to
 
-        if (this._origConfig && this._origArt) this.init(this._origArt, this._origConfig);
+        if (this._origConfig && this._origArt) {
+          this.init(this._origArt, this._origConfig);
+        }
       }
     },
     enumerable: true,
@@ -72003,53 +72463,62 @@ function () {
    */
 
   Emitter.prototype.init = function (art, config) {
-    if (!art || !config) return; //clean up any existing particles
+    if (!art || !config) {
+      return;
+    } // clean up any existing particles
 
-    this.cleanup(); //store the original config and particle images, in case we need to re-initialize
-    //when the particle constructor is changed
+
+    this.cleanup(); // store the original config and particle images, in case we need to re-initialize
+    // when the particle constructor is changed
 
     this._origConfig = config;
-    this._origArt = art; //set up the array of data, also ensuring that it is an array
+    this._origArt = art; // set up the array of data, also ensuring that it is an array
 
-    art = Array.isArray(art) ? art.slice() : [art]; //run the art through the particle class's parsing function
+    art = Array.isArray(art) ? art.slice() : [art]; // run the art through the particle class's parsing function
 
     var partClass = this._particleConstructor;
-    this.particleImages = partClass.parseArt ? partClass.parseArt(art) : art; ///////////////////////////
+    this.particleImages = partClass.parseArt ? partClass.parseArt(art) : art; // /////////////////////////
     // Particle Properties   //
-    ///////////////////////////
-    //set up the alpha
+    // /////////////////////////
+    // set up the alpha
 
     if (config.alpha) {
       this.startAlpha = PropertyNode.createList(config.alpha);
-    } else this.startAlpha = new PropertyNode(1, 0); //set up the speed
+    } else {
+      this.startAlpha = new PropertyNode(1, 0);
+    } // set up the speed
 
 
     if (config.speed) {
-      this.startSpeed = PropertyNode.createList(config.speed);
+      this.startSpeed = PropertyNode.createList(config.speed); // eslint-disable-next-line max-len
+
       this.minimumSpeedMultiplier = ('minimumSpeedMultiplier' in config ? config.minimumSpeedMultiplier : config.speed.minimumSpeedMultiplier) || 1;
     } else {
       this.minimumSpeedMultiplier = 1;
       this.startSpeed = new PropertyNode(0, 0);
-    } //set up acceleration
+    } // set up acceleration
 
 
     var acceleration = config.acceleration;
 
     if (acceleration && (acceleration.x || acceleration.y)) {
-      //make sure we disable speed interpolation
+      // make sure we disable speed interpolation
       this.startSpeed.next = null;
       this.acceleration = new pixi.Point(acceleration.x, acceleration.y);
       this.maxSpeed = config.maxSpeed || NaN;
-    } else this.acceleration = new pixi.Point(); //set up the scale
+    } else {
+      this.acceleration = new pixi.Point();
+    } // set up the scale
 
 
     if (config.scale) {
-      this.startScale = PropertyNode.createList(config.scale);
+      this.startScale = PropertyNode.createList(config.scale); // eslint-disable-next-line max-len
+
       this.minimumScaleMultiplier = ('minimumScaleMultiplier' in config ? config.minimumScaleMultiplier : config.scale.minimumScaleMultiplier) || 1;
     } else {
       this.startScale = new PropertyNode(1, 0);
       this.minimumScaleMultiplier = 1;
-    } //set up the color
+    } // set up the color
 
 
     if (config.color) {
@@ -72060,65 +72529,82 @@ function () {
         g: 0xFF,
         b: 0xFF
       }, 0);
-    } //set up the start rotation
+    } // set up the start rotation
 
 
     if (config.startRotation) {
       this.minStartRotation = config.startRotation.min;
       this.maxStartRotation = config.startRotation.max;
-    } else this.minStartRotation = this.maxStartRotation = 0;
+    } else {
+      this.minStartRotation = this.maxStartRotation = 0;
+    }
 
     if (config.noRotation && (this.minStartRotation || this.maxStartRotation)) {
       this.noRotation = !!config.noRotation;
-    } else this.noRotation = false; //set up the rotation speed
+    } else {
+      this.noRotation = false;
+    } // set up the rotation speed
 
 
     if (config.rotationSpeed) {
       this.minRotationSpeed = config.rotationSpeed.min;
       this.maxRotationSpeed = config.rotationSpeed.max;
-    } else this.minRotationSpeed = this.maxRotationSpeed = 0;
+    } else {
+      this.minRotationSpeed = this.maxRotationSpeed = 0;
+    }
 
-    this.rotationAcceleration = config.rotationAcceleration || 0; //set up the lifetime
+    this.rotationAcceleration = config.rotationAcceleration || 0; // set up the lifetime
 
     this.minLifetime = config.lifetime.min;
-    this.maxLifetime = config.lifetime.max; //get the blend mode
+    this.maxLifetime = config.lifetime.max; // get the blend mode
 
-    this.particleBlendMode = ParticleUtils.getBlendMode(config.blendMode); //use the custom ease if provided
+    this.particleBlendMode = ParticleUtils.getBlendMode(config.blendMode); // use the custom ease if provided
 
     if (config.ease) {
-      this.customEase = typeof config.ease == "function" ? config.ease : ParticleUtils.generateEase(config.ease);
-    } else this.customEase = null; //set up the extra data, running it through the particle class's parseData function.
+      this.customEase = typeof config.ease === 'function' ? config.ease : ParticleUtils.generateEase(config.ease);
+    } else {
+      this.customEase = null;
+    } // set up the extra data, running it through the particle class's parseData function.
 
 
-    if (partClass.parseData) this.extraData = partClass.parseData(config.extraData);else this.extraData = config.extraData || null; //////////////////////////
+    if (partClass.parseData) {
+      this.extraData = partClass.parseData(config.extraData);
+    } else {
+      this.extraData = config.extraData || null;
+    } // ////////////////////////
     // Emitter Properties   //
-    //////////////////////////
-    //reset spawn type specific settings
+    // ////////////////////////
+    // reset spawn type specific settings
+
 
     this.spawnRect = this.spawnCircle = null;
     this.particlesPerWave = 1;
-    if (config.particlesPerWave && config.particlesPerWave > 1) this.particlesPerWave = config.particlesPerWave;
-    this.particleSpacing = 0;
-    this.angleStart = 0; //determine the spawn function to use
 
-    this.parseSpawnType(config); //set the spawning frequency
+    if (config.particlesPerWave && config.particlesPerWave > 1) {
+      this.particlesPerWave = config.particlesPerWave;
+    }
+
+    this.particleSpacing = 0;
+    this.angleStart = 0; // determine the spawn function to use
+
+    this.parseSpawnType(config); // set the spawning frequency
 
     this.frequency = config.frequency;
-    this.spawnChance = typeof config.spawnChance === 'number' && config.spawnChance > 0 ? config.spawnChance : 1; //set the emitter lifetime
+    this.spawnChance = typeof config.spawnChance === 'number' && config.spawnChance > 0 ? config.spawnChance : 1; // set the emitter lifetime
 
-    this.emitterLifetime = config.emitterLifetime || -1; //set the max particles
+    this.emitterLifetime = config.emitterLifetime || -1; // set the max particles
 
-    this.maxParticles = config.maxParticles > 0 ? config.maxParticles : 1000; //determine if we should add the particle at the back of the list or not
+    this.maxParticles = config.maxParticles > 0 ? config.maxParticles : 1000; // determine if we should add the particle at the back of the list or not
 
-    this.addAtBack = !!config.addAtBack; //reset the emitter position and rotation variables
+    this.addAtBack = !!config.addAtBack; // reset the emitter position and rotation variables
 
     this.rotation = 0;
     this.ownerPos = new pixi.Point();
     this.spawnPos = new pixi.Point(config.pos.x, config.pos.y);
     this.initAdditional(art, config);
-    this._prevEmitterPos = this.spawnPos.clone(); //previous emitter position is invalid and should not be used for interpolation
+    this._prevEmitterPos = this.spawnPos.clone(); // previous emitter position is invalid and should not be used for interpolation
 
-    this._prevPosIsValid = false; //start emitting
+    this._prevPosIsValid = false; // start emitting
 
     this._spawnTimer = 0;
     this.emit = config.emit === undefined ? true : !!config.emit;
@@ -72131,9 +72617,11 @@ function () {
    * @param art A texture or array of textures to use for the particles.
    * @param config A configuration object containing settings for the emitter.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 
-  Emitter.prototype.initAdditional = function (art, config) {};
+  Emitter.prototype.initAdditional = function (art, config) {// override in subclasses
+  };
   /**
    * Parsing emitter spawn type from config settings.
    * Place for override and add new kind of spawn type
@@ -72145,48 +72633,48 @@ function () {
     var spawnCircle;
 
     switch (config.spawnType) {
-      case "rect":
-        this.spawnType = "rect";
+      case 'rect':
+        this.spawnType = 'rect';
         this._spawnFunc = this._spawnRect;
         var spawnRect = config.spawnRect;
         this.spawnRect = new pixi.Rectangle(spawnRect.x, spawnRect.y, spawnRect.w, spawnRect.h);
         break;
 
-      case "circle":
-        this.spawnType = "circle";
+      case 'circle':
+        this.spawnType = 'circle';
         this._spawnFunc = this._spawnCircle;
         spawnCircle = config.spawnCircle;
         this.spawnCircle = new pixi.Circle(spawnCircle.x, spawnCircle.y, spawnCircle.r);
         break;
 
-      case "ring":
-        this.spawnType = "ring";
+      case 'ring':
+        this.spawnType = 'ring';
         this._spawnFunc = this._spawnRing;
         spawnCircle = config.spawnCircle;
         this.spawnCircle = new pixi.Circle(spawnCircle.x, spawnCircle.y, spawnCircle.r);
         this.spawnCircle.minRadius = spawnCircle.minR;
         break;
 
-      case "burst":
-        this.spawnType = "burst";
+      case 'burst':
+        this.spawnType = 'burst';
         this._spawnFunc = this._spawnBurst;
         this.particleSpacing = config.particleSpacing;
         this.angleStart = config.angleStart ? config.angleStart : 0;
         break;
 
-      case "point":
-        this.spawnType = "point";
+      case 'point':
+        this.spawnType = 'point';
         this._spawnFunc = this._spawnPoint;
         break;
 
-      case "polygonalChain":
-        this.spawnType = "polygonalChain";
+      case 'polygonalChain':
+        this.spawnType = 'polygonalChain';
         this._spawnFunc = this._spawnPolygonalChain;
         this.spawnPolygonalChain = new PolygonalChain(config.spawnPolygon);
         break;
 
       default:
-        this.spawnType = "point";
+        this.spawnType = 'point';
         this._spawnFunc = this._spawnPoint;
         break;
     }
@@ -72199,16 +72687,31 @@ function () {
 
 
   Emitter.prototype.recycle = function (particle) {
-    if (particle.next) particle.next.prev = particle.prev;
-    if (particle.prev) particle.prev.next = particle.next;
-    if (particle == this._activeParticlesLast) this._activeParticlesLast = particle.prev;
-    if (particle == this._activeParticlesFirst) this._activeParticlesFirst = particle.next; //add to pool
+    if (particle.next) {
+      particle.next.prev = particle.prev;
+    }
+
+    if (particle.prev) {
+      particle.prev.next = particle.next;
+    }
+
+    if (particle === this._activeParticlesLast) {
+      this._activeParticlesLast = particle.prev;
+    }
+
+    if (particle === this._activeParticlesFirst) {
+      this._activeParticlesFirst = particle.next;
+    } // add to pool
+
 
     particle.prev = null;
     particle.next = this._poolFirst;
-    this._poolFirst = particle; //remove child from display, or make it invisible if it is in a ParticleContainer
+    this._poolFirst = particle; // remove child from display, or make it invisible if it is in a ParticleContainer
 
-    if (particle.parent) particle.parent.removeChild(particle); //decrease count
+    if (particle.parent) {
+      particle.parent.removeChild(particle);
+    } // decrease count
+
 
     --this.particleCount;
   };
@@ -72219,12 +72722,12 @@ function () {
 
 
   Emitter.prototype.rotate = function (newRot) {
-    if (this.rotation == newRot) return; //caclulate the difference in rotation for rotating spawnPos
+    if (this.rotation === newRot) return; // caclulate the difference in rotation for rotating spawnPos
 
     var diff = newRot - this.rotation;
-    this.rotation = newRot; //rotate spawnPos
+    this.rotation = newRot; // rotate spawnPos
 
-    ParticleUtils.rotatePoint(diff, this.spawnPos); //mark the position as having changed
+    ParticleUtils.rotatePoint(diff, this.spawnPos); // mark the position as having changed
 
     this._posChanged = true;
   };
@@ -72330,37 +72833,40 @@ function () {
   Emitter.prototype.update = function (delta) {
     if (this._autoUpdate) {
       delta = delta / pixi.settings.TARGET_FPMS / 1000;
-    } //if we don't have a parent to add particles to, then don't do anything.
-    //this also works as a isDestroyed check
+    } // if we don't have a parent to add particles to, then don't do anything.
+    // this also works as a isDestroyed check
 
 
-    if (!this._parent) return; //update existing particles
+    if (!this._parent) return; // update existing particles
 
-    var i, particle, next;
+    var i;
+    var particle;
+    var next;
 
     for (particle = this._activeParticlesFirst; particle; particle = next) {
       next = particle.next;
       particle.update(delta);
     }
 
-    var prevX, prevY; //if the previous position is valid, store these for later interpolation
+    var prevX;
+    var prevY; // if the previous position is valid, store these for later interpolation
 
     if (this._prevPosIsValid) {
       prevX = this._prevEmitterPos.x;
       prevY = this._prevEmitterPos.y;
-    } //store current position of the emitter as local variables
+    } // store current position of the emitter as local variables
 
 
     var curX = this.ownerPos.x + this.spawnPos.x;
-    var curY = this.ownerPos.y + this.spawnPos.y; //spawn new particles
+    var curY = this.ownerPos.y + this.spawnPos.y; // spawn new particles
 
     if (this._emit) {
-      //decrease spawn timer
-      this._spawnTimer -= delta < 0 ? 0 : delta; //while _spawnTimer < 0, we have particles to spawn
+      // decrease spawn timer
+      this._spawnTimer -= delta < 0 ? 0 : delta; // while _spawnTimer < 0, we have particles to spawn
 
       while (this._spawnTimer <= 0) {
-        //determine if the emitter should stop spawning
-        if (this._emitterLife > 0) {
+        // determine if the emitter should stop spawning
+        if (this._emitterLife >= 0) {
           this._emitterLife -= this._frequency;
 
           if (this._emitterLife <= 0) {
@@ -72369,41 +72875,50 @@ function () {
             this.emit = false;
             break;
           }
-        } //determine if we have hit the particle limit
+        } // determine if we have hit the particle limit
 
 
         if (this.particleCount >= this.maxParticles) {
           this._spawnTimer += this._frequency;
           continue;
-        } //determine the particle lifetime
+        } // determine the particle lifetime
 
 
         var lifetime = void 0;
-        if (this.minLifetime == this.maxLifetime) lifetime = this.minLifetime;else lifetime = Math.random() * (this.maxLifetime - this.minLifetime) + this.minLifetime; //only make the particle if it wouldn't immediately destroy itself
+
+        if (this.minLifetime === this.maxLifetime) {
+          lifetime = this.minLifetime;
+        } else {
+          lifetime = Math.random() * (this.maxLifetime - this.minLifetime) + this.minLifetime;
+        } // only make the particle if it wouldn't immediately destroy itself
+
 
         if (-this._spawnTimer < lifetime) {
-          //If the position has changed and this isn't the first spawn,
-          //interpolate the spawn position
-          var emitPosX = void 0,
-              emitPosY = void 0;
+          // If the position has changed and this isn't the first spawn,
+          // interpolate the spawn position
+          var emitPosX = void 0;
+          var emitPosY = void 0;
 
           if (this._prevPosIsValid && this._posChanged) {
-            //1 - _spawnTimer / delta, but _spawnTimer is negative
+            // 1 - _spawnTimer / delta, but _spawnTimer is negative
             var lerp = 1 + this._spawnTimer / delta;
             emitPosX = (curX - prevX) * lerp + prevX;
             emitPosY = (curY - prevY) * lerp + prevY;
-          } else //otherwise just set to the spawn position
+          } else // otherwise just set to the spawn position
             {
               emitPosX = curX;
               emitPosY = curY;
-            } //create enough particles to fill the wave (non-burst types have a wave of 1)
+            } // create enough particles to fill the wave (non-burst types have a wave of 1)
 
 
           i = 0;
 
           for (var len = Math.min(this.particlesPerWave, this.maxParticles - this.particleCount); i < len; ++i) {
-            //see if we actually spawn one
-            if (this.spawnChance < 1 && Math.random() >= this.spawnChance) continue; //create particle
+            // see if we actually spawn one
+            if (this.spawnChance < 1 && Math.random() >= this.spawnChance) {
+              continue;
+            } // create particle
+
 
             var p = void 0;
 
@@ -72413,7 +72928,7 @@ function () {
               p.next = null;
             } else {
               p = new this.particleConstructor(this);
-            } //set a random texture if we have more than one
+            } // set a random texture if we have more than one
 
 
             if (this.particleImages.length > 1) {
@@ -72430,15 +72945,16 @@ function () {
                   p.applyArt(this.particleImages[Math.floor(Math.random() * this.particleImages.length)]);
                 }
             } else {
-              //if they are actually the same texture, a standard particle
-              //will quit early from the texture setting in setTexture().
+              // if they are actually the same texture, a standard particle
+              // will quit early from the texture setting in setTexture().
               p.applyArt(this.particleImages[0]);
-            } //set up the start and end values
+            } // set up the start and end values
 
 
             p.alphaList.reset(this.startAlpha);
 
-            if (this.minimumSpeedMultiplier != 1) {
+            if (this.minimumSpeedMultiplier !== 1) {
+              // eslint-disable-next-line max-len
               p.speedMultiplier = Math.random() * (1 - this.minimumSpeedMultiplier) + this.minimumSpeedMultiplier;
             }
 
@@ -72447,48 +72963,65 @@ function () {
             p.acceleration.y = this.acceleration.y;
             p.maxSpeed = this.maxSpeed;
 
-            if (this.minimumScaleMultiplier != 1) {
+            if (this.minimumScaleMultiplier !== 1) {
+              // eslint-disable-next-line max-len
               p.scaleMultiplier = Math.random() * (1 - this.minimumScaleMultiplier) + this.minimumScaleMultiplier;
             }
 
             p.scaleList.reset(this.startScale);
-            p.colorList.reset(this.startColor); //randomize the rotation speed
+            p.colorList.reset(this.startColor); // randomize the rotation speed
 
-            if (this.minRotationSpeed == this.maxRotationSpeed) p.rotationSpeed = this.minRotationSpeed;else p.rotationSpeed = Math.random() * (this.maxRotationSpeed - this.minRotationSpeed) + this.minRotationSpeed;
+            if (this.minRotationSpeed === this.maxRotationSpeed) {
+              p.rotationSpeed = this.minRotationSpeed;
+            } else {
+              // eslint-disable-next-line max-len
+              p.rotationSpeed = Math.random() * (this.maxRotationSpeed - this.minRotationSpeed) + this.minRotationSpeed;
+            }
+
             p.rotationAcceleration = this.rotationAcceleration;
-            p.noRotation = this.noRotation; //set up the lifetime
+            p.noRotation = this.noRotation; // set up the lifetime
 
-            p.maxLife = lifetime; //set the blend mode
+            p.maxLife = lifetime; // set the blend mode
 
-            p.blendMode = this.particleBlendMode; //set the custom ease, if any
+            p.blendMode = this.particleBlendMode; // set the custom ease, if any
 
-            p.ease = this.customEase; //set the extra data, if any
+            p.ease = this.customEase; // set the extra data, if any
 
-            p.extraData = this.extraData; //set additional properties to particle
+            p.extraData = this.extraData; // set additional properties to particle
 
-            this.applyAdditionalProperties(p); //call the proper function to handle rotation and position of particle
+            this.applyAdditionalProperties(p); // call the proper function to handle rotation and position of particle
 
-            this._spawnFunc(p, emitPosX, emitPosY, i); //initialize particle
+            this._spawnFunc(p, emitPosX, emitPosY, i); // initialize particle
 
 
-            p.init(); //update the particle by the time passed, so the particles are spread out properly
-
-            p.update(-this._spawnTimer); //we want a positive delta, because a negative delta messes things up
-            //add the particle to the display list
+            p.init(); // add the particle to the display list
 
             if (!p.parent) {
-              if (this.addAtBack) this._parent.addChildAt(p, 0);else this._parent.addChild(p);
+              if (this.addAtBack) {
+                this._parent.addChildAt(p, 0);
+              } else {
+                this._parent.addChild(p);
+              }
             } else {
-              //kind of hacky, but performance friendly
-              //shuffle children to correct place
-              var children = this._parent.children; //avoid using splice if possible
+              // kind of hacky, but performance friendly
+              // shuffle children to correct place
+              var children = this._parent.children; // avoid using splice if possible
 
-              if (children[0] == p) children.shift();else if (children[children.length - 1] == p) children.pop();else {
+              if (children[0] === p) {
+                children.shift();
+              } else if (children[children.length - 1] === p) {
+                children.pop();
+              } else {
                 var index = children.indexOf(p);
                 children.splice(index, 1);
               }
-              if (this.addAtBack) children.unshift(p);else children.push(p);
-            } //add particle to list of active particles
+
+              if (this.addAtBack) {
+                children.unshift(p);
+              } else {
+                children.push(p);
+              }
+            } // add particle to list of active particles
 
 
             if (this._activeParticlesLast) {
@@ -72499,14 +73032,16 @@ function () {
               this._activeParticlesLast = this._activeParticlesFirst = p;
             }
 
-            ++this.particleCount;
+            ++this.particleCount; // update the particle by the time passed, so the particles are spread out properly
+
+            p.update(-this._spawnTimer); // we want a positive delta, because a negative delta messes things up
           }
-        } //increase timer and continue on to any other particles that need to be created
+        } // increase timer and continue on to any other particles that need to be created
 
 
         this._spawnTimer += this._frequency;
       }
-    } //if the position changed before this update, then keep track of that
+    } // if the position changed before this update, then keep track of that
 
 
     if (this._posChanged) {
@@ -72514,7 +73049,7 @@ function () {
       this._prevEmitterPos.y = curY;
       this._prevPosIsValid = true;
       this._posChanged = false;
-    } //if we are all done and should destroy ourselves, take care of that
+    } // if we are all done and should destroy ourselves, take care of that
 
 
     if (!this._emit && !this._activeParticlesFirst) {
@@ -72534,9 +73069,11 @@ function () {
    * Using on classes that extend from Emitter
    * @param p The particle
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 
-  Emitter.prototype.applyAdditionalProperties = function (p) {};
+  Emitter.prototype.applyAdditionalProperties = function (p) {// for override in subclass
+  };
   /**
    * Positions a particle for a point type emitter.
    * @param p The particle to position and rotate.
@@ -72547,9 +73084,15 @@ function () {
 
 
   Emitter.prototype._spawnPoint = function (p, emitPosX, emitPosY) {
-    //set the initial rotation/direction of the particle based on
-    //starting particle angle and rotation of emitter
-    if (this.minStartRotation == this.maxStartRotation) p.rotation = this.minStartRotation + this.rotation;else p.rotation = Math.random() * (this.maxStartRotation - this.minStartRotation) + this.minStartRotation + this.rotation; //drop the particle at the emitter's position
+    // set the initial rotation/direction of the particle based on
+    // starting particle angle and rotation of emitter
+    if (this.minStartRotation === this.maxStartRotation) {
+      p.rotation = this.minStartRotation + this.rotation;
+    } else {
+      // eslint-disable-next-line max-len
+      p.rotation = Math.random() * (this.maxStartRotation - this.minStartRotation) + this.minStartRotation + this.rotation;
+    } // drop the particle at the emitter's position
+
 
     p.position.x = emitPosX;
     p.position.y = emitPosY;
@@ -72564,13 +73107,23 @@ function () {
 
 
   Emitter.prototype._spawnRect = function (p, emitPosX, emitPosY) {
-    //set the initial rotation/direction of the particle based on starting
-    //particle angle and rotation of emitter
-    if (this.minStartRotation == this.maxStartRotation) p.rotation = this.minStartRotation + this.rotation;else p.rotation = Math.random() * (this.maxStartRotation - this.minStartRotation) + this.minStartRotation + this.rotation; //place the particle at a random point in the rectangle
+    // set the initial rotation/direction of the particle based on starting
+    // particle angle and rotation of emitter
+    if (this.minStartRotation === this.maxStartRotation) {
+      p.rotation = this.minStartRotation + this.rotation;
+    } else {
+      // eslint-disable-next-line max-len
+      p.rotation = Math.random() * (this.maxStartRotation - this.minStartRotation) + this.minStartRotation + this.rotation;
+    } // place the particle at a random point in the rectangle
+
 
     helperPoint.x = Math.random() * this.spawnRect.width + this.spawnRect.x;
     helperPoint.y = Math.random() * this.spawnRect.height + this.spawnRect.y;
-    if (this.rotation !== 0) ParticleUtils.rotatePoint(this.rotation, helperPoint);
+
+    if (this.rotation !== 0) {
+      ParticleUtils.rotatePoint(this.rotation, helperPoint);
+    }
+
     p.position.x = emitPosX + helperPoint.x;
     p.position.y = emitPosY + helperPoint.y;
   };
@@ -72584,19 +73137,28 @@ function () {
 
 
   Emitter.prototype._spawnCircle = function (p, emitPosX, emitPosY) {
-    //set the initial rotation/direction of the particle based on starting
-    //particle angle and rotation of emitter
-    if (this.minStartRotation == this.maxStartRotation) p.rotation = this.minStartRotation + this.rotation;else p.rotation = Math.random() * (this.maxStartRotation - this.minStartRotation) + this.minStartRotation + this.rotation; //place the particle at a random radius in the circle
+    // set the initial rotation/direction of the particle based on starting
+    // particle angle and rotation of emitter
+    if (this.minStartRotation === this.maxStartRotation) {
+      p.rotation = this.minStartRotation + this.rotation;
+    } else {
+      // eslint-disable-next-line max-len
+      p.rotation = Math.random() * (this.maxStartRotation - this.minStartRotation) + this.minStartRotation + this.rotation;
+    } // place the particle at a random radius in the circle
+
 
     helperPoint.x = Math.random() * this.spawnCircle.radius;
-    helperPoint.y = 0; //rotate the point to a random angle in the circle
+    helperPoint.y = 0; // rotate the point to a random angle in the circle
 
-    ParticleUtils.rotatePoint(Math.random() * 360, helperPoint); //offset by the circle's center
+    ParticleUtils.rotatePoint(Math.random() * 360, helperPoint); // offset by the circle's center
 
     helperPoint.x += this.spawnCircle.x;
-    helperPoint.y += this.spawnCircle.y; //rotate the point by the emitter's rotation
+    helperPoint.y += this.spawnCircle.y; // rotate the point by the emitter's rotation
 
-    if (this.rotation !== 0) ParticleUtils.rotatePoint(this.rotation, helperPoint); //set the position, offset by the emitter's position
+    if (this.rotation !== 0) {
+      ParticleUtils.rotatePoint(this.rotation, helperPoint);
+    } // set the position, offset by the emitter's position
+
 
     p.position.x = emitPosX + helperPoint.x;
     p.position.y = emitPosY + helperPoint.y;
@@ -72611,25 +73173,35 @@ function () {
 
 
   Emitter.prototype._spawnRing = function (p, emitPosX, emitPosY) {
-    var spawnCircle = this.spawnCircle; //set the initial rotation/direction of the particle based on starting
-    //particle angle and rotation of emitter
+    var spawnCircle = this.spawnCircle; // set the initial rotation/direction of the particle based on starting
+    // particle angle and rotation of emitter
 
-    if (this.minStartRotation == this.maxStartRotation) p.rotation = this.minStartRotation + this.rotation;else p.rotation = Math.random() * (this.maxStartRotation - this.minStartRotation) + this.minStartRotation + this.rotation; //place the particle at a random radius in the ring
+    if (this.minStartRotation === this.maxStartRotation) {
+      p.rotation = this.minStartRotation + this.rotation;
+    } else {
+      p.rotation = Math.random() * (this.maxStartRotation - this.minStartRotation) + this.minStartRotation + this.rotation;
+    } // place the particle at a random radius in the ring
+
 
     if (spawnCircle.minRadius !== spawnCircle.radius) {
       helperPoint.x = Math.random() * (spawnCircle.radius - spawnCircle.minRadius) + spawnCircle.minRadius;
-    } else helperPoint.x = spawnCircle.radius;
+    } else {
+      helperPoint.x = spawnCircle.radius;
+    }
 
-    helperPoint.y = 0; //rotate the point to a random angle in the circle
+    helperPoint.y = 0; // rotate the point to a random angle in the circle
 
     var angle = Math.random() * 360;
     p.rotation += angle;
-    ParticleUtils.rotatePoint(angle, helperPoint); //offset by the circle's center
+    ParticleUtils.rotatePoint(angle, helperPoint); // offset by the circle's center
 
     helperPoint.x += this.spawnCircle.x;
-    helperPoint.y += this.spawnCircle.y; //rotate the point by the emitter's rotation
+    helperPoint.y += this.spawnCircle.y; // rotate the point by the emitter's rotation
 
-    if (this.rotation !== 0) ParticleUtils.rotatePoint(this.rotation, helperPoint); //set the position, offset by the emitter's position
+    if (this.rotation !== 0) {
+      ParticleUtils.rotatePoint(this.rotation, helperPoint);
+    } // set the position, offset by the emitter's position
+
 
     p.position.x = emitPosX + helperPoint.x;
     p.position.y = emitPosY + helperPoint.y;
@@ -72644,13 +73216,21 @@ function () {
 
 
   Emitter.prototype._spawnPolygonalChain = function (p, emitPosX, emitPosY) {
-    //set the initial rotation/direction of the particle based on starting
-    //particle angle and rotation of emitter
-    if (this.minStartRotation == this.maxStartRotation) p.rotation = this.minStartRotation + this.rotation;else p.rotation = Math.random() * (this.maxStartRotation - this.minStartRotation) + this.minStartRotation + this.rotation; // get random point on the polygon chain
+    // set the initial rotation/direction of the particle based on starting
+    // particle angle and rotation of emitter
+    if (this.minStartRotation === this.maxStartRotation) {
+      p.rotation = this.minStartRotation + this.rotation;
+    } else {
+      p.rotation = Math.random() * (this.maxStartRotation - this.minStartRotation) + this.minStartRotation + this.rotation;
+    } // get random point on the polygon chain
 
-    this.spawnPolygonalChain.getRandomPoint(helperPoint); //rotate the point by the emitter's rotation
 
-    if (this.rotation !== 0) ParticleUtils.rotatePoint(this.rotation, helperPoint); //set the position, offset by the emitter's position
+    this.spawnPolygonalChain.getRandomPoint(helperPoint); // rotate the point by the emitter's rotation
+
+    if (this.rotation !== 0) {
+      ParticleUtils.rotatePoint(this.rotation, helperPoint);
+    } // set the position, offset by the emitter's position
+
 
     p.position.x = emitPosX + helperPoint.x;
     p.position.y = emitPosY + helperPoint.y;
@@ -72665,9 +73245,14 @@ function () {
 
 
   Emitter.prototype._spawnBurst = function (p, emitPosX, emitPosY, i) {
-    //set the initial rotation/direction of the particle based on spawn
-    //angle and rotation of emitter
-    if (this.particleSpacing === 0) p.rotation = Math.random() * 360;else p.rotation = this.angleStart + this.particleSpacing * i + this.rotation; //drop the particle at the emitter's position
+    // set the initial rotation/direction of the particle based on spawn
+    // angle and rotation of emitter
+    if (this.particleSpacing === 0) {
+      p.rotation = Math.random() * 360;
+    } else {
+      p.rotation = this.angleStart + this.particleSpacing * i + this.rotation;
+    } // drop the particle at the emitter's position
+
 
     p.position.x = emitPosX;
     p.position.y = emitPosY;
@@ -72678,12 +73263,16 @@ function () {
 
 
   Emitter.prototype.cleanup = function () {
-    var particle, next;
+    var particle;
+    var next;
 
     for (particle = this._activeParticlesFirst; particle; particle = next) {
       next = particle.next;
       this.recycle(particle);
-      if (particle.parent) particle.parent.removeChild(particle);
+
+      if (particle.parent) {
+        particle.parent.removeChild(particle);
+      }
     }
 
     this._activeParticlesFirst = this._activeParticlesLast = null;
@@ -72695,15 +73284,15 @@ function () {
 
 
   Emitter.prototype.destroy = function () {
-    //make sure we aren't still listening to any tickers
-    this.autoUpdate = false; //puts all active particles in the pool, and removes them from the particle parent
+    // make sure we aren't still listening to any tickers
+    this.autoUpdate = false; // puts all active particles in the pool, and removes them from the particle parent
 
-    this.cleanup(); //wipe the pool clean
+    this.cleanup(); // wipe the pool clean
 
     var next;
 
     for (var particle = this._poolFirst; particle; particle = next) {
-      //store next value so we don't lose it in our destroy call
+      // store next value so we don't lose it in our destroy call
       next = particle.next;
       particle.destroy();
     }
@@ -72727,15 +73316,15 @@ var helperPoint$1 = new pixi.Point();
  * @hidden
  */
 
-var MATH_FUNCS = ["pow", "sqrt", "abs", "floor", "round", "ceil", "E", "PI", "sin", "cos", "tan", "asin", "acos", "atan", "atan2", "log"];
+var MATH_FUNCS = ['pow', 'sqrt', 'abs', 'floor', 'round', 'ceil', 'E', 'PI', 'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2', 'log'];
 /**
  * create an actual regular expression object from the string
  * @hidden
  */
 
-var WHITELISTER = new RegExp([//Allow the 4 basic operations, parentheses and all numbers/decimals, as well
-//as 'x', for the variable usage.
-"[01234567890\\.\\*\\-\\+\\/\\(\\)x ,]"].concat(MATH_FUNCS).join("|"), "g");
+var WHITELISTER = new RegExp([// Allow the 4 basic operations, parentheses and all numbers/decimals, as well
+// as 'x', for the variable usage.
+'[01234567890\\.\\*\\-\\+\\/\\(\\)x ,]'].concat(MATH_FUNCS).join('|'), 'g');
 /**
  * Parses a string into a function for path following.
  * This involves whitelisting the string for safety, inserting "Math." to math function
@@ -72745,16 +73334,19 @@ var WHITELISTER = new RegExp([//Allow the 4 basic operations, parentheses and al
  * @return The path function - takes x, outputs y.
  */
 
-var parsePath = function (pathString) {
+function parsePath(pathString) {
   var matches = pathString.match(WHITELISTER);
 
   for (var i = matches.length - 1; i >= 0; --i) {
-    if (MATH_FUNCS.indexOf(matches[i]) >= 0) matches[i] = "Math." + matches[i];
+    if (MATH_FUNCS.indexOf(matches[i]) >= 0) {
+      matches[i] = "Math." + matches[i];
+    }
   }
 
-  pathString = matches.join("");
-  return new Function("x", "return " + pathString + ";");
-};
+  pathString = matches.join(''); // eslint-disable-next-line no-new-func
+
+  return new Function('x', "return " + pathString + ";");
+}
 /**
  * An particle that follows a path defined by an algebraic expression, e.g. "sin(x)" or
  * "5x + 3".
@@ -72801,16 +73393,16 @@ function (_super) {
 
 
   PathParticle.prototype.init = function () {
-    //get initial rotation before it is converted to radians
-    this.initialRotation = this.rotation; //standard init
+    // get initial rotation before it is converted to radians
+    this.initialRotation = this.rotation; // standard init
 
-    this.Particle_init(); //set the path for the particle
+    this.Particle_init(); // set the path for the particle
 
-    this.path = this.extraData.path; //cancel the normal movement behavior
+    this.path = this.extraData.path; // cancel the normal movement behavior
 
-    this._doNormalMovement = !this.path; //reset movement
+    this._doNormalMovement = !this.path; // reset movement
 
-    this.movement = 0; //grab position
+    this.movement = 0; // grab position
 
     this.initialPosition.x = this.position.x;
     this.initialPosition.y = this.position.y;
@@ -72822,12 +73414,18 @@ function (_super) {
 
 
   PathParticle.prototype.update = function (delta) {
-    var lerp = this.Particle_update(delta); //if the particle died during the update, then don't bother
+    var lerp = this.Particle_update(delta); // if the particle died during the update, then don't bother
 
     if (lerp >= 0 && this.path) {
-      //increase linear movement based on speed
-      var speed = this.speedList.interpolate(lerp) * this.speedMultiplier;
-      this.movement += speed * delta; //set up the helper point for rotation
+      // increase linear movement based on speed
+      if (this._doSpeed) {
+        var speed = this.speedList.interpolate(lerp) * this.speedMultiplier;
+        this.movement += speed * delta;
+      } else {
+        var speed = this.speedList.current.value * this.speedMultiplier;
+        this.movement += speed * delta;
+      } // set up the helper point for rotation
+
 
       helperPoint$1.x = this.movement;
       helperPoint$1.y = this.path(this.movement);
@@ -72876,11 +73474,17 @@ function (_super) {
       try {
         output.path = parsePath(extraData.path);
       } catch (e) {
-        if (ParticleUtils.verbose) console.error("PathParticle: error in parsing path expression");
+        if (ParticleUtils.verbose) {
+          console.error('PathParticle: error in parsing path expression');
+        }
+
         output.path = null;
       }
     } else {
-      if (ParticleUtils.verbose) console.error("PathParticle requires a path string in extraData!");
+      if (ParticleUtils.verbose) {
+        console.error('PathParticle requires a path string in extraData!');
+      }
+
       output.path = null;
     }
 
@@ -72951,7 +73555,7 @@ function (_super) {
 
   AnimatedParticle.prototype.init = function () {
     this.Particle_init();
-    this.elapsed = 0; //if the animation needs to match the particle's life, then cacluate variables
+    this.elapsed = 0; // if the animation needs to match the particle's life, then cacluate variables
 
     if (this.framerate < 0) {
       this.duration = this.maxLife;
@@ -72977,15 +73581,19 @@ function (_super) {
 
 
   AnimatedParticle.prototype.update = function (delta) {
-    var lerp = this.Particle_update(delta); //only animate the particle if it is still alive
+    var lerp = this.Particle_update(delta); // only animate the particle if it is still alive
 
     if (lerp >= 0) {
       this.elapsed += delta;
 
       if (this.elapsed > this.duration) {
-        //loop elapsed back around
-        if (this.loop) this.elapsed = this.elapsed % this.duration; //subtract a small amount to prevent attempting to go past the end of the animation
-        else this.elapsed = this.duration - 0.000001;
+        // loop elapsed back around
+        if (this.loop) {
+          this.elapsed = this.elapsed % this.duration;
+        } // subtract a small amount to prevent attempting to go past the end of the animation
+        else {
+            this.elapsed = this.duration - 0.000001;
+          }
       } // add a very small number to the frame and then floor it to avoid
       // the frame being one short due to floating point errors.
 
@@ -73014,40 +73622,49 @@ function (_super) {
 
 
   AnimatedParticle.parseArt = function (art) {
-    var data, output, textures, tex, outTextures;
     var outArr = [];
 
     for (var i = 0; i < art.length; ++i) {
-      data = art[i];
-      outArr[i] = output = {};
-      output.textures = outTextures = [];
-      textures = data.textures;
+      var data = art[i];
+      var output = outArr[i] = {};
+      var outTextures = output.textures = [];
+      var textures = data.textures;
 
       for (var j = 0; j < textures.length; ++j) {
-        tex = textures[j];
-        if (typeof tex == "string") outTextures.push(GetTextureFromString(tex));else if (tex instanceof pixi.Texture) outTextures.push(tex); //assume an object with extra data determining duplicate frame data
+        var tex = textures[j];
+
+        if (typeof tex === 'string') {
+          outTextures.push(GetTextureFromString(tex));
+        } else if (tex instanceof pixi.Texture) {
+          outTextures.push(tex);
+        } // assume an object with extra data determining duplicate frame data
         else {
             var dupe = tex.count || 1;
-            if (typeof tex.texture == "string") tex = GetTextureFromString(tex.texture);else // if(tex.texture instanceof Texture)
-              tex = tex.texture;
+
+            if (typeof tex.texture === 'string') {
+              tex = GetTextureFromString(tex.texture);
+            } else // if(tex.texture instanceof Texture)
+              {
+                tex = tex.texture;
+              }
 
             for (; dupe > 0; --dupe) {
               outTextures.push(tex);
             }
           }
-      } //use these values to signify that the animation should match the particle life time.
+      } // use these values to signify that the animation should match the particle life time.
 
 
-      if (data.framerate == "matchLife") {
-        //-1 means that it should be calculated
+      if (data.framerate === 'matchLife') {
+        // -1 means that it should be calculated
         output.framerate = -1;
         output.duration = 0;
         output.loop = false;
       } else {
-        //determine if the animation should loop
-        output.loop = !!data.loop; //get the framerate, default to 60
+        // determine if the animation should loop
+        output.loop = !!data.loop; // get the framerate, default to 60
 
-        output.framerate = data.framerate > 0 ? data.framerate : 60; //determine the duration
+        output.framerate = data.framerate > 0 ? data.framerate : 60; // determine the duration
 
         output.duration = outTextures.length / output.framerate;
       }
@@ -73952,7 +74569,329 @@ function _createMask() {
   }));
   return _createMask.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../resources/resolveImages":"animation/resources/resolveImages.js","../resources/createTextureFromImage":"animation/resources/createTextureFromImage.js","../../utils":"utils/index.js","../../utils/collection":"utils/collection.js","../errors":"animation/errors.js","../../utils/graphics":"utils/graphics.js"}],"animation/generators/index.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../resources/resolveImages":"animation/resources/resolveImages.js","../resources/createTextureFromImage":"animation/resources/createTextureFromImage.js","../../utils":"utils/index.js","../../utils/collection":"utils/collection.js","../errors":"animation/errors.js","../../utils/graphics":"utils/graphics.js"}],"pixi/utils/find-objects-of-role.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.findDisplayObjectsOfRole = findDisplayObjectsOfRole;
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+/** finds all PIXI layers matching a specified role */
+function findDisplayObjectsOfRole(container, types) {
+  var depth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+  var results = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+
+  // check each child, if any
+  var _iterator = _createForOfIteratorHelper(container.children || []),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var child = _step.value;
+
+      // if this matches the role, add it to the results
+      if (!!~types.indexOf(child.role)) {
+        results.push(child);
+      } // if there's children, check the container
+
+
+      findDisplayObjectsOfRole(child, types, depth + 1, results);
+    } // if it's not the top level, just continue
+
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  if (depth !== 0) return; // give back the matches
+
+  return results;
+}
+},{}],"pixi/utils/get-bounds-of-role.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getBoundsForRole = getBoundsForRole;
+
+var _findObjectsOfRole = require("./find-objects-of-role");
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+/** handles finding the bounds of a specified role */
+function getBoundsForRole(container, types) {
+  var roles = (0, _findObjectsOfRole.findDisplayObjectsOfRole)(container, types); // collect all bounds
+
+  var xs = [];
+  var ys = [];
+
+  var _iterator = _createForOfIteratorHelper(roles),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var match = _step.value;
+      var bounds = match.getBounds();
+      xs.push(bounds.x, bounds.x + bounds.width);
+      ys.push(bounds.y, bounds.y + bounds.height);
+    } // figure out the bounds
+
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  var left = Math.min.apply(Math, xs) || 0;
+  var top = Math.min.apply(Math, ys) || 0;
+  var right = Math.max.apply(Math, xs) || 0;
+  var bottom = Math.max.apply(Math, ys) || 0;
+  var width = right - left;
+  var height = bottom - top; // give back the final bounds
+
+  return {
+    top: top,
+    left: left,
+    right: right,
+    bottom: bottom,
+    width: width,
+    height: height
+  };
+}
+},{"./find-objects-of-role":"pixi/utils/find-objects-of-role.js"}],"animation/generators/repeater.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createRepeater;
+
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+
+var PIXI = _interopRequireWildcard(require("pixi.js"));
+
+var _animation = _interopRequireDefault(require("./animation"));
+
+var _assign = require("../assign");
+
+var _utils = require("../../utils");
+
+var _getBoundsOfRole = require("../../pixi/utils/get-bounds-of-role");
+
+var _ = _interopRequireDefault(require("."));
+
+var _findObjectsOfRole = require("../../pixi/utils/find-objects-of-role");
+
+var _expressions = require("../expressions");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+// default parameters to create a sprite
+var GROUP_DEFAULTS = {
+  alpha: 1,
+  rotation: 0,
+  scaleY: 1,
+  scaleX: 1,
+  pivotX: 0.5,
+  pivotY: 0.5,
+  x: 0,
+  y: 0
+};
+/** creates a repeater instance */
+
+function createRepeater(_x, _x2, _x3, _x4) {
+  return _createRepeater.apply(this, arguments);
+}
+/** recursively finds a layer that has an assigned pivot point */
+
+
+function _createRepeater() {
+  _createRepeater = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, path, composition, layer) {
+    var update, phase, container, tiles, columns, rows, bounds, i, col, row, instance, marginX, marginY, offsetX, offsetY, animation, layers, offsetBy;
+    return _regenerator.default.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            // recursively built update function
+            update = _utils.noop; // tracking setup phase
+
+            phase = '';
+            _context.prev = 2;
+            // NOTE: sprites are added a wrapper container on purpose
+            // because any animations that modify scale will interfere
+            // with scaling done to fit within responsive containers
+            container = new PIXI.Container();
+            container.role = layer.role; // create the instance of the group (each group should
+            // have it's own compose prop)
+
+            phase = 'creating repeater contents';
+            tiles = new PIXI.Container(); // identify the repeating pattern
+
+            columns = (0, _utils.isNumber)(layer.repeatX) ? layer.repeatX : 1;
+            rows = (0, _utils.isNumber)(layer.repeatY) ? layer.repeatY : 1; // create the scene using the sizing
+
+            i = 0;
+
+          case 10:
+            if (!(i < columns * rows)) {
+              _context.next = 27;
+              break;
+            }
+
+            col = i % columns;
+            row = Math.floor(i / columns); // create the layer
+
+            _context.next = 15;
+            return (0, _.default)(animator, path, layer);
+
+          case 15:
+            instance = _context.sent;
+            tiles.addChild(instance); // if this is the first, tile then calculate the size
+
+            if (!bounds) {
+              bounds = (0, _getBoundsOfRole.getBoundsForRole)(instance, 'base');
+            } // calculate values
+
+
+            marginX = (0, _expressions.evaluateExpression)(layer.marginX || 0);
+            marginY = (0, _expressions.evaluateExpression)(layer.marginY || 0);
+            offsetX = (0, _expressions.evaluateExpression)(layer.offsetX || 0);
+            offsetY = (0, _expressions.evaluateExpression)(layer.offsetY || 0); // set the position
+
+            instance.x = col * (bounds.width + marginX) + offsetX;
+            instance.y = row * (bounds.height + marginY) + offsetY;
+
+          case 24:
+            i++;
+            _context.next = 10;
+            break;
+
+          case 27:
+            // sort the contents
+            tiles.sortChildren(); // create dynamically rendered properties
+
+            phase = 'creating dynamic properties';
+            (0, _assign.applyDynamicProperties)(tiles, layer.props); // prepare expressions
+
+            phase = 'evaluating property expressions';
+            (0, _assign.evaluateDisplayObjectExpressions)(layer.props); // set defaults
+
+            phase = 'applying defaults';
+            (0, _utils.setDefaults)(layer, 'props', GROUP_DEFAULTS); // prepare data
+
+            phase = 'assigning object props';
+            (0, _assign.assignDisplayObjectProps)(tiles, layer.props); // setup animations, if any
+
+            phase = 'creating animations';
+            animation = (0, _animation.default)(animator, path, composition, layer, tiles); // add to the view
+
+            container.zIndex = tiles.zIndex;
+            container.addChild(tiles); // offset the repeated container by the
+            // first base layer found with a pivot
+            // TODO: if there are conflicting pivots, or piviots
+            // set on base layers, this might create issues
+            // consider figuring out a better way of doing this
+
+            layers = (0, _findObjectsOfRole.findDisplayObjectsOfRole)(tiles, 'base');
+            offsetBy = findPivot(layers[0]);
+            tiles.pivot.x -= offsetBy.x;
+            tiles.pivot.y -= offsetBy.y; // warn, just in case
+
+            if (offsetBy.didFindMultiplePivots) {
+              console.warn("Found multiple pivot base layer pivot points");
+            } // attach the update function
+
+
+            return _context.abrupt("return", [{
+              displayObject: container,
+              data: layer,
+              update: update,
+              animation: animation
+            }]);
+
+          case 48:
+            _context.prev = 48;
+            _context.t0 = _context["catch"](2);
+            console.error("Failed to create group ".concat(path, " while ").concat(phase));
+            throw _context.t0;
+
+          case 52:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, null, [[2, 48]]);
+  }));
+  return _createRepeater.apply(this, arguments);
+}
+
+function findPivot(container) {
+  var _container$pivot, _container$pivot2, _container$pivot3, _container$pivot4;
+
+  var pivot = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+    x: 0,
+    y: 0
+  };
+  // nothing to check
+  if (!container) return pivot; // this pivot 
+
+  var hasX = (0, _utils.isNumber)((_container$pivot = container.pivot) === null || _container$pivot === void 0 ? void 0 : _container$pivot.x) && ((_container$pivot2 = container.pivot) === null || _container$pivot2 === void 0 ? void 0 : _container$pivot2.x) !== 0;
+  var hasY = (0, _utils.isNumber)((_container$pivot3 = container.pivot) === null || _container$pivot3 === void 0 ? void 0 : _container$pivot3.y) && ((_container$pivot4 = container.pivot) === null || _container$pivot4 === void 0 ? void 0 : _container$pivot4.y) !== 0; // if this pivot point was already set
+
+  if ((hasX || hasY) && pivot.x !== 0 && pivot.y !== 0) {
+    pivot.didFindMultiplePivots = true;
+  } // has an assigned pivot point
+  else if (hasX || hasY) {
+      pivot.x = container.pivot.x;
+      pivot.y = container.pivot.y;
+    } // if a pivot hasn't been found and there are
+  // children, go ahead and check deeper
+
+
+  if (!(pivot.x || pivot.y) && container.children) {
+    var _iterator = _createForOfIteratorHelper(container.children),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var child = _step.value;
+        findPivot(child, pivot);
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+  }
+
+  return pivot;
+}
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../../pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js",".":"animation/generators/index.js","../../pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","../expressions":"animation/expressions.js"}],"animation/generators/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -73982,6 +74921,8 @@ var _mask = _interopRequireDefault(require("./mask"));
 
 var _collection = require("../../utils/collection");
 
+var _repeater = _interopRequireDefault(require("./repeater"));
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -73996,7 +74937,7 @@ function createInstance(_x, _x2, _x3, _x4) {
 
 function _createInstance() {
   _createInstance = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, path, data, relativeTo) {
-    var instance, container, pending, i, layer, type, sprite, group, mask, emitter, plugin, custom, composite, layers, _i, _layer, didSetMask, j, target;
+    var instance, container, pending, i, layer, type, sprite, emitter, repeated, group, mask, plugin, custom, composite, layers, _i, _layer, didSetMask, j, target;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -74041,31 +74982,35 @@ function _createInstance() {
             if (type === 'sprite') {
               sprite = (0, _sprite.default)(animator, path, data, layer);
               pending.push(sprite);
-            } // object groups
-            else if (type === 'group') {
-                group = (0, _group.default)(animator, path, data, layer);
-                pending.push(group);
-              } // masking effects
-              else if (type === 'mask') {
-                  mask = (0, _mask.default)(animator, path, data, layer);
-                  pending.push(mask);
-                } // particle emitters
-                else if (type === 'emitter') {
-                    emitter = (0, _emitter.default)(animator, path, data, layer);
-                    pending.push(emitter);
-                  } // not a valid type
-                  else {
-                      // check for plugins
-                      plugin = animator.plugins[type];
+            } // particle emitters
+            else if (type === 'emitter') {
+                emitter = (0, _emitter.default)(animator, path, data, layer);
+                pending.push(emitter);
+              } // repeating composition
+              else if (type === 'repeater') {
+                  repeated = (0, _repeater.default)(animator, path, data, layer);
+                  pending.push(repeated);
+                } // object groups
+                else if (type === 'group') {
+                    group = (0, _group.default)(animator, path, data, layer);
+                    pending.push(group);
+                  } // masking effects
+                  else if (type === 'mask') {
+                      mask = (0, _mask.default)(animator, path, data, layer);
+                      pending.push(mask);
+                    } // not a valid type
+                    else {
+                        // check for plugins
+                        plugin = animator.plugins[type];
 
-                      if (plugin) {
-                        custom = plugin(animator, path, data, layer);
-                        pending.push(custom);
-                      } // unable to create this type
-                      else {
-                          console.error("[compose] Unknown layer type \"".concat(type, "\""));
-                        }
-                    }
+                        if (plugin) {
+                          custom = plugin(animator, path, data, layer);
+                          pending.push(custom);
+                        } // unable to create this type
+                        else {
+                            console.error("[compose] Unknown layer type \"".concat(type, "\""));
+                          }
+                      }
 
           case 16:
             _context.next = 8;
@@ -74163,7 +75108,7 @@ function _createInstance() {
   }));
   return _createInstance.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js"}],"animation/index.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js"}],"animation/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -74195,11 +75140,15 @@ var _eventEmitter = require("../common/event-emitter");
 
 var _path = require("./path");
 
+var _rng = _interopRequireDefault(require("./rng"));
+
 var _generators = _interopRequireDefault(require("./generators"));
 
 var _getSprite = _interopRequireDefault(require("./resources/getSprite"));
 
 var _getSpritesheet = _interopRequireDefault(require("./resources/getSpritesheet"));
+
+var _expressions = require("./expressions");
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
@@ -74207,7 +75156,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _createSuper(Derived) { return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (_isNativeReflectConstruct()) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
@@ -74224,7 +75173,9 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
     var _this;
 
     (0, _classCallCheck2.default)(this, Animator);
-    _this = _super.call(this); // save the data file
+    _this = _super.call(this); // creates a new random number generator
+    // that can be used to create consistent, but random
+    // designs
 
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "plugins", {});
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "getSpritesheet", /*#__PURE__*/function () {
@@ -74349,6 +75300,14 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
         return _ref4.apply(this, arguments);
       };
     }());
+    _this.rng = new _rng.default(options.seed); // TODO: expression functions are just lone functions
+    // that aren't part of this class. This will set the
+    // expression to use the preferred randomizer, but it
+    // could be accidentially replaced - consider refactoring
+    // to make all of this more clear
+
+    (0, _expressions.setRandomizer)(_this.rng); // save the data file
+
     _this.manifest = manifest;
     _this.options = options;
     return _this;
@@ -74368,109 +75327,155 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
 }(_eventEmitter.EventEmitter);
 
 exports.Animator = Animator;
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","../common/event-emitter":"common/event-emitter.js","./path":"animation/path.js","./generators":"animation/generators/index.js","./resources/getSprite":"animation/resources/getSprite.js","./resources/getSpritesheet":"animation/resources/getSpritesheet.js"}],"pixi/utils/find-objects-of-role.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","../common/event-emitter":"common/event-emitter.js","./path":"animation/path.js","./rng":"animation/rng.js","./generators":"animation/generators/index.js","./resources/getSprite":"animation/resources/getSprite.js","./resources/getSpritesheet":"animation/resources/getSpritesheet.js","./expressions":"animation/expressions.js"}],"pixi/detatched-container.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.findDisplayObjectsOfRole = findDisplayObjectsOfRole;
+exports.default = void 0;
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _get3 = _interopRequireDefault(require("@babel/runtime/helpers/get"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var PIXI = _interopRequireWildcard(require("pixi.js"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-/** finds all PIXI layers matching a specified role */
-function findDisplayObjectsOfRole(container, types) {
-  var depth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-  var results = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
 
-  // check each child, if any
-  var _iterator = _createForOfIteratorHelper(container.children || []),
-      _step;
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var child = _step.value;
+var DetatchedContainer = /*#__PURE__*/function (_PIXI$Container) {
+  (0, _inherits2.default)(DetatchedContainer, _PIXI$Container);
 
-      // if this matches the role, add it to the results
-      if (!!~types.indexOf(child.role)) {
-        results.push(child);
-      } // if there's children, check the container
+  var _super = _createSuper(DetatchedContainer);
 
+  function DetatchedContainer() {
+    var _this;
 
-      findDisplayObjectsOfRole(child, types, depth + 1, results);
-    } // if it's not the top level, just continue
+    (0, _classCallCheck2.default)(this, DetatchedContainer);
 
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _super.call.apply(_super, [this].concat(args));
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "_parts", []);
+    return _this;
   }
 
-  if (depth !== 0) return; // give back the matches
+  (0, _createClass2.default)(DetatchedContainer, [{
+    key: "addChild",
 
-  return results;
-}
-},{}],"pixi/utils/get-bounds-of-role.js":[function(require,module,exports) {
-"use strict";
+    /** adds a child to the detatched container */
+    value: function addChild() {
+      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getBoundsForRole = getBoundsForRole;
+      // add to the list of parts
+      for (var _i = 0, _args = args; _i < _args.length; _i++) {
+        var child = _args[_i];
 
-var _findObjectsOfRole = require("./find-objects-of-role");
+        this._parts.push(child);
+      }
+    }
+    /** removes a child from a detatched container */
 
-function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+  }, {
+    key: "removeChild",
+    value: function removeChild() {
+      var _get2;
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+      console.warn("Removing children from DetatchedContainer is not implemented yet");
 
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+      (_get2 = (0, _get3.default)((0, _getPrototypeOf2.default)(DetatchedContainer.prototype), "removeChild", this)).call.apply(_get2, [this].concat((0, _toConsumableArray2.default)(arg)));
+    }
+    /** applies a value to each part */
 
-/** handles finding the bounds of a specified role */
-function getBoundsForRole(container, types) {
-  var roles = (0, _findObjectsOfRole.findDisplayObjectsOfRole)(container, types); // collect all bounds
+  }, {
+    key: "assign",
+    value: function assign(apply) {
+      this.each(function (part) {
+        return Object.assign(part, apply);
+      });
+    }
+    /** applies a value to each part */
 
-  var xs = [];
-  var ys = [];
+  }, {
+    key: "each",
+    value: function each(action) {
+      var _iterator = _createForOfIteratorHelper(this.parts),
+          _step;
 
-  var _iterator = _createForOfIteratorHelper(roles),
-      _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var part = _step.value;
+          action(part);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    }
+    /** attaches each child layer to the target container */
 
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var match = _step.value;
-      var bounds = match.getBounds();
-      xs.push(bounds.x, bounds.x + bounds.width);
-      ys.push(bounds.y, bounds.y + bounds.height);
-    } // figure out the bounds
+  }, {
+    key: "attachTo",
+    value: function attachTo(target, scaleTo) {
+      var parts = this.parts; // get a scale to work with
 
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
+      if (isNaN(scaleTo)) {
+        scaleTo = target.scale.x;
+      } // trails are attached as detatched
 
-  var left = Math.min.apply(Math, xs) || 0;
-  var top = Math.min.apply(Math, ys) || 0;
-  var right = Math.max.apply(Math, xs) || 0;
-  var bottom = Math.max.apply(Math, ys) || 0;
-  var width = right - left;
-  var height = bottom - top; // give back the final bounds
 
-  return {
-    top: top,
-    left: left,
-    right: right,
-    bottom: bottom,
-    width: width,
-    height: height
-  };
-}
-},{"./find-objects-of-role":"pixi/utils/find-objects-of-role.js"}],"index.js":[function(require,module,exports) {
+      for (var i = parts.length; i-- > 0;) {
+        var child = parts[i]; // match the scale of the target
+
+        child.scale.x = child.scale.y = scaleTo;
+        child.x *= scaleTo;
+        child.y *= scaleTo; // then add to the view
+
+        target.addChild(child);
+      } // always update sorting
+
+
+      target.sortChildren();
+    }
+  }]);
+  return DetatchedContainer;
+}(PIXI.Container);
+
+exports.default = DetatchedContainer;
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/get":"../node_modules/@babel/runtime/helpers/get.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js"}],"index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -74520,6 +75525,8 @@ var _responsive = _interopRequireDefault(require("./pixi/responsive"));
 
 var _stage = _interopRequireDefault(require("./pixi/stage"));
 
+var _detatchedContainer = _interopRequireDefault(require("./pixi/detatched-container"));
+
 var _loadImage = _interopRequireDefault(require("./animation/resources/loadImage"));
 
 var _eventEmitter = require("./common/event-emitter");
@@ -74536,11 +75543,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // PIXI helpers
 var PIXI = {
   ResponsiveContainer: _responsive.default,
-  ResponsiveStage: _stage.default
+  ResponsiveStage: _stage.default,
+  DetatchedContainer: _detatchedContainer.default
 }; // helpful utils
 
 exports.PIXI = PIXI;
-},{"./animation":"animation/index.js","./pixi/responsive":"pixi/responsive.js","./pixi/stage":"pixi/stage.js","./animation/resources/loadImage":"animation/resources/loadImage.js","./common/event-emitter":"common/event-emitter.js","./pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js","./pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","./utils/graphics":"utils/graphics.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./animation":"animation/index.js","./pixi/responsive":"pixi/responsive.js","./pixi/stage":"pixi/stage.js","./pixi/detatched-container":"pixi/detatched-container.js","./animation/resources/loadImage":"animation/resources/loadImage.js","./common/event-emitter":"common/event-emitter.js","./pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js","./pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","./utils/graphics":"utils/graphics.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -74568,7 +75576,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60195" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51178" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

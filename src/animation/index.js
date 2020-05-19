@@ -1,9 +1,11 @@
 import * as PIXI from 'pixi.js';
 import { EventEmitter } from "../common/event-emitter";
 import { parsePath, resolvePath } from "./path";
+import Random from './rng';
 import createInstance from "./generators";
 import getSprite from "./resources/getSprite";
 import getSpritesheet from "./resources/getSpritesheet";
+import { setRandomizer } from './expressions';
 
 /** handles creating PIXI animations using defined files */
 export class Animator extends EventEmitter {
@@ -14,6 +16,18 @@ export class Animator extends EventEmitter {
 	/** creates a new instance */
 	constructor(manifest, options) {
 		super();
+
+		// creates a new random number generator
+		// that can be used to create consistent, but random
+		// designs
+		this.rng = new Random(options.seed);
+
+		// TODO: expression functions are just lone functions
+		// that aren't part of this class. This will set the
+		// expression to use the preferred randomizer, but it
+		// could be accidentially replaced - consider refactoring
+		// to make all of this more clear
+		setRandomizer(this.rng);
 
 		// save the data file
 		this.manifest = manifest;
