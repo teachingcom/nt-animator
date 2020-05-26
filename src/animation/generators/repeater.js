@@ -10,6 +10,7 @@ import { getBoundsForRole } from '../../pixi/utils/get-bounds-of-role';
 import createInstance from '.';
 import { findDisplayObjectsOfRole } from '../../pixi/utils/find-objects-of-role';
 import { evaluateExpression } from '../expressions';
+import { normalizeProps } from '../normalize';
 
 // default parameters to create a sprite
 const GROUP_DEFAULTS = {
@@ -37,7 +38,9 @@ export default async function createRepeater(animator, path, composition, layer)
 		// because any animations that modify scale will interfere
 		// with scaling done to fit within responsive containers
 		const container = new PIXI.Container();
+		container.isRepeater = true;
 		container.role = layer.role;
+		container.path = path;
 		
 		// create the instance of the group (each group should
 		// have it's own compose prop)
@@ -77,13 +80,12 @@ export default async function createRepeater(animator, path, composition, layer)
 		// sort the contents
 		tiles.sortChildren();
 
+		// sync up shorthand names
+		normalizeProps(layer.props);
+
 		// create dynamically rendered properties
 		phase = 'creating dynamic properties';
 		applyDynamicProperties(tiles, layer.props);
-
-		// prepare expressions
-		phase = 'evaluating property expressions';
-		evaluateDisplayObjectExpressions(layer.props);
 
 		// set defaults
 		phase = 'applying defaults';
@@ -95,7 +97,7 @@ export default async function createRepeater(animator, path, composition, layer)
 
 		// setup animations, if any
 		phase = 'creating animations';
-		const animation = createAnimation(animator, path, composition, layer, tiles);
+		createAnimation(animator, path, composition, layer, tiles);
 
 		// add to the view
 		container.zIndex = tiles.zIndex;
@@ -117,7 +119,7 @@ export default async function createRepeater(animator, path, composition, layer)
 		}
 
 		// attach the update function
-		return [{ displayObject: container, data: layer, update, animation }];
+		return [{ displayObject: container, data: layer, update }];
 	}
 	catch(ex) {
 		console.error(`Failed to create group ${path} while ${phase}`);

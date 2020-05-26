@@ -1,32 +1,40 @@
 import cloneDeep from "clone-deep";
 
+// helper math values
 export const TAU = Math.PI * 2;
 export const RAD = Math.PI / 180;
 
+/** checks if an object is non-null and not undefined */
 export function isNil(obj) {
 	return obj === null || obj === undefined;
 }
 
+/** checks if an object has a value */
 export function isSet(obj) {
 	return !isNil(obj);
 }
 
+/** checks if an object is an array */
 export function isArray(obj) {
 	return Array.isArray(obj);
 }
 
+/** checks if an object is just an object */
 export function isObject(obj) {
 	return typeof obj === 'object';
 }
 
+/** checks if an object can be iterated over */
 export function isIterable(obj) {
 	return isObject(obj) || isArray(obj);
 }
 
+/** checks if n object is a string */
 export function isString(obj) {
 	return typeof obj === 'string' || obj instanceof String;
 }
 
+/** checks if an object is a number */
 export function isNumber(obj) {
 	return typeof obj === 'number' || obj instanceof Number;
 }

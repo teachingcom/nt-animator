@@ -7,6 +7,7 @@ import { setDefaults, noop } from '../../utils';
 
 // for creating child instances
 import createInstance from '.';
+import { normalizeProps } from '../normalize';
 
 // default parameters to create a sprite
 const GROUP_DEFAULTS = {
@@ -21,7 +22,7 @@ const GROUP_DEFAULTS = {
 };
 
 /** creates a group instance */
-export default async function createGroup(animator, path, composition, layer) {
+export default async function createGroup(animator, controller, path, composition, layer) {
 
 	// recursively built update function
 	let update = noop;
@@ -34,23 +35,27 @@ export default async function createGroup(animator, path, composition, layer) {
 		// because any animations that modify scale will interfere
 		// with scaling done to fit within responsive containers
 		const container = new PIXI.Container();
+		container.isGroup = true;
 		container.role = layer.role;
+		container.path = path;
 		
 		// create the instance of the group (each group should
 		// have it's own compose prop)
 		phase = 'creating group contents';
-		const group = await createInstance(animator, path, layer);
+		const group = await createInstance(animator, controller, path, layer);
+
+		// identify as a group
+		container.isGroup = group.isGroup = true;
 		
 		// sort the contents
 		group.sortChildren();
 
+		// match up shorthand names
+		normalizeProps(layer.props);
+
 		// create dynamically rendered properties
 		phase = 'creating dynamic properties';
 		applyDynamicProperties(group, layer.props);
-
-		// prepare expressions
-		phase = 'evaluating property expressions';
-		evaluateDisplayObjectExpressions(layer.props);
 
 		// set defaults
 		phase = 'applying defaults';
@@ -62,7 +67,7 @@ export default async function createGroup(animator, path, composition, layer) {
 
 		// setup animations, if any
 		phase = 'creating animations';
-		const animation = createAnimation(animator, path, composition, layer, group);
+		createAnimation(animator, path, composition, layer, group);
 
 		// add to the view
 		container.zIndex = group.zIndex;
@@ -72,8 +77,11 @@ export default async function createGroup(animator, path, composition, layer) {
 		group.pivot.x = 0;
 		group.pivot.y = 0;
 
+		// include this instance
+		controller.register(container);
+
 		// attach the update function
-		return [{ displayObject: container, data: layer, update, animation }];
+		return [{ displayObject: container, data: layer, update }];
 	}
 	catch(ex) {
 		console.error(`Failed to create group ${path} while ${phase}`);

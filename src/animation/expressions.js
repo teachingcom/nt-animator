@@ -1,4 +1,5 @@
 import { isArray, isString } from "../utils";
+import * as mappings from './mappings';
 
 // defaults to standard Math random function
 let randomizer = Math;
@@ -10,7 +11,6 @@ export function setRandomizer(val) {
 
 /** expression types */
 const EXPRESSIONS = {
-	':rnd': getRandom,
 	':+': addTo,
 	':-': subtractBy,
 	':*': multiplyBy,
@@ -18,22 +18,10 @@ const EXPRESSIONS = {
 	':%': percentOf,
 };
 
-const DYNAMICS = { 
-	':rx': relativeX
-}
-
-/** returns a random number in a range */
-export function getRandom(min, max, toInt = true) {
-
-	// single value provided
-	if (isNaN(max)) {
-		max = min;
-		min = 0;
-	}
-
-	// randomize
-	const value = (randomizer.random() * (max - min)) + min;
-	return toInt ? 0|value : value;
+const DYNAMICS = {
+	':rnd': getRandom,
+	':rx': relativeX,
+	':ry': relativeY,
 }
 
 export function addTo(add, relativeTo) {
@@ -61,7 +49,8 @@ export function relativeX(obj, stage, prop, min, max, toInt) {
 	const bounds = obj.getBounds();
 	const percent = (bounds.x / (stage.width / 2)) / 2;
 	const value = ((max - min) * percent) + min;
-	obj[prop] = toInt ? 0 | value : value;
+	const mapping = mappings.lookup(prop);
+	mapping(obj, toInt ? 0 | value : value);
 }
 
 // value is relative to the x position on screen
@@ -69,7 +58,47 @@ export function relativeY(obj, stage, prop, min, max, toInt) {
 	const bounds = obj.getBounds();
 	const percent = (bounds.y / (stage.height / 2)) / 2;
 	const value = ((max - min) * percent) + min;
-	obj[prop] = toInt ? 0 | value : value;
+	const mapping = mappings.lookup(prop);
+	mapping(obj, toInt ? 0 | value : value);
+}
+
+
+/** returns a random number in a range */
+export function getRandom(obj, stage, prop, ...params) {
+	const mapping = mappings.lookup(prop);
+	
+	// check for a cached value
+	const cacheKey = `___cache_${prop}___`;
+	const cached = obj[cacheKey];
+
+	// apply the cached value
+	if (cached !== undefined) {
+		mapping(obj, cached);
+		return;
+	}
+
+	// sort out the params
+	const toInt = !~params.indexOf('decimal');
+	const isVariable = !!~params.indexOf('var');
+
+	// extract the value
+	let [min, max] = params;
+	if (isNaN(max)) {
+		max = min;
+		min = 0;
+	}
+
+	// randomize
+	const value = (randomizer.random() * (max - min)) + min;
+	const result = toInt ? 0|value : value;
+
+	// cache, if needed
+	if (!isVariable) {
+		obj[cacheKey] = result;
+	}
+
+	// save the result
+	mapping(obj, result);
 }
 
 /** checks if a node appears to be an expression */

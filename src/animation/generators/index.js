@@ -12,7 +12,7 @@ import { flatten } from '../../utils/collection';
 import createRepeater from './repeater';
 
 // creates an instance of a car
-export default async function createInstance(animator, path, data, relativeTo) {
+export default async function createInstance(animator, controller, path, data, relativeTo) {
 
 	// format the path
 	path = path.replace(/^\/*/, '');
@@ -42,27 +42,27 @@ export default async function createInstance(animator, path, data, relativeTo) {
 		// sprite layers
 		const { type } = layer;
 		if (type === 'sprite') {
-			const sprite = createSprite(animator, path, data, layer);
+			const sprite = createSprite(animator, controller, path, data, layer);
 			pending.push(sprite);
 		}
 		// particle emitters
 		else if (type === 'emitter') {
-			const emitter = createEmitter(animator, path, data, layer);
+			const emitter = createEmitter(animator, controller, path, data, layer);
 			pending.push(emitter);
 		}
 		// repeating composition
 		else if (type === 'repeater') {
-			const repeated = createRepeater(animator, path, data, layer);
+			const repeated = createRepeater(animator, controller, path, data, layer);
 			pending.push(repeated);
 		}
 		// object groups
 		else if (type === 'group') {
-			const group = createGroup(animator, path, data, layer);
+			const group = createGroup(animator, controller, path, data, layer);
 			pending.push(group);
 		}
 		// masking effects
 		else if (type === 'mask') {
-			const mask = createMask(animator, path, data, layer);
+			const mask = createMask(animator, controller, path, data, layer);
 			pending.push(mask);
 		}
 		// not a valid type

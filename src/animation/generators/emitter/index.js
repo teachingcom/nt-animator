@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import * as Particles from 'pixi-particles';
-import { assignIf, toColor, evaluateDisplayObjectExpressions, assignDisplayObjectProps } from "../../assign";
+import { assignIf, assignDisplayObjectProps, applyDynamicProperties } from "../../assign";
 import { isNumber, noop, setDefaults, isString, isArray, RAD } from "../../../utils";
 import { map } from "../../../utils/collection";
 import defineEmitterBounds from './bounds';
@@ -11,6 +11,8 @@ import './overrides';
 import createAnimation from '../animation';
 import resolveImages from "../../resources/resolveImages";
 import createTextureFromImage from '../../resources/createTextureFromImage';
+import { normalizeProps } from '../../normalize';
+import { toColor } from '../../converters';
 
 // emitter property mappings
 const MAPPINGS = {
@@ -37,7 +39,23 @@ const EMITTER_DEFAULTS = {
 };
 
 /** creates an emitter instance */
-export default async function createEmitter(animator, path, composition, layer) {
+export default async function createEmitter(animator, controller, path, composition, layer) {
+
+	// NOTE: emitters are added to one more container on purpose
+	// because any animations that modify scale will interfere
+	// with scaling done to fit within responsive containers
+	const container = new PIXI.Container();
+	container.role = layer.role;
+	container.path = path;
+
+	// TODO: this can't be done without creating
+	// problems with pivot points. Need to come back
+	// and check why - for now the emitter itself 
+	// is marked as "isEmitter"
+	// container.isEmitter = true;
+
+	// create the container for the emitter
+	const generator = new PIXI.Container();
 
 	// recursively built update function
 	let update = noop;
@@ -65,16 +83,14 @@ export default async function createEmitter(animator, path, composition, layer) 
 		// create the instance of the sprite
 		phase = 'configuring emitter';
 		
-		// prepare expressions
-		evaluateDisplayObjectExpressions(layer.props);
-
 		// generate a config -- pixi-particles uses a lot of
 		// objects that are difficult to work with - nt-animator
 		// just accepts arrays and shorthand names, but the need to
 		// be converted - the list of mappings are at the top of the
 		// file to make it easier to understand
-		const config = { autoUpdate: true };
 		const { emit = { } } = layer;
+		const auto = layer.auto !== false && layer.autoStart !== false;
+		const config = { autoUpdate: auto };
 
 		// fix common naming mistakes
 		if (emit.colors) {
@@ -154,8 +170,8 @@ export default async function createEmitter(animator, path, composition, layer) 
 		config.noRotation = !!emit.noRotation;
 		config.atBack = !!emit.atBack;
 		config.orderedArt = !!emit.orderedArt;
-		config.flipParticleX = !!emit.flipParticleX;
-		config.flipParticleY = !!emit.flipParticleY;
+		config.flipParticleX = !!(emit.flipParticleX || emit.flipX || emit['flip.x']);
+		config.flipParticleY = !!(emit.flipParticleY || emit.flipY || emit['flip.y']);
 
 		// if rotation is disabled
 		if (config.noRotation) {
@@ -191,18 +207,25 @@ export default async function createEmitter(animator, path, composition, layer) 
 		// create the emitter
 		phase = 'creating emitter instance';
 
-		// NOTE: emitters are added to one more container on purpose
-		// because any animations that modify scale will interfere
-		// with scaling done to fit within responsive containers
-		const container = new PIXI.Container();
-		container.role = layer.role;
-
 		// create the particle generator
-		const generator = new PIXI.Container();
-		generator.emitter = new Particles.Emitter(generator, textures, config);
-		generator.emitter.config = config;
-		container.addChild(generator);
+		const emitter = new Particles.Emitter(generator, textures, config);
 		
+		// save some properties
+		emitter.config = config;
+		container.emitter = emitter;
+		container.addChild(generator);
+
+		// the generator also may need access
+		generator.emitter = emitter;
+		generator.isEmitter = true;
+
+		// fix property names to account for aliases
+		normalizeProps(layer.props);
+
+		// create dynamically rendered properties
+		phase = 'creating dynamic properties';
+		applyDynamicProperties(generator, layer.props);
+
 		// set container defaults
 		setDefaults(layer, 'props', EMITTER_DEFAULTS);
 		assignDisplayObjectProps(generator, layer.props);
@@ -212,7 +235,10 @@ export default async function createEmitter(animator, path, composition, layer) 
 
 		// animate, if needed
 		phase = 'creating animation';
-		generator.animation = createAnimation(animator, path, composition, layer, generator);
+		createAnimation(animator, path, composition, layer, generator);
+
+		// include this instance
+		controller.register(generator);
 
 		// attach the update function
 		return [{ displayObject: container, data: layer, update }];
@@ -223,5 +249,4 @@ export default async function createEmitter(animator, path, composition, layer) 
 	}
 
 }
-
 

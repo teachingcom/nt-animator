@@ -10,6 +10,7 @@ import { setDefaults, noop } from '../../utils';
 import { map } from '../../utils/collection';
 import { InvalidMaskBoundsException } from '../errors';
 import { createContext } from '../../utils/graphics';
+import { normalizeProps } from '../normalize';
 
 // definging sprites by size requires scale to be set - in the
 // event at user creates a mask that doesn't have an image, we're
@@ -32,7 +33,7 @@ const MASK_DEFAULTS = {
 };
 
 /** creates a mask instance */
-export default async function createMask(animator, path, composition, layer) {
+export default async function createMask(animator, controller, path, composition, layer) {
 
 	// recursively built update function
 	let update = noop;
@@ -45,7 +46,9 @@ export default async function createMask(animator, path, composition, layer) {
 		// because any animations that modify scale will interfere
 		// with scaling done to fit within responsive containers
 		const container = new PIXI.Container();
+		container.isMask = true;
 		container.role = layer.role;
+		container.path = layer.path;
 		
 		// gather all required images
 		phase = 'resolving images';
@@ -96,14 +99,12 @@ export default async function createMask(animator, path, composition, layer) {
 			if (isAnimated) mask.play();
 		}
 
+		// match up names
+		normalizeProps(layer.props);
 
 		// create dynamically rendered properties
 		phase = 'creating dynamic properties';
 		applyDynamicProperties(mask, layer.props);
-
-		// prepare expressions
-		phase = 'evaluating property expressions';
-		evaluateDisplayObjectExpressions(layer.props);
 
 		// set defaults
 		phase = 'applying defaults';
@@ -115,7 +116,7 @@ export default async function createMask(animator, path, composition, layer) {
 
 		// setup animations, if any
 		phase = 'creating animations';
-		const animation = createAnimation(animator, path, composition, layer, mask);
+		createAnimation(animator, path, composition, layer, mask);
 
 		// add to the view
 		container.zIndex = mask.zIndex;
@@ -126,8 +127,11 @@ export default async function createMask(animator, path, composition, layer) {
 		mask.pivot.x = mask.width / 2;
 		mask.pivot.y = mask.height / 2;
 
+		// include this instance
+		controller.register(container);
+
 		// attach the update function
-		return [{ displayObject: container, data: layer, update, animation }];
+		return [{ displayObject: container, data: layer, update }];
 	}
 	catch(ex) {
 		console.error(`Failed to create mask ${path} while ${phase}`);

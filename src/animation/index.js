@@ -6,6 +6,7 @@ import createInstance from "./generators";
 import getSprite from "./resources/getSprite";
 import getSpritesheet from "./resources/getSpritesheet";
 import { setRandomizer } from './expressions';
+import Controller from './generators/controller';
 
 /** handles creating PIXI animations using defined files */
 export class Animator extends EventEmitter {
@@ -67,9 +68,12 @@ export class Animator extends EventEmitter {
 	 * @type {string} the relative path for the resource
 	 */
 	compose = async (data, resource, relativeTo) => {
-		const instance = await createInstance(this, resource, data, relativeTo);
+		const controller = new Controller();
+		const instance = await createInstance(this, controller, resource, data, relativeTo);
 		instance.type = data.type;
 		instance.path = resource;
+		instance.controller = controller;
+
 		return instance;
 	}
 

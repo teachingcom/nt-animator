@@ -6,7 +6,8 @@ export default class Random {
 	constructor(seed) {
 		this.activate(seed);
 	}
-	
+
+	/** sets the random seed to use */
 	activate = seed => {
 		this.seed = seed;
 		this.rng = random.create(seed);

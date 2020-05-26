@@ -1,4 +1,4 @@
-import { isArray } from ".";
+import { isArray, isNil } from ".";
 
 // single depth flattening
 export function flatten(collection) {
@@ -23,4 +23,11 @@ export function map(source, action) {
 		for (let i in source)
 			keep.push(action(source[i], i));
 	return keep;
+}
+
+/** finds the first item in a collection */
+export function first(...items) {
+	items = flatten(items);
+	for (const item of items)
+		if (!isNil(item)) return item;
 }

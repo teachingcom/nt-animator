@@ -2,9 +2,10 @@ import * as pop from 'popmotion';
 import deep from 'deep-get-set';
 import cloneDeep from "clone-deep";
 import { unpack, inheritFrom } from "../utils";
-import { isNumber, isArray, noop } from "../../utils";
-import { assignDisplayObjectProps, toEasing, assignEmitterProps, evaluateDisplayObjectExpressions } from '../assign';
+import { isNumber, isArray, noop, appendFunc } from "../../utils";
+import { assignDisplayObjectProps } from '../assign';
 import { evaluateExpression } from '../expressions';
+import { toEasing } from '../converters';
 
 // creates an animation
 export default function createAnimation(animator, path, composition, layer, instance) {
@@ -26,13 +27,9 @@ export default function createAnimation(animator, path, composition, layer, inst
 		return;
 	}
 
-	// used to update sub properties
-	const isEmitter = layer.type === 'emitter';
-
 	// update function
 	let updater = noop;
 	layer.animations = [ ];
-	
 
 	// create each animation
 	for (let i = 0; i < animations.length; i++) {
@@ -125,22 +122,24 @@ export default function createAnimation(animator, path, composition, layer, inst
 			// property values
 			// TODO: research the "merge" function for Popmotion
 			const handler = pop.keyframes(config);
-			handler.start({
-				update: update => {
-					assignDisplayObjectProps(instance, update);
-
-					// assign any emitter changes
-					if (isEmitter) {
-						assignEmitterProps(instance.emitter, update);
-					}
-
-				}
+			const animator = handler.start({
+				update: update => assignDisplayObjectProps(instance, update)
 			});
+
+			// include a stop function
+			instance.hasAnimation = true;
+			instance.animation = { 
+				stop: () => animator.stop()
+			};
 
 		}
 		// make it clear which animation failed
 		catch (ex) {
-			console.error(`failed to create animation ${i}`);
+			console.error(`Failed to create animation ${i}`);
+			if (ex instanceof TypeError) {
+				console.error('You may be attempting to tween between a property that has no known start value. Either add a default value or assign the property for the animation');				
+			}
+
 			throw ex;
 		}
 

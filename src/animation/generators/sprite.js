@@ -7,6 +7,7 @@ import { assignDisplayObjectProps, evaluateDisplayObjectExpressions, applyDynami
 import { setDefaults, noop } from '../../utils';
 import createTextureFromImage from '../resources/createTextureFromImage';
 import { map } from '../../utils/collection';
+import { normalizeProps } from '../normalize';
 
 // default parameters to create a sprite
 const SPRITE_DEFAULTS = {
@@ -21,7 +22,7 @@ const SPRITE_DEFAULTS = {
 };
 
 /** creates a sprite instance */
-export default async function createSprite(animator, path, composition, layer) {
+export default async function createSprite(animator, controller, path, composition, layer) {
 
 	// recursively built update function
 	let update = noop;
@@ -34,7 +35,9 @@ export default async function createSprite(animator, path, composition, layer) {
 		// because any animations that modify scale will interfere
 		// with scaling done to fit within responsive containers
 		const container = new PIXI.Container();
+		container.isSprite = true;
 		container.role = layer.role;
+		container.path = path;
 
 		// gather all required images
 		phase = 'resolving images';
@@ -60,19 +63,19 @@ export default async function createSprite(animator, path, composition, layer) {
 			: new PIXI.Sprite(textures[0]);
 
 		// if animated, start playback
+		container.isAnimatedSprite = isAnimated;
 		if (isAnimated) sprite.play();
 
 		// set some default values
 		sprite.pivot.x = sprite.width / 2;
 		sprite.pivot.y = sprite.height / 2;
 
+		// sync up shorthand names
+		normalizeProps(layer.props);
+
 		// create dynamically rendered properties
 		phase = 'creating dynamic properties';
 		applyDynamicProperties(sprite, layer.props);
-
-		// prepare expressions
-		phase = 'evaluating property expressions';
-		evaluateDisplayObjectExpressions(layer.props);
 
 		// set defaults
 		phase = 'applying defaults';
@@ -84,14 +87,17 @@ export default async function createSprite(animator, path, composition, layer) {
 
 		// setup animations, if any
 		phase = 'creating animations';
-		const animation = createAnimation(animator, path, composition, layer, sprite);
+		createAnimation(animator, path, composition, layer, sprite);
 
 		// add to the view
 		container.zIndex = sprite.zIndex;
 		container.addChild(sprite);
 
+		// include this instance
+		controller.register(container);
+
 		// attach the update function
-		return [{ displayObject: container, data: layer, update, animation }];
+		return [{ displayObject: container, data: layer, update }];
 	}
 	catch(ex) {
 		console.error(`Failed to create sprite ${path} while ${phase}`);
