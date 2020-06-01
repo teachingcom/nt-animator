@@ -70396,6 +70396,8 @@ var ResponsiveContainer = /*#__PURE__*/function (_PIXI$Container) {
     _this = _super.call.apply(_super, [this].concat(args));
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "_relativeX", 0);
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "_relativeY", 0);
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "scaleX", 0);
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "scaleY", 0);
     return _this;
   }
 
@@ -70420,8 +70422,8 @@ var ResponsiveContainer = /*#__PURE__*/function (_PIXI$Container) {
 
       this.x = this._relativeX * width;
       this.y = this._relativeY * height;
-      this.scale.x = x / Math.abs(x) * scaleX;
-      this.scale.y = y / Math.abs(y) * scaleY; // perform the render
+      this.scale.x = x / Math.abs(x) * scaleX + this.scaleX;
+      this.scale.y = y / Math.abs(y) * scaleY + this.scaleY; // perform the render
 
       for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
         args[_key2] = arguments[_key2];
@@ -75933,7 +75935,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52690" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52997" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -36,6 +36,10 @@ export default class ResponsiveContainer extends PIXI.Container {
 	_relativeX = 0;
 	_relativeY = 0;
 
+	// bonus scaling values
+	scaleX = 0;
+	scaleY = 0;
+
 	/** match the scaling as required */
 	render(...args) {
 		// TODO -- optimise and check for a timestamp
@@ -48,8 +52,8 @@ export default class ResponsiveContainer extends PIXI.Container {
 		// update values
 		this.x = this._relativeX * width;
 		this.y = this._relativeY * height;
-		this.scale.x = (x / Math.abs(x)) * scaleX;
-		this.scale.y = (y / Math.abs(y)) * scaleY;
+		this.scale.x = ((x / Math.abs(x)) * scaleX) + this.scaleX;
+		this.scale.y = ((y / Math.abs(y)) * scaleY) + this.scaleY;
 
 		// perform the render
 		super.render(...args);
