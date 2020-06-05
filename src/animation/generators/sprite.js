@@ -3,7 +3,7 @@ import * as PIXI from 'pixi.js';
 import createAnimation from './animation';
 import resolveImages from '../resources/resolveImages';
 
-import { assignDisplayObjectProps, evaluateDisplayObjectExpressions, applyDynamicProperties } from '../assign';
+import { assignDisplayObjectProps, applyExpressions, applyDynamicProperties } from '../assign';
 import { setDefaults, noop } from '../../utils';
 import createTextureFromImage from '../resources/createTextureFromImage';
 import { map } from '../../utils/collection';
@@ -62,6 +62,9 @@ export default async function createSprite(animator, controller, path, compositi
 			? new PIXI.AnimatedSprite(textures)
 			: new PIXI.Sprite(textures[0]);
 
+		// prevent seams
+		sprite.roundPixels = true;
+
 		// if animated, start playback
 		container.isAnimatedSprite = isAnimated;
 		if (isAnimated) sprite.play();
@@ -72,6 +75,10 @@ export default async function createSprite(animator, controller, path, compositi
 
 		// sync up shorthand names
 		normalizeProps(layer.props);
+
+		// perform simple expressions
+		phase = 'evaluating expressions';
+		applyExpressions(layer.props);
 
 		// create dynamically rendered properties
 		phase = 'creating dynamic properties';
@@ -93,7 +100,12 @@ export default async function createSprite(animator, controller, path, compositi
 		container.zIndex = sprite.zIndex;
 		container.addChild(sprite);
 
-		// include this instance
+		// // include this instance
+		// if (sprite.pivot.y === 117) {
+		// 	window.PIV = window.PIV || [ ];
+		// 	window.PIV.push(sprite);
+		// }
+
 		controller.register(container);
 
 		// attach the update function

@@ -10,7 +10,7 @@ import { getBoundsForRole } from '../../pixi/utils/get-bounds-of-role';
 import createInstance from '.';
 import { findDisplayObjectsOfRole } from '../../pixi/utils/find-objects-of-role';
 import { evaluateExpression } from '../expressions';
-import { normalizeProps } from '../normalize';
+import { normalizeProps, normalizeTo } from '../normalize';
 
 // default parameters to create a sprite
 const GROUP_DEFAULTS = {
@@ -25,7 +25,7 @@ const GROUP_DEFAULTS = {
 };
 
 /** creates a repeater instance */
-export default async function createRepeater(animator, path, composition, layer) {
+export default async function createRepeater(animator, controller, path, composition, layer) {
 
 	// recursively built update function
 	let update = noop;
@@ -47,10 +47,15 @@ export default async function createRepeater(animator, path, composition, layer)
 		phase = 'creating repeater contents';
 		const tiles = new PIXI.Container();
 
+		// fix prop names
+		normalizeTo(layer, 'repeatX', 'cols', 'columns');
+		normalizeTo(layer, 'repeatY', 'rows');
+
 		// identify the repeating pattern
 		const columns = isNumber(layer.repeatX) ? layer.repeatX : 1;
 		const rows = isNumber(layer.repeatY) ? layer.repeatY : 1;
 
+		console.log('make', path, rows, columns);
 		// create the scene using the sizing
 		let bounds;
 		for (let i = 0; i < columns * rows; i++) {
@@ -58,12 +63,17 @@ export default async function createRepeater(animator, path, composition, layer)
 			const row = Math.floor(i / columns);
 
 			// create the layer
-			const instance = await createInstance(animator, path, layer);
+			const instance = await createInstance(animator, controller, path, layer);
 			tiles.addChild(instance);
 
 			// if this is the first, tile then calculate the size
 			if (!bounds) {
-				bounds = getBoundsForRole(instance, 'base');
+				bounds = getBoundsForRole(instance, 'bounds');
+
+				if (Math.abs(bounds.top) === Infinity) {
+					bounds = instance.getBounds();
+				}
+				console.log(bounds);
 			}
 
 			// calculate values
@@ -75,6 +85,7 @@ export default async function createRepeater(animator, path, composition, layer)
 			// set the position
 			instance.x = (col * (bounds.width + marginX)) + offsetX;
 			instance.y = (row * (bounds.height + marginY)) + offsetY;
+			console.log(instance.x, instance.y);
 		}
 
 		// sort the contents
@@ -103,20 +114,15 @@ export default async function createRepeater(animator, path, composition, layer)
 		container.zIndex = tiles.zIndex;
 		container.addChild(tiles);
 
-		// offset the repeated container by the
-		// first base layer found with a pivot
-		// TODO: if there are conflicting pivots, or piviots
-		// set on base layers, this might create issues
-		// consider figuring out a better way of doing this
-		const layers = findDisplayObjectsOfRole(tiles, 'base');
-		const offsetBy = findPivot(layers[0]);
-		tiles.pivot.x -= offsetBy.x;
-		tiles.pivot.y -= offsetBy.y;
-
-		// warn, just in case
-		if (offsetBy.didFindMultiplePivots) {
-			console.warn(`Found multiple pivot base layer pivot points`)
+		// get the complete bounds
+		let complete = getBoundsForRole(container, 'bounds');
+		if (Math.abs(complete.top) === Infinity) {
+			complete = container.getBounds();
 		}
+
+		// position
+		tiles.x = complete.width / 2;
+		tiles.y = complete.height / 2;
 
 		// attach the update function
 		return [{ displayObject: container, data: layer, update }];

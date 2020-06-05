@@ -70110,6 +70110,7 @@ exports.subtractBy = subtractBy;
 exports.multiplyBy = multiplyBy;
 exports.divideBy = divideBy;
 exports.percentOf = percentOf;
+exports.expression = expression;
 exports.relativeX = relativeX;
 exports.relativeY = relativeY;
 exports.getRandom = getRandom;
@@ -70145,7 +70146,8 @@ var EXPRESSIONS = {
   ':-': subtractBy,
   ':*': multiplyBy,
   ':/': divideBy,
-  ':%': percentOf
+  ':%': percentOf,
+  ':exp': expression
 };
 var DYNAMICS = {
   ':rnd': getRandom,
@@ -70171,6 +70173,21 @@ function divideBy(divide, relativeTo) {
 
 function percentOf(percent, relativeTo) {
   return relativeTo * (percent / 100);
+}
+
+function expression() {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  var val = args[0];
+
+  for (var i = 1; i < args.length; i += 2) {
+    var action = EXPRESSIONS[args[i]];
+    val = action(val, args[i + 1]);
+  }
+
+  return isNaN(val) ? 0 : val;
 } // value is relative to the x position on screen
 
 
@@ -70205,8 +70222,8 @@ function getRandom(obj, stage, prop) {
   } // sort out the params
 
 
-  for (var _len = arguments.length, params = new Array(_len > 3 ? _len - 3 : 0), _key = 3; _key < _len; _key++) {
-    params[_key - 3] = arguments[_key];
+  for (var _len2 = arguments.length, params = new Array(_len2 > 3 ? _len2 - 3 : 0), _key2 = 3; _key2 < _len2; _key2++) {
+    params[_key2 - 3] = arguments[_key2];
   }
 
   var toInt = !~params.indexOf('decimal');
@@ -70255,8 +70272,8 @@ function evaluateExpression(expression) {
   var handler = EXPRESSIONS[token];
   var rest = expression.slice(1);
 
-  for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-    args[_key2 - 1] = arguments[_key2];
+  for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+    args[_key3 - 1] = arguments[_key3];
   }
 
   rest.push.apply(rest, args); // this expression will probably fail
@@ -70277,7 +70294,8 @@ function evaluateExpression(expression) {
 
 
 function createDynamicExpression(prop, source) {
-  var expression = source[prop];
+  var expression = source[prop]; // not a dynamic property
+
   if (!isDynamic(expression)) return expression;
 
   var _expression2 = (0, _slicedToArray2.default)(expression, 1),
@@ -70288,15 +70306,15 @@ function createDynamicExpression(prop, source) {
 
   rest.unshift(prop); // include any extra configs
 
-  for (var _len3 = arguments.length, args = new Array(_len3 > 2 ? _len3 - 2 : 0), _key3 = 2; _key3 < _len3; _key3++) {
-    args[_key3 - 2] = arguments[_key3];
+  for (var _len4 = arguments.length, args = new Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
+    args[_key4 - 2] = arguments[_key4];
   }
 
   rest.push.apply(rest, args); // create the handler function
 
   return function () {
-    for (var _len4 = arguments.length, params = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-      params[_key4] = arguments[_key4];
+    for (var _len5 = arguments.length, params = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+      params[_key5] = arguments[_key5];
     }
 
     var args = [].concat(params).concat(rest);
@@ -70638,6 +70656,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.assignIf = assignIf;
 exports.assignDisplayObjectProps = assignDisplayObjectProps;
+exports.applyExpressions = applyExpressions;
 exports.applyDynamicProperties = applyDynamicProperties;
 
 var _utils = require("../utils");
@@ -70666,7 +70685,9 @@ var DYNAMIC_PROPERTY_DEFAULTS = {
   pivotX: 0,
   pivotY: 0,
   scaleX: 1,
-  scaleY: 1
+  scaleY: 1,
+  anchorX: 0.5,
+  anchorY: 0.5
 };
 /** executes an assignment function only when the condtion passes */
 
@@ -70693,20 +70714,19 @@ function assignDisplayObjectProps(target, props) {
       if (props[mapping.prop] !== undefined) {
         mapping.apply(target, props[mapping.prop]);
       }
-    } // for (const id in props) {
-    // 	const mapping = MAPPINGS[id];
-    // 	if (mapping) {
-    // 		mapping(target, props[id]);
-    // 	}
-    // 	else {
-    // 		console.warn('No mapping found for', id);
-    // 	}
-    // }
-
+    }
   } catch (err) {
     _iterator.e(err);
   } finally {
     _iterator.f();
+  }
+}
+/** evaluates simple expressions */
+
+
+function applyExpressions(obj) {
+  for (var prop in obj) {
+    obj[prop] = (0, _expressions.evaluateExpression)(obj[prop]);
   }
 }
 /** handles adding dynamically rendered properties */
@@ -71389,6 +71409,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.normalizeProps = normalizeProps;
+exports.normalizeTo = normalizeTo;
 
 var _utils = require("../utils");
 
@@ -71399,6 +71420,8 @@ function normalizeProps(props) {
   normalizeTo(props, 'scaleY', 'scale.y');
   normalizeTo(props, 'pivotX', 'pivot.x');
   normalizeTo(props, 'pivotY', 'pivot.y');
+  normalizeTo(props, 'anchorX', 'anchor.x');
+  normalizeTo(props, 'anchorY', 'anchor.y');
   normalizeTo(props, 'alpha', 'opacity', 'transparency');
 } // finds the first value and normalizes it to the first argument
 
@@ -71517,7 +71540,9 @@ function _createSprite() {
             // create the instance of the sprite
             phase = 'creating sprite instance';
             isAnimated = images.length > 1;
-            sprite = isAnimated ? new PIXI.AnimatedSprite(textures) : new PIXI.Sprite(textures[0]); // if animated, start playback
+            sprite = isAnimated ? new PIXI.AnimatedSprite(textures) : new PIXI.Sprite(textures[0]); // prevent seams
+
+            sprite.roundPixels = true; // if animated, start playback
 
             container.isAnimatedSprite = isAnimated;
             if (isAnimated) sprite.play(); // set some default values
@@ -71525,7 +71550,10 @@ function _createSprite() {
             sprite.pivot.x = sprite.width / 2;
             sprite.pivot.y = sprite.height / 2; // sync up shorthand names
 
-            (0, _normalize.normalizeProps)(layer.props); // create dynamically rendered properties
+            (0, _normalize.normalizeProps)(layer.props); // perform simple expressions
+
+            phase = 'evaluating expressions';
+            (0, _assign.applyExpressions)(layer.props); // create dynamically rendered properties
 
             phase = 'creating dynamic properties';
             (0, _assign.applyDynamicProperties)(sprite, layer.props); // set defaults
@@ -71540,7 +71568,11 @@ function _createSprite() {
             (0, _animation.default)(animator, path, composition, layer, sprite); // add to the view
 
             container.zIndex = sprite.zIndex;
-            container.addChild(sprite); // include this instance
+            container.addChild(sprite); // // include this instance
+            // if (sprite.pivot.y === 117) {
+            // 	window.PIV = window.PIV || [ ];
+            // 	window.PIV.push(sprite);
+            // }
 
             controller.register(container); // attach the update function
 
@@ -71550,18 +71582,18 @@ function _createSprite() {
               update: update
             }]);
 
-          case 42:
-            _context.prev = 42;
+          case 45:
+            _context.prev = 45;
             _context.t1 = _context["catch"](2);
             console.error("Failed to create sprite ".concat(path, " while ").concat(phase));
             throw _context.t1;
 
-          case 46:
+          case 49:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 42], [12, 16]]);
+    }, _callee, null, [[2, 45], [12, 16]]);
   }));
   return _createSprite.apply(this, arguments);
 }
@@ -74846,7 +74878,7 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 /** finds all PIXI layers matching a specified role */
-function findDisplayObjectsOfRole(container, types) {
+function findDisplayObjectsOfRole(container, role) {
   var depth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
   var results = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
 
@@ -74859,12 +74891,12 @@ function findDisplayObjectsOfRole(container, types) {
       var child = _step.value;
 
       // if this matches the role, add it to the results
-      if (!!~types.indexOf(child.role)) {
+      if (!!child.role && !!~child.role.indexOf(role)) {
         results.push(child);
       } // if there's children, check the container
 
 
-      findDisplayObjectsOfRole(child, types, depth + 1, results);
+      findDisplayObjectsOfRole(child, role, depth + 1, results);
     } // if it's not the top level, just continue
 
   } catch (err) {
@@ -74894,8 +74926,8 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 /** handles finding the bounds of a specified role */
-function getBoundsForRole(container, types) {
-  var roles = (0, _findObjectsOfRole.findDisplayObjectsOfRole)(container, types); // collect all bounds
+function getBoundsForRole(container, role) {
+  var roles = (0, _findObjectsOfRole.findDisplayObjectsOfRole)(container, role); // collect all bounds
 
   var xs = [];
   var ys = [];
@@ -74988,15 +75020,15 @@ var GROUP_DEFAULTS = {
 };
 /** creates a repeater instance */
 
-function createRepeater(_x, _x2, _x3, _x4) {
+function createRepeater(_x, _x2, _x3, _x4, _x5) {
   return _createRepeater.apply(this, arguments);
 }
 /** recursively finds a layer that has an assigned pivot point */
 
 
 function _createRepeater() {
-  _createRepeater = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, path, composition, layer) {
-    var update, phase, container, tiles, columns, rows, bounds, i, col, row, instance, marginX, marginY, offsetX, offsetY, layers, offsetBy;
+  _createRepeater = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, composition, layer) {
+    var update, phase, container, tiles, columns, rows, bounds, i, col, row, instance, marginX, marginY, offsetX, offsetY, complete;
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -75016,31 +75048,41 @@ function _createRepeater() {
             // have it's own compose prop)
 
             phase = 'creating repeater contents';
-            tiles = new PIXI.Container(); // identify the repeating pattern
+            tiles = new PIXI.Container(); // fix prop names
+
+            (0, _normalize.normalizeTo)(layer, 'repeatX', 'cols', 'columns');
+            (0, _normalize.normalizeTo)(layer, 'repeatY', 'rows'); // identify the repeating pattern
 
             columns = (0, _utils.isNumber)(layer.repeatX) ? layer.repeatX : 1;
-            rows = (0, _utils.isNumber)(layer.repeatY) ? layer.repeatY : 1; // create the scene using the sizing
+            rows = (0, _utils.isNumber)(layer.repeatY) ? layer.repeatY : 1;
+            console.log('make', path, rows, columns); // create the scene using the sizing
 
             i = 0;
 
-          case 12:
+          case 15:
             if (!(i < columns * rows)) {
-              _context.next = 29;
+              _context.next = 33;
               break;
             }
 
             col = i % columns;
             row = Math.floor(i / columns); // create the layer
 
-            _context.next = 17;
-            return (0, _.default)(animator, path, layer);
+            _context.next = 20;
+            return (0, _.default)(animator, controller, path, layer);
 
-          case 17:
+          case 20:
             instance = _context.sent;
             tiles.addChild(instance); // if this is the first, tile then calculate the size
 
             if (!bounds) {
-              bounds = (0, _getBoundsOfRole.getBoundsForRole)(instance, 'base');
+              bounds = (0, _getBoundsOfRole.getBoundsForRole)(instance, 'bounds');
+
+              if (Math.abs(bounds.top) === Infinity) {
+                bounds = instance.getBounds();
+              }
+
+              console.log(bounds);
             } // calculate values
 
 
@@ -75051,13 +75093,14 @@ function _createRepeater() {
 
             instance.x = col * (bounds.width + marginX) + offsetX;
             instance.y = row * (bounds.height + marginY) + offsetY;
+            console.log(instance.x, instance.y);
 
-          case 26:
+          case 30:
             i++;
-            _context.next = 12;
+            _context.next = 15;
             break;
 
-          case 29:
+          case 33:
             // sort the contents
             tiles.sortChildren(); // sync up shorthand names
 
@@ -75076,21 +75119,17 @@ function _createRepeater() {
             (0, _animation.default)(animator, path, composition, layer, tiles); // add to the view
 
             container.zIndex = tiles.zIndex;
-            container.addChild(tiles); // offset the repeated container by the
-            // first base layer found with a pivot
-            // TODO: if there are conflicting pivots, or piviots
-            // set on base layers, this might create issues
-            // consider figuring out a better way of doing this
+            container.addChild(tiles); // get the complete bounds
 
-            layers = (0, _findObjectsOfRole.findDisplayObjectsOfRole)(tiles, 'base');
-            offsetBy = findPivot(layers[0]);
-            tiles.pivot.x -= offsetBy.x;
-            tiles.pivot.y -= offsetBy.y; // warn, just in case
+            complete = (0, _getBoundsOfRole.getBoundsForRole)(container, 'bounds');
 
-            if (offsetBy.didFindMultiplePivots) {
-              console.warn("Found multiple pivot base layer pivot points");
-            } // attach the update function
+            if (Math.abs(complete.top) === Infinity) {
+              complete = container.getBounds();
+            } // position
 
+
+            tiles.x = complete.width / 2;
+            tiles.y = complete.height / 2; // attach the update function
 
             return _context.abrupt("return", [{
               displayObject: container,
@@ -75098,18 +75137,18 @@ function _createRepeater() {
               update: update
             }]);
 
-          case 49:
-            _context.prev = 49;
+          case 52:
+            _context.prev = 52;
             _context.t0 = _context["catch"](2);
             console.error("Failed to create group ".concat(path, " while ").concat(phase));
             throw _context.t0;
 
-          case 53:
+          case 56:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 49]]);
+    }, _callee, null, [[2, 52]]);
   }));
   return _createRepeater.apply(this, arguments);
 }
@@ -75268,7 +75307,7 @@ function _createInstance() {
                         plugin = animator.plugins[type];
 
                         if (plugin) {
-                          custom = plugin(animator, path, data, layer);
+                          custom = plugin(animator, controller, path, data, layer);
                           pending.push(custom);
                         } // unable to create this type
                         else {
@@ -75907,209 +75946,5 @@ var PIXI = {
 }; // helpful utils
 
 exports.PIXI = PIXI;
-},{"./animation":"animation/index.js","./pixi/responsive":"pixi/responsive.js","./pixi/stage":"pixi/stage.js","./pixi/detatched-container":"pixi/detatched-container.js","./animation/resources/loadImage":"animation/resources/loadImage.js","./common/event-emitter":"common/event-emitter.js","./pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js","./pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","./utils/graphics":"utils/graphics.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
-var global = arguments[3];
-var OVERLAY_ID = '__parcel__error__overlay__';
-var OldModule = module.bundle.Module;
-
-function Module(moduleName) {
-  OldModule.call(this, moduleName);
-  this.hot = {
-    data: module.bundle.hotData,
-    _acceptCallbacks: [],
-    _disposeCallbacks: [],
-    accept: function (fn) {
-      this._acceptCallbacks.push(fn || function () {});
-    },
-    dispose: function (fn) {
-      this._disposeCallbacks.push(fn);
-    }
-  };
-  module.bundle.hotData = null;
-}
-
-module.bundle.Module = Module;
-var checkedAssets, assetsToAccept;
-var parent = module.bundle.parent;
-
-if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
-  var hostname = "" || location.hostname;
-  var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52997" + '/');
-
-  ws.onmessage = function (event) {
-    checkedAssets = {};
-    assetsToAccept = [];
-    var data = JSON.parse(event.data);
-
-    if (data.type === 'update') {
-      var handled = false;
-      data.assets.forEach(function (asset) {
-        if (!asset.isNew) {
-          var didAccept = hmrAcceptCheck(global.parcelRequire, asset.id);
-
-          if (didAccept) {
-            handled = true;
-          }
-        }
-      }); // Enable HMR for CSS by default.
-
-      handled = handled || data.assets.every(function (asset) {
-        return asset.type === 'css' && asset.generated.js;
-      });
-
-      if (handled) {
-        console.clear();
-        data.assets.forEach(function (asset) {
-          hmrApply(global.parcelRequire, asset);
-        });
-        assetsToAccept.forEach(function (v) {
-          hmrAcceptRun(v[0], v[1]);
-        });
-      } else if (location.reload) {
-        // `location` global exists in a web worker context but lacks `.reload()` function.
-        location.reload();
-      }
-    }
-
-    if (data.type === 'reload') {
-      ws.close();
-
-      ws.onclose = function () {
-        location.reload();
-      };
-    }
-
-    if (data.type === 'error-resolved') {
-      console.log('[parcel] ✨ Error resolved');
-      removeErrorOverlay();
-    }
-
-    if (data.type === 'error') {
-      console.error('[parcel] 🚨  ' + data.error.message + '\n' + data.error.stack);
-      removeErrorOverlay();
-      var overlay = createErrorOverlay(data);
-      document.body.appendChild(overlay);
-    }
-  };
-}
-
-function removeErrorOverlay() {
-  var overlay = document.getElementById(OVERLAY_ID);
-
-  if (overlay) {
-    overlay.remove();
-  }
-}
-
-function createErrorOverlay(data) {
-  var overlay = document.createElement('div');
-  overlay.id = OVERLAY_ID; // html encode message and stack trace
-
-  var message = document.createElement('div');
-  var stackTrace = document.createElement('pre');
-  message.innerText = data.error.message;
-  stackTrace.innerText = data.error.stack;
-  overlay.innerHTML = '<div style="background: black; font-size: 16px; color: white; position: fixed; height: 100%; width: 100%; top: 0px; left: 0px; padding: 30px; opacity: 0.85; font-family: Menlo, Consolas, monospace; z-index: 9999;">' + '<span style="background: red; padding: 2px 4px; border-radius: 2px;">ERROR</span>' + '<span style="top: 2px; margin-left: 5px; position: relative;">🚨</span>' + '<div style="font-size: 18px; font-weight: bold; margin-top: 20px;">' + message.innerHTML + '</div>' + '<pre>' + stackTrace.innerHTML + '</pre>' + '</div>';
-  return overlay;
-}
-
-function getParents(bundle, id) {
-  var modules = bundle.modules;
-
-  if (!modules) {
-    return [];
-  }
-
-  var parents = [];
-  var k, d, dep;
-
-  for (k in modules) {
-    for (d in modules[k][1]) {
-      dep = modules[k][1][d];
-
-      if (dep === id || Array.isArray(dep) && dep[dep.length - 1] === id) {
-        parents.push(k);
-      }
-    }
-  }
-
-  if (bundle.parent) {
-    parents = parents.concat(getParents(bundle.parent, id));
-  }
-
-  return parents;
-}
-
-function hmrApply(bundle, asset) {
-  var modules = bundle.modules;
-
-  if (!modules) {
-    return;
-  }
-
-  if (modules[asset.id] || !bundle.parent) {
-    var fn = new Function('require', 'module', 'exports', asset.generated.js);
-    asset.isNew = !modules[asset.id];
-    modules[asset.id] = [fn, asset.deps];
-  } else if (bundle.parent) {
-    hmrApply(bundle.parent, asset);
-  }
-}
-
-function hmrAcceptCheck(bundle, id) {
-  var modules = bundle.modules;
-
-  if (!modules) {
-    return;
-  }
-
-  if (!modules[id] && bundle.parent) {
-    return hmrAcceptCheck(bundle.parent, id);
-  }
-
-  if (checkedAssets[id]) {
-    return;
-  }
-
-  checkedAssets[id] = true;
-  var cached = bundle.cache[id];
-  assetsToAccept.push([bundle, id]);
-
-  if (cached && cached.hot && cached.hot._acceptCallbacks.length) {
-    return true;
-  }
-
-  return getParents(global.parcelRequire, id).some(function (id) {
-    return hmrAcceptCheck(global.parcelRequire, id);
-  });
-}
-
-function hmrAcceptRun(bundle, id) {
-  var cached = bundle.cache[id];
-  bundle.hotData = {};
-
-  if (cached) {
-    cached.hot.data = bundle.hotData;
-  }
-
-  if (cached && cached.hot && cached.hot._disposeCallbacks.length) {
-    cached.hot._disposeCallbacks.forEach(function (cb) {
-      cb(bundle.hotData);
-    });
-  }
-
-  delete bundle.cache[id];
-  bundle(id);
-  cached = bundle.cache[id];
-
-  if (cached && cached.hot && cached.hot._acceptCallbacks.length) {
-    cached.hot._acceptCallbacks.forEach(function (cb) {
-      cb();
-    });
-
-    return true;
-  }
-}
-},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.js"], null)
+},{"./animation":"animation/index.js","./pixi/responsive":"pixi/responsive.js","./pixi/stage":"pixi/stage.js","./pixi/detatched-container":"pixi/detatched-container.js","./animation/resources/loadImage":"animation/resources/loadImage.js","./common/event-emitter":"common/event-emitter.js","./pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js","./pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","./utils/graphics":"utils/graphics.js"}]},{},["index.js"], null)
 //# sourceMappingURL=/index.js.map

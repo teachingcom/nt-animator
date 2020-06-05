@@ -1,8 +1,8 @@
 import { findDisplayObjectsOfRole } from './find-objects-of-role';
 
 /** handles finding the bounds of a specified role */
-export function getBoundsForRole(container, types) {
-	const roles = findDisplayObjectsOfRole(container, types);
+export function getBoundsForRole(container, role) {
+	const roles = findDisplayObjectsOfRole(container, role);
 	
 	// collect all bounds
 	const xs = [ ];

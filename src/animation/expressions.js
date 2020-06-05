@@ -16,6 +16,7 @@ const EXPRESSIONS = {
 	':*': multiplyBy,
 	':/': divideBy,
 	':%': percentOf,
+	':exp': expression,
 };
 
 const DYNAMICS = {
@@ -42,6 +43,16 @@ export function divideBy(divide, relativeTo) {
 
 export function percentOf(percent, relativeTo) {
 	return relativeTo * (percent / 100);
+}
+
+export function expression(...args) {
+	let val = args[0];
+	for (let i = 1; i < args.length; i += 2) {
+		const action = EXPRESSIONS[args[i]];
+		val = action(val, args[i + 1]);
+	}
+
+	return isNaN(val) ? 0 : val;
 }
 
 // value is relative to the x position on screen
@@ -137,6 +148,8 @@ export function evaluateExpression(expression, ...args) {
 /** generates a function for dynamic evaluation */
 export function createDynamicExpression(prop, source, ...args) {
 	const expression = source[prop];
+
+	// not a dynamic property
 	if (!isDynamic(expression)) return expression;
 
 	const [token] = expression;

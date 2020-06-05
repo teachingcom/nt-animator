@@ -1,6 +1,6 @@
 
 import { noop, appendFunc } from '../utils';
-import { createDynamicExpression, isDynamic } from './expressions';
+import { createDynamicExpression, isDynamic, evaluateExpression } from './expressions';
 import ResponsiveStage from '../pixi/stage';
 import { MAPPINGS } from './mappings';
 
@@ -15,6 +15,8 @@ const DYNAMIC_PROPERTY_DEFAULTS = {
 	pivotY: 0,
 	scaleX: 1,
 	scaleY: 1,
+	anchorX: 0.5,
+	anchorY: 0.5,
 };
 
 
@@ -35,16 +37,14 @@ export function assignDisplayObjectProps(target, props) {
 			mapping.apply(target, props[mapping.prop]);
 		}
 	}
+}
 
-	// for (const id in props) {
-	// 	const mapping = MAPPINGS[id];
-	// 	if (mapping) {
-	// 		mapping(target, props[id]);
-	// 	}
-	// 	else {
-	// 		console.warn('No mapping found for', id);
-	// 	}
-	// }
+
+/** evaluates simple expressions */
+export function applyExpressions(obj) {
+	for (const prop in obj) {
+		obj[prop] = evaluateExpression(obj[prop]);
+	}
 }
 
 

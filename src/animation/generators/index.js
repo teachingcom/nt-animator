@@ -71,7 +71,7 @@ export default async function createInstance(animator, controller, path, data, r
 			// check for plugins
 			const plugin = animator.plugins[type];
 			if (plugin) {
-				const custom = plugin(animator, path, data, layer);
+				const custom = plugin(animator, controller, path, data, layer);
 				pending.push(custom);
 			}
 			// unable to create this type

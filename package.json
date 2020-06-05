@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "npx parcel watch ./src/index.js",
-    "build": "npx parcel build ./src/index.js"
+    "dev": "yarn parcel watch --no-cache --no-hmr ./src/index.js",
+    "build": "yarn parcel build ./src/index.js"
   },
   "author": "",
   "license": "ISC",
