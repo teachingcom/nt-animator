@@ -8,7 +8,11 @@ function detectPivot(obj, value, relativeTo) {
 
 /** gets a mapping using a property name */
 export function lookup(prop) {
-	return LOOKUP[prop];
+	const mapping = LOOKUP[prop];
+	if (!mapping) {
+		throw new Error(`Mapping ${prop} was not found`);
+	}
+	return mapping;
 }
 
 /** a series of mapping from a property name to PIXI object value */
@@ -40,6 +44,10 @@ export const MAPPINGS = [
 	// layer scaling
 	{ prop: 'scaleX', apply: (t, v) => t.scale.x = v },
 	{ prop: 'scaleY', apply: (t, v) => t.scale.y = v },
+
+	// layer scaling
+	{ prop: 'skewX', apply: (t, v) => t.skew.x = v },
+	{ prop: 'skewY', apply: (t, v) => t.skew.y = v },
 
 	// emitter props
 	{ prop: 'emit.y', apply: (t, v) => t.emitter.spawnPos.y = v },

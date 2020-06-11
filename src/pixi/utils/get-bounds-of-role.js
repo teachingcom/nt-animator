@@ -12,6 +12,9 @@ export function getBoundsForRole(container, role) {
 		xs.push(bounds.x, bounds.x + bounds.width);
 		ys.push(bounds.y, bounds.y + bounds.height);
 	}
+
+	// make sure there's at least one coordinate
+	if (!xs.length) return null;
 	
 	// figure out the bounds
 	const left = Math.min.apply(Math, xs) || 0;

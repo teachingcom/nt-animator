@@ -4,6 +4,7 @@ import { createDynamicExpression, isDynamic, evaluateExpression } from './expres
 import ResponsiveStage from '../pixi/stage';
 import { MAPPINGS } from './mappings';
 
+const MISSING_STAGE = { width: 0, height: 0 };
 const DYNAMIC_PROPERTY_DEFAULTS = {
 	x: 0,
 	y: 0,
@@ -74,7 +75,7 @@ export function applyDynamicProperties(obj, props) {
 
 	// create the handler function
 	const updateProperties = () => {
-		const stage = ResponsiveStage.findResponsiveStage(obj);
+		const stage = ResponsiveStage.findResponsiveStage(obj) || MISSING_STAGE;
 		update(obj, stage);
 	};
 

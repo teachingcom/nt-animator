@@ -3,13 +3,19 @@ import { createUrlFromRef, parsePath } from "../path";
 import { unpack } from "../utils";
 import getSprite from "./getSprite";
 import loadImage from "./loadImage";
+import { evaluateExpression } from "../expressions";
 
 /** loads all images for a layer */
 export default async function resolveImages(animator, path, composition, layer) {
 
 	// normalize images as a single array
 	let images = [ ];
-	for (const source of [layer.image, layer.images]) {
+	for (let source of [layer.image, layer.images]) {
+
+		// eval, if needed
+		source = evaluateExpression(source);
+
+		// update
 		if (isString(source))
 			images.push(source);
 		else if (isArray(source))

@@ -55,7 +55,6 @@ export default async function createRepeater(animator, controller, path, composi
 		const columns = isNumber(layer.repeatX) ? layer.repeatX : 1;
 		const rows = isNumber(layer.repeatY) ? layer.repeatY : 1;
 
-		console.log('make', path, rows, columns);
 		// create the scene using the sizing
 		let bounds;
 		for (let i = 0; i < columns * rows; i++) {
@@ -70,10 +69,10 @@ export default async function createRepeater(animator, controller, path, composi
 			if (!bounds) {
 				bounds = getBoundsForRole(instance, 'bounds');
 
-				if (Math.abs(bounds.top) === Infinity) {
+				// if no bounds were detected
+				if (!bounds) {
 					bounds = instance.getBounds();
 				}
-				console.log(bounds);
 			}
 
 			// calculate values
@@ -85,7 +84,6 @@ export default async function createRepeater(animator, controller, path, composi
 			// set the position
 			instance.x = (col * (bounds.width + marginX)) + offsetX;
 			instance.y = (row * (bounds.height + marginY)) + offsetY;
-			console.log(instance.x, instance.y);
 		}
 
 		// sort the contents
@@ -116,7 +114,7 @@ export default async function createRepeater(animator, controller, path, composi
 
 		// get the complete bounds
 		let complete = getBoundsForRole(container, 'bounds');
-		if (Math.abs(complete.top) === Infinity) {
+		if (!complete) {
 			complete = container.getBounds();
 		}
 

@@ -10,6 +10,8 @@ export function normalizeProps(props) {
 	normalizeTo(props, 'pivotY', 'pivot.y');
 	normalizeTo(props, 'anchorX', 'anchor.x');
 	normalizeTo(props, 'anchorY', 'anchor.y');
+	normalizeTo(props, 'skewX', 'skew.x');
+	normalizeTo(props, 'skewY', 'skew.y');
 	normalizeTo(props, 'alpha', 'opacity', 'transparency');
 }
 

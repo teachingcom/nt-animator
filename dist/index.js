@@ -69975,7 +69975,13 @@ function detectPivot(obj, value, relativeTo) {
 
 
 function lookup(prop) {
-  return LOOKUP[prop];
+  var mapping = LOOKUP[prop];
+
+  if (!mapping) {
+    throw new Error("Mapping ".concat(prop, " was not found"));
+  }
+
+  return mapping;
 }
 /** a series of mapping from a property name to PIXI object value */
 
@@ -70057,6 +70063,17 @@ var MAPPINGS = [// transforms
   apply: function apply(t, v) {
     return t.scale.y = v;
   }
+}, // layer scaling
+{
+  prop: 'skewX',
+  apply: function apply(t, v) {
+    return t.skew.x = v;
+  }
+}, {
+  prop: 'skewY',
+  apply: function apply(t, v) {
+    return t.skew.y = v;
+  }
 }, // emitter props
 {
   prop: 'emit.y',
@@ -70111,6 +70128,7 @@ exports.multiplyBy = multiplyBy;
 exports.divideBy = divideBy;
 exports.percentOf = percentOf;
 exports.expression = expression;
+exports.pick = pick;
 exports.relativeX = relativeX;
 exports.relativeY = relativeY;
 exports.getRandom = getRandom;
@@ -70147,7 +70165,8 @@ var EXPRESSIONS = {
   ':*': multiplyBy,
   ':/': divideBy,
   ':%': percentOf,
-  ':exp': expression
+  ':exp': expression,
+  ':pick': pick
 };
 var DYNAMICS = {
   ':rnd': getRandom,
@@ -70188,6 +70207,14 @@ function expression() {
   }
 
   return isNaN(val) ? 0 : val;
+}
+
+function pick() {
+  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
+  }
+
+  return args[Math.floor(args.length * randomizer.random())];
 } // value is relative to the x position on screen
 
 
@@ -70222,8 +70249,8 @@ function getRandom(obj, stage, prop) {
   } // sort out the params
 
 
-  for (var _len2 = arguments.length, params = new Array(_len2 > 3 ? _len2 - 3 : 0), _key2 = 3; _key2 < _len2; _key2++) {
-    params[_key2 - 3] = arguments[_key2];
+  for (var _len3 = arguments.length, params = new Array(_len3 > 3 ? _len3 - 3 : 0), _key3 = 3; _key3 < _len3; _key3++) {
+    params[_key3 - 3] = arguments[_key3];
   }
 
   var toInt = !~params.indexOf('decimal');
@@ -70272,8 +70299,8 @@ function evaluateExpression(expression) {
   var handler = EXPRESSIONS[token];
   var rest = expression.slice(1);
 
-  for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-    args[_key3 - 1] = arguments[_key3];
+  for (var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+    args[_key4 - 1] = arguments[_key4];
   }
 
   rest.push.apply(rest, args); // this expression will probably fail
@@ -70306,15 +70333,15 @@ function createDynamicExpression(prop, source) {
 
   rest.unshift(prop); // include any extra configs
 
-  for (var _len4 = arguments.length, args = new Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
-    args[_key4 - 2] = arguments[_key4];
+  for (var _len5 = arguments.length, args = new Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
+    args[_key5 - 2] = arguments[_key5];
   }
 
   rest.push.apply(rest, args); // create the handler function
 
   return function () {
-    for (var _len5 = arguments.length, params = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
-      params[_key5] = arguments[_key5];
+    for (var _len6 = arguments.length, params = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
+      params[_key6] = arguments[_key6];
     }
 
     var args = [].concat(params).concat(rest);
@@ -70675,6 +70702,10 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
+var MISSING_STAGE = {
+  width: 0,
+  height: 0
+};
 var DYNAMIC_PROPERTY_DEFAULTS = {
   x: 0,
   y: 0,
@@ -70754,8 +70785,7 @@ function applyDynamicProperties(obj, props) {
 
 
   var updateProperties = function updateProperties() {
-    var stage = _stage.default.findResponsiveStage(obj);
-
+    var stage = _stage.default.findResponsiveStage(obj) || MISSING_STAGE;
     update(obj, stage);
   }; // set the initial values
 
@@ -71221,6 +71251,8 @@ var _getSprite = _interopRequireDefault(require("./getSprite"));
 
 var _loadImage = _interopRequireDefault(require("./loadImage"));
 
+var _expressions = require("../expressions");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
@@ -71247,6 +71279,9 @@ function _resolveImages() {
 
             for (_i = 0, _arr = [layer.image, layer.images]; _i < _arr.length; _i++) {
               source = _arr[_i];
+              // eval, if needed
+              source = (0, _expressions.evaluateExpression)(source); // update
+
               if ((0, _utils.isString)(source)) images.push(source);else if ((0, _utils.isArray)(source)) images = images.concat(source);
             } // unpack all image reference
 
@@ -71335,7 +71370,7 @@ function _resolveImages() {
   }));
   return _resolveImages.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../utils":"utils/index.js","../path":"animation/path.js","../utils":"animation/utils.js","./getSprite":"animation/resources/getSprite.js","./loadImage":"animation/resources/loadImage.js"}],"animation/resources/createTextureFromImage.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../utils":"utils/index.js","../path":"animation/path.js","../utils":"animation/utils.js","./getSprite":"animation/resources/getSprite.js","./loadImage":"animation/resources/loadImage.js","../expressions":"animation/expressions.js"}],"animation/resources/createTextureFromImage.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -71422,6 +71457,8 @@ function normalizeProps(props) {
   normalizeTo(props, 'pivotY', 'pivot.y');
   normalizeTo(props, 'anchorX', 'anchor.x');
   normalizeTo(props, 'anchorY', 'anchor.y');
+  normalizeTo(props, 'skewX', 'skew.x');
+  normalizeTo(props, 'skewY', 'skew.y');
   normalizeTo(props, 'alpha', 'opacity', 'transparency');
 } // finds the first value and normalizes it to the first argument
 
@@ -74941,13 +74978,15 @@ function getBoundsForRole(container, role) {
       var bounds = match.getBounds();
       xs.push(bounds.x, bounds.x + bounds.width);
       ys.push(bounds.y, bounds.y + bounds.height);
-    } // figure out the bounds
+    } // make sure there's at least one coordinate
 
   } catch (err) {
     _iterator.e(err);
   } finally {
     _iterator.f();
   }
+
+  if (!xs.length) return null; // figure out the bounds
 
   var left = Math.min.apply(Math, xs) || 0;
   var top = Math.min.apply(Math, ys) || 0;
@@ -75054,35 +75093,32 @@ function _createRepeater() {
             (0, _normalize.normalizeTo)(layer, 'repeatY', 'rows'); // identify the repeating pattern
 
             columns = (0, _utils.isNumber)(layer.repeatX) ? layer.repeatX : 1;
-            rows = (0, _utils.isNumber)(layer.repeatY) ? layer.repeatY : 1;
-            console.log('make', path, rows, columns); // create the scene using the sizing
+            rows = (0, _utils.isNumber)(layer.repeatY) ? layer.repeatY : 1; // create the scene using the sizing
 
             i = 0;
 
-          case 15:
+          case 14:
             if (!(i < columns * rows)) {
-              _context.next = 33;
+              _context.next = 31;
               break;
             }
 
             col = i % columns;
             row = Math.floor(i / columns); // create the layer
 
-            _context.next = 20;
+            _context.next = 19;
             return (0, _.default)(animator, controller, path, layer);
 
-          case 20:
+          case 19:
             instance = _context.sent;
             tiles.addChild(instance); // if this is the first, tile then calculate the size
 
             if (!bounds) {
-              bounds = (0, _getBoundsOfRole.getBoundsForRole)(instance, 'bounds');
+              bounds = (0, _getBoundsOfRole.getBoundsForRole)(instance, 'bounds'); // if no bounds were detected
 
-              if (Math.abs(bounds.top) === Infinity) {
+              if (!bounds) {
                 bounds = instance.getBounds();
               }
-
-              console.log(bounds);
             } // calculate values
 
 
@@ -75093,14 +75129,13 @@ function _createRepeater() {
 
             instance.x = col * (bounds.width + marginX) + offsetX;
             instance.y = row * (bounds.height + marginY) + offsetY;
-            console.log(instance.x, instance.y);
 
-          case 30:
+          case 28:
             i++;
-            _context.next = 15;
+            _context.next = 14;
             break;
 
-          case 33:
+          case 31:
             // sort the contents
             tiles.sortChildren(); // sync up shorthand names
 
@@ -75123,7 +75158,7 @@ function _createRepeater() {
 
             complete = (0, _getBoundsOfRole.getBoundsForRole)(container, 'bounds');
 
-            if (Math.abs(complete.top) === Infinity) {
+            if (!complete) {
               complete = container.getBounds();
             } // position
 
@@ -75137,18 +75172,18 @@ function _createRepeater() {
               update: update
             }]);
 
-          case 52:
-            _context.prev = 52;
+          case 50:
+            _context.prev = 50;
             _context.t0 = _context["catch"](2);
             console.error("Failed to create group ".concat(path, " while ").concat(phase));
             throw _context.t0;
 
-          case 56:
+          case 54:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 52]]);
+    }, _callee, null, [[2, 50]]);
   }));
   return _createRepeater.apply(this, arguments);
 }

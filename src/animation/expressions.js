@@ -17,6 +17,7 @@ const EXPRESSIONS = {
 	':/': divideBy,
 	':%': percentOf,
 	':exp': expression,
+	':pick': pick,
 };
 
 const DYNAMICS = {
@@ -53,6 +54,10 @@ export function expression(...args) {
 	}
 
 	return isNaN(val) ? 0 : val;
+}
+
+export function pick(...args) {
+	return args[Math.floor(args.length * randomizer.random())];
 }
 
 // value is relative to the x position on screen
