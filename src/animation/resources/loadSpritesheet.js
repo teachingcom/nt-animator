@@ -1,24 +1,33 @@
 import loadImage from "./loadImage";
 
 // handle loading an external spritesheet
-export default async function loadSpritesheet(animator, spritesheetId, spritesheet) {
+export default async function loadSpritesheet(animator, spritesheetId, spritesheet, ext) {
 
 	// load the image first
 	// for now, only expect PNG images
-	const url = `${animator.baseUrl}${spritesheetId}.png`;
+	const url = `${animator.baseUrl}${spritesheetId}.${ext}`;
 	const image = await loadImage(url);
 
 	// with the image, create slices based on the spritesheet
 	if (!spritesheet.__initialized__)
-		generateSprites(image, spritesheetId, spritesheet);
+		generateSprites(image, spritesheetId, spritesheet, ext);
 }
 
 // create individual sprites from an image
-function generateSprites(image, spritesheetId, spritesheet) {
+function generateSprites(image, spritesheetId, spritesheet, ext) {
 
 	// create each sprite slice
 	for (const id in spritesheet) {
-		const [ x, y, width, height ] = spritesheet[id];
+		const record = spritesheet[id];
+
+		// if this is not an array, skip it
+		if (!Array.isArray(record)) continue;
+
+		// get the bounds
+		const [ x, y, width, height, type ] = record;
+
+		// make sure it's for the image type used
+		if (type !== ext) continue;
 		
 		// match the canvas
 		const canvas = document.createElement('canvas');
@@ -36,7 +45,4 @@ function generateSprites(image, spritesheetId, spritesheet) {
 		// replace the bounds
 		spritesheet[id] = canvas;
 	}
-
-	// spritesheet is ready for use
-	spritesheet.__initialized__ = true;
 }

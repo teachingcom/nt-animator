@@ -5,7 +5,7 @@ import Random from './rng';
 import createInstance from "./generators";
 import getSprite from "./resources/getSprite";
 import getSpritesheet from "./resources/getSpritesheet";
-import { setRandomizer } from './expressions';
+import { setRandomizer, evaluateExpression } from './expressions';
 import Controller from './generators/controller';
 
 /** handles creating PIXI animations using defined files */
@@ -61,6 +61,11 @@ export class Animator extends EventEmitter {
 	lookup = resource => {
 		const path = parsePath(resource);
 		return resolvePath(this.manifest, path.parts);
+	}
+
+	/** evaluates an expression */
+	evaluateExpression = value => {
+		return evaluateExpression(value);
 	}
 
 	/** handles composing a layer using the provided data

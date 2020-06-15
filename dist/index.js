@@ -70127,6 +70127,7 @@ exports.subtractBy = subtractBy;
 exports.multiplyBy = multiplyBy;
 exports.divideBy = divideBy;
 exports.percentOf = percentOf;
+exports.range = range;
 exports.expression = expression;
 exports.pick = pick;
 exports.relativeX = relativeX;
@@ -70166,7 +70167,8 @@ var EXPRESSIONS = {
   ':/': divideBy,
   ':%': percentOf,
   ':exp': expression,
-  ':pick': pick
+  ':pick': pick,
+  ':range': range
 };
 var DYNAMICS = {
   ':rnd': getRandom,
@@ -70194,9 +70196,30 @@ function percentOf(percent, relativeTo) {
   return relativeTo * (percent / 100);
 }
 
+function range() {
+  for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+    params[_key] = arguments[_key];
+  }
+
+  // sort out the params
+  var toInt = !~params.indexOf('decimal'); // extract the value
+
+  var min = params[0],
+      max = params[1];
+
+  if (isNaN(max)) {
+    max = min;
+    min = 0;
+  } // randomize
+
+
+  var value = randomizer.random() * (max - min) + min;
+  return toInt ? 0 | value : value;
+}
+
 function expression() {
-  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-    args[_key] = arguments[_key];
+  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
   }
 
   var val = args[0];
@@ -70210,8 +70233,8 @@ function expression() {
 }
 
 function pick() {
-  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    args[_key2] = arguments[_key2];
+  for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+    args[_key3] = arguments[_key3];
   }
 
   return args[Math.floor(args.length * randomizer.random())];
@@ -70249,8 +70272,8 @@ function getRandom(obj, stage, prop) {
   } // sort out the params
 
 
-  for (var _len3 = arguments.length, params = new Array(_len3 > 3 ? _len3 - 3 : 0), _key3 = 3; _key3 < _len3; _key3++) {
-    params[_key3 - 3] = arguments[_key3];
+  for (var _len4 = arguments.length, params = new Array(_len4 > 3 ? _len4 - 3 : 0), _key4 = 3; _key4 < _len4; _key4++) {
+    params[_key4 - 3] = arguments[_key4];
   }
 
   var toInt = !~params.indexOf('decimal');
@@ -70299,8 +70322,8 @@ function evaluateExpression(expression) {
   var handler = EXPRESSIONS[token];
   var rest = expression.slice(1);
 
-  for (var _len4 = arguments.length, args = new Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
-    args[_key4 - 1] = arguments[_key4];
+  for (var _len5 = arguments.length, args = new Array(_len5 > 1 ? _len5 - 1 : 0), _key5 = 1; _key5 < _len5; _key5++) {
+    args[_key5 - 1] = arguments[_key5];
   }
 
   rest.push.apply(rest, args); // this expression will probably fail
@@ -70333,15 +70356,15 @@ function createDynamicExpression(prop, source) {
 
   rest.unshift(prop); // include any extra configs
 
-  for (var _len5 = arguments.length, args = new Array(_len5 > 2 ? _len5 - 2 : 0), _key5 = 2; _key5 < _len5; _key5++) {
-    args[_key5 - 2] = arguments[_key5];
+  for (var _len6 = arguments.length, args = new Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
+    args[_key6 - 2] = arguments[_key6];
   }
 
   rest.push.apply(rest, args); // create the handler function
 
   return function () {
-    for (var _len6 = arguments.length, params = new Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
-      params[_key6] = arguments[_key6];
+    for (var _len7 = arguments.length, params = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
+      params[_key7] = arguments[_key7];
     }
 
     var args = [].concat(params).concat(rest);
@@ -71075,13 +71098,13 @@ var _loadImage = _interopRequireDefault(require("./loadImage"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // handle loading an external spritesheet
-function loadSpritesheet(_x, _x2, _x3) {
+function loadSpritesheet(_x, _x2, _x3, _x4) {
   return _loadSpritesheet.apply(this, arguments);
 } // create individual sprites from an image
 
 
 function _loadSpritesheet() {
-  _loadSpritesheet = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, spritesheetId, spritesheet) {
+  _loadSpritesheet = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, spritesheetId, spritesheet, ext) {
     var url, image;
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -71089,14 +71112,14 @@ function _loadSpritesheet() {
           case 0:
             // load the image first
             // for now, only expect PNG images
-            url = "".concat(animator.baseUrl).concat(spritesheetId, ".png");
+            url = "".concat(animator.baseUrl).concat(spritesheetId, ".").concat(ext);
             _context.next = 3;
             return (0, _loadImage.default)(url);
 
           case 3:
             image = _context.sent;
             // with the image, create slices based on the spritesheet
-            if (!spritesheet.__initialized__) generateSprites(image, spritesheetId, spritesheet);
+            if (!spritesheet.__initialized__) generateSprites(image, spritesheetId, spritesheet, ext);
 
           case 5:
           case "end":
@@ -71108,15 +71131,22 @@ function _loadSpritesheet() {
   return _loadSpritesheet.apply(this, arguments);
 }
 
-function generateSprites(image, spritesheetId, spritesheet) {
+function generateSprites(image, spritesheetId, spritesheet, ext) {
   // create each sprite slice
   for (var id in spritesheet) {
-    var _spritesheet$id = (0, _slicedToArray2.default)(spritesheet[id], 4),
-        x = _spritesheet$id[0],
-        y = _spritesheet$id[1],
-        width = _spritesheet$id[2],
-        height = _spritesheet$id[3]; // match the canvas
+    var record = spritesheet[id]; // if this is not an array, skip it
 
+    if (!Array.isArray(record)) continue; // get the bounds
+
+    var _record = (0, _slicedToArray2.default)(record, 5),
+        x = _record[0],
+        y = _record[1],
+        width = _record[2],
+        height = _record[3],
+        type = _record[4]; // make sure it's for the image type used
+
+
+    if (type !== ext) continue; // match the canvas
 
     var canvas = document.createElement('canvas');
     canvas.width = width;
@@ -71129,10 +71159,7 @@ function generateSprites(image, spritesheetId, spritesheet) {
     ctx.drawImage(image, x, y, width, height, 0, 0, width, height); // replace the bounds
 
     spritesheet[id] = canvas;
-  } // spritesheet is ready for use
-
-
-  spritesheet.__initialized__ = true;
+  }
 }
 },{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","./loadImage":"animation/resources/loadImage.js"}],"animation/resources/getSpritesheet.js":[function(require,module,exports) {
 "use strict";
@@ -71166,17 +71193,21 @@ function _getSpritesheet() {
             spritesheet = animator.manifest.spritesheets[spritesheetId]; // check if the spritesheet needs to be created
 
             if (spritesheet.__initialized__) {
-              _context.next = 4;
+              _context.next = 5;
               break;
             }
 
             _context.next = 4;
-            return (0, _loadSpritesheet.default)(animator, spritesheetId, spritesheet);
+            return Promise.all([spritesheet.hasJpg && (0, _loadSpritesheet.default)(animator, spritesheetId, spritesheet, 'jpg'), spritesheet.hasPng && (0, _loadSpritesheet.default)(animator, spritesheetId, spritesheet, 'png')]);
 
           case 4:
-            return _context.abrupt("return", spritesheet);
+            // spritesheet is ready for use
+            spritesheet.__initialized__ = true;
 
           case 5:
+            return _context.abrupt("return", spritesheet);
+
+          case 6:
           case "end":
             return _context.stop();
         }
@@ -75067,7 +75098,8 @@ function createRepeater(_x, _x2, _x3, _x4, _x5) {
 
 function _createRepeater() {
   _createRepeater = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, composition, layer) {
-    var update, phase, container, tiles, columns, rows, bounds, i, col, row, instance, marginX, marginY, offsetX, offsetY, complete;
+    var update, phase, _layer$props, _layer$props2, container, tiles, columns, rows, originX, originY, useOffsetX, offsetX, useOffsetY, offsetY, needBounds, bounds, i, col, row, instance, x, y, complete, _iterator2, _step2, child;
+
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -75093,49 +75125,73 @@ function _createRepeater() {
             (0, _normalize.normalizeTo)(layer, 'repeatY', 'rows'); // identify the repeating pattern
 
             columns = (0, _utils.isNumber)(layer.repeatX) ? layer.repeatX : 1;
-            rows = (0, _utils.isNumber)(layer.repeatY) ? layer.repeatY : 1; // create the scene using the sizing
+            rows = (0, _utils.isNumber)(layer.repeatY) ? layer.repeatY : 1;
+            originX = (0, _expressions.evaluateExpression)(((_layer$props = layer.props) === null || _layer$props === void 0 ? void 0 : _layer$props.x) || 0);
+            originY = (0, _expressions.evaluateExpression)(((_layer$props2 = layer.props) === null || _layer$props2 === void 0 ? void 0 : _layer$props2.y) || 0); // check for defined distances
+
+            useOffsetX = false;
+            offsetX = 0;
+
+            if ('offsetX' in layer) {
+              offsetX = (0, _expressions.evaluateExpression)(layer.offsetX || 0);
+              useOffsetX = true;
+            }
+
+            useOffsetY = false;
+            offsetY = 0;
+
+            if ('offsetY' in layer) {
+              offsetY = (0, _expressions.evaluateExpression)(layer.offsetY || 0);
+              useOffsetY = true;
+            } // do we still need bounds for each section?
+
+
+            needBounds = !(useOffsetX && useOffsetY); // create the scene using the sizing
 
             i = 0;
 
-          case 14:
+          case 23:
             if (!(i < columns * rows)) {
-              _context.next = 31;
+              _context.next = 42;
               break;
             }
 
             col = i % columns;
             row = Math.floor(i / columns); // create the layer
 
-            _context.next = 19;
+            _context.next = 28;
             return (0, _.default)(animator, controller, path, layer);
 
-          case 19:
+          case 28:
             instance = _context.sent;
             tiles.addChild(instance); // if this is the first, tile then calculate the size
 
-            if (!bounds) {
+            if (needBounds && !bounds) {
               bounds = (0, _getBoundsOfRole.getBoundsForRole)(instance, 'bounds'); // if no bounds were detected
 
               if (!bounds) {
                 bounds = instance.getBounds();
               }
-            } // calculate values
+            } // default position
 
 
-            marginX = (0, _expressions.evaluateExpression)(layer.marginX || 0);
-            marginY = (0, _expressions.evaluateExpression)(layer.marginY || 0);
-            offsetX = (0, _expressions.evaluateExpression)(layer.offsetX || 0);
-            offsetY = (0, _expressions.evaluateExpression)(layer.offsetY || 0); // set the position
+            x = originX;
+            y = originY; // apply offsets
 
-            instance.x = col * (bounds.width + marginX) + offsetX;
-            instance.y = row * (bounds.height + marginY) + offsetY;
+            x += col * (useOffsetX ? offsetX : bounds.width);
+            y += row * (useOffsetY ? offsetY : bounds.height); // include nudge
 
-          case 28:
+            x += (0, _expressions.evaluateExpression)(layer.nudgeX || 0);
+            y += (0, _expressions.evaluateExpression)(layer.nudgeY || 0);
+            instance.x = x;
+            instance.y = y;
+
+          case 39:
             i++;
-            _context.next = 14;
+            _context.next = 23;
             break;
 
-          case 31:
+          case 42:
             // sort the contents
             tiles.sortChildren(); // sync up shorthand names
 
@@ -75160,6 +75216,26 @@ function _createRepeater() {
 
             if (!complete) {
               complete = container.getBounds();
+            } // check for custom sorting
+
+
+            if (layer.sortBy) {
+              // update each property
+              _iterator2 = _createForOfIteratorHelper(tiles.children);
+
+              try {
+                for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+                  child = _step2.value;
+                  child.zIndex = child[layer.sortBy];
+                } // sort again
+
+              } catch (err) {
+                _iterator2.e(err);
+              } finally {
+                _iterator2.f();
+              }
+
+              tiles.sortChildren();
             } // position
 
 
@@ -75172,18 +75248,18 @@ function _createRepeater() {
               update: update
             }]);
 
-          case 50:
-            _context.prev = 50;
+          case 62:
+            _context.prev = 62;
             _context.t0 = _context["catch"](2);
             console.error("Failed to create group ".concat(path, " while ").concat(phase));
             throw _context.t0;
 
-          case 54:
+          case 66:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 50]]);
+    }, _callee, null, [[2, 62]]);
   }));
   return _createRepeater.apply(this, arguments);
 }
@@ -75661,6 +75737,9 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "lookup", function (resource) {
       var path = (0, _path.parsePath)(resource);
       return (0, _path.resolvePath)(_this.manifest, path.parts);
+    });
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "evaluateExpression", function (value) {
+      return (0, _expressions.evaluateExpression)(value);
     });
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "compose", /*#__PURE__*/function () {
       var _ref3 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(data, resource, relativeTo) {

@@ -54,6 +54,26 @@ export default async function createRepeater(animator, controller, path, composi
 		// identify the repeating pattern
 		const columns = isNumber(layer.repeatX) ? layer.repeatX : 1;
 		const rows = isNumber(layer.repeatY) ? layer.repeatY : 1;
+		const originX = evaluateExpression(layer.props?.x || 0);
+		const originY = evaluateExpression(layer.props?.y || 0);
+
+		// check for defined distances
+		let useOffsetX = false;
+		let offsetX = 0;
+		if ('offsetX' in layer) {
+			offsetX = evaluateExpression(layer.offsetX || 0);
+			useOffsetX = true;
+		}
+
+		let useOffsetY = false;
+		let offsetY = 0;
+		if ('offsetY' in layer) {
+			offsetY = evaluateExpression(layer.offsetY || 0);
+			useOffsetY = true;
+		}
+
+		// do we still need bounds for each section?
+		const needBounds = !(useOffsetX && useOffsetY);
 
 		// create the scene using the sizing
 		let bounds;
@@ -66,7 +86,7 @@ export default async function createRepeater(animator, controller, path, composi
 			tiles.addChild(instance);
 
 			// if this is the first, tile then calculate the size
-			if (!bounds) {
+			if (needBounds && !bounds) {
 				bounds = getBoundsForRole(instance, 'bounds');
 
 				// if no bounds were detected
@@ -75,15 +95,21 @@ export default async function createRepeater(animator, controller, path, composi
 				}
 			}
 
-			// calculate values
-			const marginX = evaluateExpression(layer.marginX || 0);
-			const marginY = evaluateExpression(layer.marginY || 0);
-			const offsetX = evaluateExpression(layer.offsetX || 0);
-			const offsetY = evaluateExpression(layer.offsetY || 0);
 			
-			// set the position
-			instance.x = (col * (bounds.width + marginX)) + offsetX;
-			instance.y = (row * (bounds.height + marginY)) + offsetY;
+			// default position
+			const x = originX;
+			const y = originY;
+
+			// apply offsets
+			x += col * (useOffsetX ? offsetX : bounds.width);
+			y += row * (useOffsetY ? offsetY : bounds.height);
+
+			// include nudge
+			x += evaluateExpression(layer.nudgeX || 0);
+			y += evaluateExpression(layer.nudgeY || 0);
+
+			instance.x = x;
+			instance.y = y;
 		}
 
 		// sort the contents
@@ -116,6 +142,18 @@ export default async function createRepeater(animator, controller, path, composi
 		let complete = getBoundsForRole(container, 'bounds');
 		if (!complete) {
 			complete = container.getBounds();
+		}
+
+		// check for custom sorting
+		if (layer.sortBy) {
+
+			// update each property
+			for (const child of tiles.children) {
+				child.zIndex = child[layer.sortBy];
+			}
+
+			// sort again
+			tiles.sortChildren();
 		}
 
 		// position

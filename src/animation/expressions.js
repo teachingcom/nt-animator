@@ -18,6 +18,7 @@ const EXPRESSIONS = {
 	':%': percentOf,
 	':exp': expression,
 	':pick': pick,
+	':range': range,
 };
 
 const DYNAMICS = {
@@ -44,6 +45,24 @@ export function divideBy(divide, relativeTo) {
 
 export function percentOf(percent, relativeTo) {
 	return relativeTo * (percent / 100);
+}
+
+export function range(...params) {
+	
+	// sort out the params
+	const toInt = !~params.indexOf('decimal');
+
+	// extract the value
+	let [min, max] = params;
+	if (isNaN(max)) {
+		max = min;
+		min = 0;
+	}
+
+	// randomize
+	const value = (randomizer.random() * (max - min)) + min;
+	return toInt ? 0|value : value;
+
 }
 
 export function expression(...args) {
