@@ -71475,6 +71475,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.normalizeProps = normalizeProps;
+exports.normalizeEmit = normalizeEmit;
 exports.normalizeTo = normalizeTo;
 
 var _utils = require("../utils");
@@ -71491,6 +71492,13 @@ function normalizeProps(props) {
   normalizeTo(props, 'skewX', 'skew.x');
   normalizeTo(props, 'skewY', 'skew.y');
   normalizeTo(props, 'alpha', 'opacity', 'transparency');
+}
+
+function normalizeEmit(emit) {
+  if (!emit) return; // fix emitter props
+
+  normalizeTo(emit, 'rotation', 'rotate');
+  normalizeTo(emit, 'startRotation', 'startingRotation');
 } // finds the first value and normalizes it to the first argument
 
 
@@ -74562,7 +74570,8 @@ function _createEmitter() {
             generator.emitter = emitter;
             generator.isEmitter = true; // fix property names to account for aliases
 
-            (0, _normalize.normalizeProps)(layer.props); // create dynamically rendered properties
+            (0, _normalize.normalizeProps)(layer.props);
+            (0, _normalize.normalizeEmit)(layer.emit); // create dynamically rendered properties
 
             phase = 'creating dynamic properties';
             (0, _assign2.applyDynamicProperties)(generator, layer.props); // set container defaults
@@ -74583,18 +74592,18 @@ function _createEmitter() {
               update: update
             }]);
 
-          case 69:
-            _context.prev = 69;
+          case 70:
+            _context.prev = 70;
             _context.t3 = _context["catch"](6);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
             throw _context.t3;
 
-          case 73:
+          case 74:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[6, 69], [12, 16]]);
+    }, _callee, null, [[6, 70], [12, 16]]);
   }));
   return _createEmitter.apply(this, arguments);
 }

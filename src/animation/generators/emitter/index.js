@@ -11,7 +11,7 @@ import './overrides';
 import createAnimation from '../animation';
 import resolveImages from "../../resources/resolveImages";
 import createTextureFromImage from '../../resources/createTextureFromImage';
-import { normalizeProps } from '../../normalize';
+import { normalizeProps, normalizeEmit } from '../../normalize';
 import { toColor } from '../../converters';
 
 // emitter property mappings
@@ -221,6 +221,7 @@ export default async function createEmitter(animator, controller, path, composit
 
 		// fix property names to account for aliases
 		normalizeProps(layer.props);
+		normalizeEmit(layer.emit);
 
 		// create dynamically rendered properties
 		phase = 'creating dynamic properties';

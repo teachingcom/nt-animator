@@ -15,6 +15,14 @@ export function normalizeProps(props) {
 	normalizeTo(props, 'alpha', 'opacity', 'transparency');
 }
 
+export function normalizeEmit(emit) {
+	if (!emit) return;
+	
+	// fix emitter props
+	normalizeTo(emit, 'rotation', 'rotate');
+	normalizeTo(emit, 'startRotation', 'startingRotation');
+}
+
 
 // finds the first value and normalizes it to the first argument
 export function normalizeTo(props, ...keys) {
