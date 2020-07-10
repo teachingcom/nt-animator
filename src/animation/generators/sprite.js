@@ -26,6 +26,7 @@ export default async function createSprite(animator, controller, path, compositi
 
 	// recursively built update function
 	let update = noop;
+	let dispose = noop;
 
 	// tracking setup phase
 	let phase = '';
@@ -62,12 +63,14 @@ export default async function createSprite(animator, controller, path, compositi
 			? new PIXI.AnimatedSprite(textures)
 			: new PIXI.Sprite(textures[0]);
 
-		// prevent seams
-		sprite.roundPixels = true;
-
 		// if animated, start playback
 		container.isAnimatedSprite = isAnimated;
-		if (isAnimated) sprite.play();
+		if (isAnimated) {
+			sprite.play();
+			
+			// disposal
+			dispose = () => sprite.stop();
+		}
 
 		// set some default values
 		sprite.pivot.x = sprite.width / 2;
@@ -100,16 +103,11 @@ export default async function createSprite(animator, controller, path, compositi
 		container.zIndex = sprite.zIndex;
 		container.addChild(sprite);
 
-		// // include this instance
-		// if (sprite.pivot.y === 117) {
-		// 	window.PIV = window.PIV || [ ];
-		// 	window.PIV.push(sprite);
-		// }
-
+		// add to the controller
 		controller.register(container);
 
 		// attach the update function
-		return [{ displayObject: container, data: layer, update }];
+		return [{ displayObject: container, data: layer, update, dispose }];
 	}
 	catch(ex) {
 		console.error(`Failed to create sprite ${path} while ${phase}`);

@@ -2,15 +2,15 @@ import * as PIXI from 'pixi.js';
 
 import createAnimation from './animation';
 
-import { assignDisplayObjectProps, evaluateDisplayObjectExpressions, applyDynamicProperties } from '../assign';
-import { setDefaults, noop, isNumber } from '../../utils';
+import { assignDisplayObjectProps, applyDynamicProperties, applyExpressions } from '../assign';
+import { setDefaults, noop, isNumber, appendFunc, isString } from '../../utils';
 import { getBoundsForRole } from '../../pixi/utils/get-bounds-of-role';
 
 // for creating child instances
 import createInstance from '.';
-import { findDisplayObjectsOfRole } from '../../pixi/utils/find-objects-of-role';
 import { evaluateExpression } from '../expressions';
 import { normalizeProps, normalizeTo } from '../normalize';
+import { unpack } from '../utils';
 
 // default parameters to create a sprite
 const GROUP_DEFAULTS = {
@@ -26,13 +26,20 @@ const GROUP_DEFAULTS = {
 
 /** creates a repeater instance */
 export default async function createRepeater(animator, controller, path, composition, layer) {
+	const root = animator.lookup(path);
 
 	// recursively built update function
 	let update = noop;
+	let dispose = noop;
 
 	// tracking setup phase
 	let phase = '';
 	try {
+
+		// if the composition refers to a path
+		if (isString(layer.compose)) {
+			unpack(animator, root, layer);
+		}
 
 		// NOTE: sprites are added a wrapper container on purpose
 		// because any animations that modify scale will interfere
@@ -50,6 +57,8 @@ export default async function createRepeater(animator, controller, path, composi
 		// fix prop names
 		normalizeTo(layer, 'repeatX', 'cols', 'columns');
 		normalizeTo(layer, 'repeatY', 'rows');
+		normalizeTo(layer, 'jitterX', 'jitter.x');
+		normalizeTo(layer, 'jitterY', 'jitter.y');
 
 		// identify the repeating pattern
 		const columns = isNumber(layer.repeatX) ? layer.repeatX : 1;
@@ -72,6 +81,21 @@ export default async function createRepeater(animator, controller, path, composi
 			useOffsetY = true;
 		}
 
+		// check for jitter values
+		let useJitterX = false;
+		let jitterX = 0;
+		if ('jitterX' in layer) {
+			jitterX = evaluateExpression(layer.jitterX || 0);
+			useJitterX = true;
+		}
+
+		let useJitterY = false;
+		let jitterY = 0;
+		if ('jitterY' in layer) {
+			jitterY = evaluateExpression(layer.jitterY || 0);
+			useJitterY = true;
+		}
+
 		// do we still need bounds for each section?
 		const needBounds = !(useOffsetX && useOffsetY);
 
@@ -82,8 +106,11 @@ export default async function createRepeater(animator, controller, path, composi
 			const row = Math.floor(i / columns);
 
 			// create the layer
-			const instance = await createInstance(animator, controller, path, layer);
+			const instance = await createInstance(animator, controller, path, layer, root);
 			tiles.addChild(instance);
+			
+			// include the dispose function
+			dispose = appendFunc(dispose, instance.dispose);
 
 			// if this is the first, tile then calculate the size
 			if (needBounds && !bounds) {
@@ -104,6 +131,10 @@ export default async function createRepeater(animator, controller, path, composi
 			x += col * (useOffsetX ? offsetX : bounds.width);
 			y += row * (useOffsetY ? offsetY : bounds.height);
 
+			// check for jittering
+			if (useJitterX) x += 0 | ((Math.random() * jitterX * 2) - jitterX);
+			if (useJitterY) y += 0 | ((Math.random() * jitterY * 2) - jitterY);
+
 			// include nudge
 			x += evaluateExpression(layer.nudgeX || 0);
 			y += evaluateExpression(layer.nudgeY || 0);
@@ -117,6 +148,10 @@ export default async function createRepeater(animator, controller, path, composi
 
 		// sync up shorthand names
 		normalizeProps(layer.props);
+
+		// perform simple expressions
+		phase = 'evaluating expressions';
+		applyExpressions(layer.props);
 
 		// create dynamically rendered properties
 		phase = 'creating dynamic properties';
@@ -149,7 +184,7 @@ export default async function createRepeater(animator, controller, path, composi
 
 			// update each property
 			for (const child of tiles.children) {
-				child.zIndex = child[layer.sortBy];
+				child.zIndex = child[layer.sortBy] + 5000;
 			}
 
 			// sort again
@@ -161,7 +196,7 @@ export default async function createRepeater(animator, controller, path, composi
 		tiles.y = complete.height / 2;
 
 		// attach the update function
-		return [{ displayObject: container, data: layer, update }];
+		return [{ displayObject: container, data: layer, update, dispose }];
 	}
 	catch(ex) {
 		console.error(`Failed to create group ${path} while ${phase}`);

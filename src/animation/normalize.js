@@ -13,6 +13,7 @@ export function normalizeProps(props) {
 	normalizeTo(props, 'skewX', 'skew.x');
 	normalizeTo(props, 'skewY', 'skew.y');
 	normalizeTo(props, 'alpha', 'opacity', 'transparency');
+	normalizeTo(props, 'roundPixels', 'snapToPixel', 'snapToGrid', 'snap');
 }
 
 export function normalizeEmit(emit) {

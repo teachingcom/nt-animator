@@ -2,8 +2,9 @@ import * as PIXI from 'pixi.js';
 
 import createAnimation from './animation';
 
-import { assignDisplayObjectProps, evaluateDisplayObjectExpressions, applyDynamicProperties } from '../assign';
-import { setDefaults, noop } from '../../utils';
+import { assignDisplayObjectProps, evaluateDisplayObjectExpressions, applyDynamicProperties, applyExpressions } from '../assign';
+import { setDefaults, noop, appendFunc, isString } from '../../utils';
+import { unpack } from '../utils';
 
 // for creating child instances
 import createInstance from '.';
@@ -23,13 +24,20 @@ const GROUP_DEFAULTS = {
 
 /** creates a group instance */
 export default async function createGroup(animator, controller, path, composition, layer) {
+	const root = animator.lookup(path);
 
 	// recursively built update function
 	let update = noop;
+	let dispose = noop;
 
 	// tracking setup phase
 	let phase = '';
 	try {
+		
+		// if the composition refers to a path
+		if (isString(layer.compose)) {
+			unpack(animator, root, layer);
+		}
 
 		// NOTE: sprites are added a wrapper container on purpose
 		// because any animations that modify scale will interfere
@@ -42,7 +50,13 @@ export default async function createGroup(animator, controller, path, compositio
 		// create the instance of the group (each group should
 		// have it's own compose prop)
 		phase = 'creating group contents';
-		const group = await createInstance(animator, controller, path, layer);
+		const group = await createInstance(animator, controller, path, layer, root);
+
+		// handle cleanup
+		for (const child of group.children) {
+			if (child.dispose)
+				dispose = appendFunc(dispose, child.dispose);
+		}
 
 		// identify as a group
 		container.isGroup = group.isGroup = true;
@@ -52,6 +66,10 @@ export default async function createGroup(animator, controller, path, compositio
 
 		// match up shorthand names
 		normalizeProps(layer.props);
+
+		// perform simple expressions
+		phase = 'evaluating expressions';
+		applyExpressions(layer.props);
 
 		// create dynamically rendered properties
 		phase = 'creating dynamic properties';
@@ -81,7 +99,7 @@ export default async function createGroup(animator, controller, path, compositio
 		controller.register(container);
 
 		// attach the update function
-		return [{ displayObject: container, data: layer, update }];
+		return [{ displayObject: container, data: layer, update, dispose }];
 	}
 	catch(ex) {
 		console.error(`Failed to create group ${path} while ${phase}`);

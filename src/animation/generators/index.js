@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import cloneDeep from 'clone-deep';
-import { inheritFrom } from '../utils';
+import { inheritFrom, unpack } from '../utils';
 import { appendFunc, noop } from '../../utils';
 
 // types
@@ -20,11 +20,16 @@ export default async function createInstance(animator, controller, path, data, r
 	// unpack all data
 	const instance = cloneDeep(data);
 	inheritFrom(animator, data, instance, 'base');
-	delete data.base;
+	delete instance.base;
+
+	// // unpack data
+	// if ('debug' in instance)
+	// unpack(animator, relativeTo || data, instance, 'props');
 	
 	// create the instance container
 	const container = new PIXI.Container();
 	container.update = noop;
+	container.dispose = noop;
 	
 	// kick off creating each element
 	const pending = [ ];
@@ -92,6 +97,7 @@ export default async function createInstance(animator, controller, path, data, r
 
 		// add to the view
 		container.update = appendFunc(container.update, layer.update);
+		container.dispose = appendFunc(container.dispose, layer.dispose);
 		container.addChildAt(layer.displayObject, 0);
 
 		// if it's a mask, then apply to previous layers

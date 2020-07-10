@@ -41,6 +41,11 @@ export default class Controller {
 		}
 	}
 
+	// cleanup work
+	dispose = () => {
+		this.obj.dispose();
+	}
+
 	// list of all nested layers
 	emitters = [ ]
 	animations = [ ]

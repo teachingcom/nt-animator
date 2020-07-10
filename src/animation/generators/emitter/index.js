@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import * as Particles from 'pixi-particles';
-import { assignIf, assignDisplayObjectProps, applyDynamicProperties } from "../../assign";
+import { assignIf, assignDisplayObjectProps, applyDynamicProperties, applyExpressions } from "../../assign";
 import { isNumber, noop, setDefaults, isString, isArray, RAD } from "../../../utils";
 import { map } from "../../../utils/collection";
 import defineEmitterBounds from './bounds';
@@ -59,10 +59,15 @@ export default async function createEmitter(animator, controller, path, composit
 
 	// recursively built update function
 	let update = noop;
+	let dispose = noop;
 
 	// tracking setup phase
 	let phase = '';
 	try {
+
+		// perform simple expressions
+		phase = 'evaluating expressions';
+		applyExpressions(layer.props);
 
 		// gather all required images
 		phase = 'resolving images';
@@ -97,7 +102,6 @@ export default async function createEmitter(animator, controller, path, composit
 			emit.color = emit.colors;
 			emit.colors = undefined;
 		}
-
 
 		// update each property
 		for (const prop in emit) {
@@ -209,6 +213,7 @@ export default async function createEmitter(animator, controller, path, composit
 
 		// create the particle generator
 		const emitter = new Particles.Emitter(generator, textures, config);
+		dispose = () => emitter.destroy();
 		
 		// save some properties
 		emitter.config = config;
@@ -242,7 +247,7 @@ export default async function createEmitter(animator, controller, path, composit
 		controller.register(generator);
 
 		// attach the update function
-		return [{ displayObject: container, data: layer, update }];
+		return [{ displayObject: container, data: layer, update, dispose }];
 	}
 	catch(ex) {
 		console.error(`Failed to create emitter ${path} while ${phase}`);

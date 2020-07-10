@@ -39,6 +39,11 @@ export function isNumber(obj) {
 	return typeof obj === 'number' || obj instanceof Number;
 }
 
+/** checks if an object is a boolean value */
+export function isBoolean(obj) {
+	return obj === true || obj === false;
+}
+
 
 /** non-action function */
 export const noop = () => { };
@@ -63,6 +68,8 @@ export function setDefaults(target, prop, defaults) {
 }
 
 /** Merges two functions into sequential calls */
-export function appendFunc(orig, append) {
-	return (...args) => { orig(...args); append(...args); }
+export function appendFunc(baseFunction, includedFunction) {
+	return includedFunction
+		? (...args) => { baseFunction(...args); includedFunction(...args); }
+		: baseFunction;
 }

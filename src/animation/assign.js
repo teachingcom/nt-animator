@@ -56,6 +56,11 @@ export function applyDynamicProperties(obj, props) {
 	let hasDynamicProperties = false;
 	let update = noop;
 
+
+	obj.startingScaleY = obj.height;
+	// if (!obj.startingScaleY) {
+	// }
+
 	// check and map all dynamic props
 	for (const id in props) {
 		if (isDynamic(props[id])) {
@@ -66,6 +71,26 @@ export function applyDynamicProperties(obj, props) {
 			update = appendFunc(update, handler);
 			props[id] = DYNAMIC_PROPERTY_DEFAULTS[id];
 		}
+	}
+	
+	// check for special functions
+	if (props.lockWidth) {
+		hasDynamicProperties = true;
+
+		// create the update function
+		update = appendFunc(update, (obj, stage) => {			
+			obj.scale.x = Math.min(10, (obj.width / obj.getBounds().width) * (props.scaleX || 1)) * (stage.scaleX || 1);
+		});
+	}
+	
+	// check for special functions
+	if (props.lockHeight) {
+		hasDynamicProperties = true;
+
+		// create the update function
+		update = appendFunc(update, (obj, stage) => {			
+			obj.scale.y = Math.min(10, (obj.height / obj.getBounds().height) * (props.scaleY || 1)) * (stage.scaleY || 1);
+		});
 	}
 
 	// if nothing was found, just skip

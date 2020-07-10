@@ -35,7 +35,7 @@ export function unpack(animator, root, source, prop, limit = 0) {
 	}
 
 	// get the value to check
-	const obj = source[prop];
+	const obj = prop ? source[prop] : source;
 	
 	// check to resolve a path
 	if (isString(obj)) {

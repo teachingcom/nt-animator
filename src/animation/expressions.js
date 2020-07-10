@@ -1,4 +1,4 @@
-import { isArray, isString } from "../utils";
+import { isArray, isString, isNumber, isBoolean } from "../utils";
 import * as mappings from './mappings';
 
 // defaults to standard Math random function
@@ -18,6 +18,8 @@ const EXPRESSIONS = {
 	':%': percentOf,
 	':exp': expression,
 	':pick': pick,
+	':seq': sequence,
+	':sequence': sequence,
 	':range': range,
 };
 
@@ -79,20 +81,77 @@ export function pick(...args) {
 	return args[Math.floor(args.length * randomizer.random())];
 }
 
-// value is relative to the x position on screen
-export function relativeX(obj, stage, prop, min, max, toInt) {
-	const bounds = obj.getBounds();
-	const percent = (bounds.x / (stage.width / 2)) / 2;
-	const value = ((max - min) * percent) + min;
-	const mapping = mappings.lookup(prop);
-	mapping(obj, toInt ? 0 | value : value);
+// TODO: this is just a temp solution -- because each
+// sequence array would be unique, there isn't actually any way
+// to keep a shared sequence without an identity - this uses
+// the array as a string for a reference
+const SEQUENCES = { };
+export function sequence(...args) {
+
+	// create a key to allow for a shared list
+	const key = args.join('::');
+	let sequence = SEQUENCES[key];
+
+	// if not shared yet, share it now
+	if (!sequence) {
+		SEQUENCES[key] = sequence = args;
+		
+		// check if shuffled
+		if (sequence[0] === ':shuffle') {
+			sequence.shift();
+			shuffle(sequence);
+		}
+	}
+
+	// cycle the item
+	const selected = sequence.pop();
+	sequence.unshift(selected);
+	return selected;
+}
+
+// extract args
+export function getRelativeArgs(args) {
+	let [min, max] = args;
+	const param1 = args[2];
+	const param2 = args[3];
+	const flip = param1 === 'flip' || param2 === 'flip';
+	const toInt = param1 === 'int' || param2 === 'int';
+	return [min, max, flip, toInt]
 }
 
 // value is relative to the x position on screen
-export function relativeY(obj, stage, prop, min, max, toInt) {
+export function relativeX(obj, stage, prop, ...args) {
 	const bounds = obj.getBounds();
-	const percent = (bounds.y / (stage.height / 2)) / 2;
+	calculateRelative(obj, prop, args, bounds.x, stage.width);
+}
+
+// value is relative to the x position on screen
+export function relativeY(obj, stage, prop, ...args) {
+	const bounds = obj.getBounds();
+	calculateRelative(obj, prop, args, bounds.y, stage.height);
+}
+
+// calculates a relative position from bounds and a relative value
+function calculateRelative(obj, prop, args, at, relativeTo) {
+	const [min, max, flip, toInt] = getRelativeArgs(args);
+
+	// calculate the percent
+	let percent;
+
+	// flips at center
+	if (flip) {
+		const cx = relativeTo / 2;
+		percent = Math.abs((at - cx) / cx);
+	}
+	// full range
+	else {
+		percent = at / relativeTo;
+	}
+	
 	const value = ((max - min) * percent) + min;
+	if (!isFinite(value) || isNaN(value)) return;
+	
+	// assign the value
 	const mapping = mappings.lookup(prop);
 	mapping(obj, toInt ? 0 | value : value);
 }
@@ -191,4 +250,17 @@ export function createDynamicExpression(prop, source, ...args) {
 		const args = [].concat(params).concat(rest);
 		return handler.apply(null, args);
 	};
+}
+
+
+// shuffle an array without changing the reference
+function shuffle(items) {
+	const shuffled = [ ];
+	for (let i = items.length; i-- > 0;) {
+		const index = Math.floor(items.length & randomizer.random());
+		shuffled.push.apply(shuffled, items.splice(index, 1));
+	}
+
+	// repopulate the array
+	items.push.apply(items, shuffled);
 }

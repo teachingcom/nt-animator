@@ -48,8 +48,12 @@ export class Animator extends EventEmitter {
 	/** handles loading a single sprite */
 	getSprite = async (spritesheetId, id) => {
 		const canvas = await getSprite(this, spritesheetId, id);
-		// const texture = PIXI.Texture.from(canvas);
 		return PIXI.Sprite.from(canvas);
+	}
+
+	/** handles loading a sprite as a canvas */
+	getImage = async (spritesheetId, id) => {
+		return await getSprite(this, spritesheetId, id);
 	}
 
 	/** handles a custom type */
