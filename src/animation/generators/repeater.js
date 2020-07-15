@@ -10,7 +10,7 @@ import { getBoundsForRole } from '../../pixi/utils/get-bounds-of-role';
 import createInstance from '.';
 import { evaluateExpression } from '../expressions';
 import { normalizeProps, normalizeTo } from '../normalize';
-import { unpack } from '../utils';
+import { unpack, toRole } from '../utils';
 
 // default parameters to create a sprite
 const GROUP_DEFAULTS = {
@@ -46,7 +46,7 @@ export default async function createRepeater(animator, controller, path, composi
 		// with scaling done to fit within responsive containers
 		const container = new PIXI.Container();
 		container.isRepeater = true;
-		container.role = layer.role;
+		container.role = toRole(layer.role);
 		container.path = path;
 		
 		// create the instance of the group (each group should

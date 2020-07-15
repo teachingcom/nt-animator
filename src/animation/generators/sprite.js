@@ -8,6 +8,7 @@ import { setDefaults, noop } from '../../utils';
 import createTextureFromImage from '../resources/createTextureFromImage';
 import { map } from '../../utils/collection';
 import { normalizeProps } from '../normalize';
+import { toRole } from '../utils';
 
 // default parameters to create a sprite
 const SPRITE_DEFAULTS = {
@@ -31,45 +32,58 @@ export default async function createSprite(animator, controller, path, compositi
 	// tracking setup phase
 	let phase = '';
 	try {
+		const { type } = layer;
+		const isSprite = type === 'sprite';
+		const isMarker = !isSprite;
 
 		// NOTE: sprites are added a wrapper container on purpose
 		// because any animations that modify scale will interfere
 		// with scaling done to fit within responsive containers
 		const container = new PIXI.Container();
 		container.isSprite = true;
-		container.role = layer.role;
+		container.role = toRole(layer.role);
 		container.path = path;
 
-		// gather all required images
-		phase = 'resolving images';
-		const images = await resolveImages(animator, path, composition, layer);
+		// create the required sprite
+		let sprite;
+		if (isSprite) {
 
-		// create textures for each sprite
-		phase = 'generating textures';
-		let textures;
-		try {
-			textures = map(images, createTextureFromImage);
-		}
-		// had a problem
-		catch (ex) {
-			console.error(`Failed to create a texture for ${path}`, composition);
-			throw ex;
-		}
-		
-		// create the instance of the sprite
-		phase = 'creating sprite instance';
-		const isAnimated = images.length > 1;
-		const sprite = isAnimated
-			? new PIXI.AnimatedSprite(textures)
-			: new PIXI.Sprite(textures[0]);
+			// gather all required images
+			phase = 'resolving images';
+			const images = await resolveImages(animator, path, composition, layer);
 
-		// if animated, start playback
-		container.isAnimatedSprite = isAnimated;
-		if (isAnimated) {
-			sprite.play();
+			// create textures for each sprite
+			phase = 'generating textures';
+			let textures;
+			try {
+				textures = map(images, createTextureFromImage);
+			}
+			// had a problem
+			catch (ex) {
+				console.error(`Failed to create a texture for ${path}`, composition);
+				throw ex;
+			}
 			
-			// disposal
-			dispose = () => sprite.stop();
+			// create the instance of the sprite
+			phase = 'creating sprite instance';
+			const isAnimated = images.length > 1;
+			sprite = isAnimated
+				? new PIXI.AnimatedSprite(textures)
+				: new PIXI.Sprite(textures[0]);
+
+			// if animated, start playback
+			container.isAnimatedSprite = isAnimated;
+			if (isAnimated) {
+				sprite.play();
+				
+				// disposal
+				dispose = () => sprite.stop();
+			}
+		}
+		// markers act like normal sprites and are used to define
+		// bounds and positions without needing an actual sprite
+		else if (isMarker) {
+			sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
 		}
 
 		// set some default values
@@ -98,6 +112,15 @@ export default async function createSprite(animator, controller, path, compositi
 		// setup animations, if any
 		phase = 'creating animations';
 		createAnimation(animator, path, composition, layer, sprite);
+
+		// few additional adjustments
+		if (isMarker) {
+			sprite.alpha = layer.debug ? 0.5 : 0;
+			
+			// scale to match the preferred pixel sizes
+			sprite.scale.x = (layer.props?.width || sprite.width) / sprite.width;
+			sprite.scale.y = (layer.props?.height || sprite.height) / sprite.height;
+		}
 
 		// add to the view
 		container.zIndex = sprite.zIndex;

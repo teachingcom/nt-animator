@@ -34,6 +34,14 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
 		canvas.width = width;
 		canvas.height = height;
 
+		// // helper to display all textures and names
+		// if (displayAllTextures) {
+		// 	const label = document.createElement('h1');
+		// 	label.textContent = id;
+		// 	document.body.appendChild(label);
+		// 	document.body.appendChild(canvas);
+		// }
+
 		// extra data (debugging)
 		canvas.setAttribute('spritesheet', spritesheetId);
 		canvas.setAttribute('sprite', id);

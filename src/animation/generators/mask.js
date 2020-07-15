@@ -11,6 +11,7 @@ import { map } from '../../utils/collection';
 import { InvalidMaskBoundsException } from '../errors';
 import { createContext } from '../../utils/graphics';
 import { normalizeProps } from '../normalize';
+import { toRole } from '../utils';
 
 // definging sprites by size requires scale to be set - in the
 // event at user creates a mask that doesn't have an image, we're
@@ -47,7 +48,7 @@ export default async function createMask(animator, controller, path, composition
 		// with scaling done to fit within responsive containers
 		const container = new PIXI.Container();
 		container.isMask = true;
-		container.role = layer.role;
+		container.role = toRole(layer.role);
 		container.path = layer.path;
 		
 		// gather all required images

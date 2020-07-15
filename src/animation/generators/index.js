@@ -46,7 +46,7 @@ export default async function createInstance(animator, controller, path, data, r
 		
 		// sprite layers
 		const { type } = layer;
-		if (type === 'sprite') {
+		if (type === 'sprite' || type === 'marker') {
 			const sprite = createSprite(animator, controller, path, data, layer);
 			pending.push(sprite);
 		}

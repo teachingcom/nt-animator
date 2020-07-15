@@ -27,6 +27,11 @@ export function clone(animator, data, path) {
 	return cloneDeep(cloned);
 }
 
+/** converts a role string to an array */
+export function toRole(str) {
+	return (str || '').split(/ +/g);
+}
+
 
 /** expands out a node to clone all data refs */
 export function unpack(animator, root, source, prop, limit = 0) {

@@ -13,6 +13,7 @@ import resolveImages from "../../resources/resolveImages";
 import createTextureFromImage from '../../resources/createTextureFromImage';
 import { normalizeProps, normalizeEmit } from '../../normalize';
 import { toColor } from '../../converters';
+import { toRole } from '../../utils';
 
 // emitter property mappings
 const MAPPINGS = {
@@ -45,7 +46,7 @@ export default async function createEmitter(animator, controller, path, composit
 	// because any animations that modify scale will interfere
 	// with scaling done to fit within responsive containers
 	const container = new PIXI.Container();
-	container.role = layer.role;
+	container.role = toRole(layer.role);
 	container.path = path;
 
 	// TODO: this can't be done without creating

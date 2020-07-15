@@ -147,6 +147,12 @@ function calculateRelative(obj, prop, args, at, relativeTo) {
 	else {
 		percent = at / relativeTo;
 	}
+
+	// specials
+	if (prop === 'visible') {
+		obj.visible = percent > min && percent < max;
+		return;
+	}
 	
 	const value = ((max - min) * percent) + min;
 	if (!isFinite(value) || isNaN(value)) return;

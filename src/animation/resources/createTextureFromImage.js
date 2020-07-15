@@ -49,6 +49,8 @@ export default function createTextureFromImage(img) {
 	}
 	// handle the error
 	catch (ex) {
+		console.error(ex);
+
 		// the image has data to work with
 		if (sprite && spritesheet) {
 			console.error(`failed to load ${sprite} from source ${spritesheet}`);

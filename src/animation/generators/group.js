@@ -4,7 +4,7 @@ import createAnimation from './animation';
 
 import { assignDisplayObjectProps, evaluateDisplayObjectExpressions, applyDynamicProperties, applyExpressions } from '../assign';
 import { setDefaults, noop, appendFunc, isString } from '../../utils';
-import { unpack } from '../utils';
+import { unpack, toRole } from '../utils';
 
 // for creating child instances
 import createInstance from '.';
@@ -44,7 +44,7 @@ export default async function createGroup(animator, controller, path, compositio
 		// with scaling done to fit within responsive containers
 		const container = new PIXI.Container();
 		container.isGroup = true;
-		container.role = layer.role;
+		container.role = toRole(layer.role);
 		container.path = path;
 		
 		// create the instance of the group (each group should
