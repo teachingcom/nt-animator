@@ -71140,6 +71140,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 var IMAGE_RESOURCE_TIMEOUT = 3000; // resources that are currently loading
 
 var pending = {};
+var images = {};
 /** handles loading an external image url 
  * @param {string} url The url of the image to load
 */
@@ -71154,25 +71155,42 @@ function _loadImage() {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            if (!pending[url]) {
+            if (!(url in images)) {
               _context.next = 2;
               break;
             }
 
-            return _context.abrupt("return", new Promise(function (resolve, reject) {
-              pending[url].push([resolve, reject]);
-            }));
+            return _context.abrupt("return", images[url]);
 
           case 2:
+            if (!pending[url]) {
+              _context.next = 4;
+              break;
+            }
+
             return _context.abrupt("return", new Promise(function (resolve, reject) {
-              // if no active queue is available, start it now
-              pending[url] = [[resolve, reject]]; // create resolution actions
+              pending[url].push({
+                resolve: resolve,
+                reject: reject
+              });
+            }));
+
+          case 4:
+            return _context.abrupt("return", new Promise(function (resolve, reject) {
+              var img = document.createElement('img'); // if no active queue is available, start it now
+
+              pending[url] = [{
+                resolve: resolve,
+                reject: reject
+              }]; // create resolution actions
 
               var timeout = setTimeout(reject, IMAGE_RESOURCE_TIMEOUT);
 
-              var handle = function handle(action) {
+              var handle = function handle(success) {
                 return function () {
-                  // kick off each handler
+                  // all finished, resolve the result
+                  images[url] = img; // execute all waiting requests
+
                   try {
                     var _iterator = _createForOfIteratorHelper(pending[url]),
                         _step;
@@ -71180,7 +71198,8 @@ function _loadImage() {
                     try {
                       for (_iterator.s(); !(_step = _iterator.n()).done;) {
                         var handler = _step.value;
-                        handler[action](img);
+                        var action = handler[success ? 'resolve' : 'reject'];
+                        action(img);
                       }
                     } catch (err) {
                       _iterator.e(err);
@@ -71196,13 +71215,12 @@ function _loadImage() {
               }; // make the exernal image request
 
 
-              var img = document.createElement('img');
-              img.onload = handle(0);
-              img.onerror = handle(1);
+              img.onload = handle(true);
+              img.onerror = handle(false);
               img.src = url;
             }));
 
-          case 3:
+          case 5:
           case "end":
             return _context.stop();
         }
@@ -74771,7 +74789,8 @@ function _createEmitter() {
             phase = 'creating animation';
             (0, _animation.default)(animator, path, composition, layer, generator); // include this instance
 
-            controller.register(generator); // attach the update function
+            controller.register(generator);
+            console.log(generator, controller, layer); // attach the update function
 
             return _context.abrupt("return", [{
               displayObject: container,
@@ -74780,18 +74799,18 @@ function _createEmitter() {
               dispose: dispose
             }]);
 
-          case 74:
-            _context.prev = 74;
+          case 75:
+            _context.prev = 75;
             _context.t3 = _context["catch"](7);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
             throw _context.t3;
 
-          case 78:
+          case 79:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[7, 74], [15, 19]]);
+    }, _callee, null, [[7, 75], [15, 19]]);
   }));
   return _createEmitter.apply(this, arguments);
 }

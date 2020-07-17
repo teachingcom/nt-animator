@@ -2,34 +2,44 @@ const IMAGE_RESOURCE_TIMEOUT = 3000;
 
 // resources that are currently loading
 const pending = { };
+const images = { }
 
 /** handles loading an external image url 
  * @param {string} url The url of the image to load
 */
 export default async function loadImage(url) {
 
+	// check if already existing
+	if (url in images)
+		return images[url];
+
 	// if already waiting for a resource
 	if (pending[url]) {
 		return new Promise((resolve, reject) => {
-			pending[url].push([ resolve, reject ]);
+			pending[url].push({ resolve, reject });
 		});
 	}
 
 	// no pending request
 	return new Promise((resolve, reject) => {
+		const img = document.createElement('img');
 
 		// if no active queue is available, start it now
-		pending[url] = [[resolve, reject]];
+		pending[url] = [{resolve, reject}];
 
 		// create resolution actions
 		const timeout = setTimeout(reject, IMAGE_RESOURCE_TIMEOUT);
-		const handle = action =>
+		const handle = success =>
 			() => {
-				
-				// kick off each handler
+
+				// all finished, resolve the result
+				images[url] = img;
+
+				// execute all waiting requests
 				try {
 					for (const handler of pending[url]) {
-						handler[action](img);
+						const action = handler[success ? 'resolve' : 'reject'];
+						action(img);
 					}
 				}
 				// cleanup
@@ -40,9 +50,8 @@ export default async function loadImage(url) {
 			};
 
 		// make the exernal image request
-		const img = document.createElement('img');
-		img.onload = handle(0);
-		img.onerror = handle(1);
+		img.onload = handle(true);
+		img.onerror = handle(false);
 		img.src = url;
 	});
 }
