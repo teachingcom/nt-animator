@@ -21,10 +21,6 @@ export default async function createInstance(animator, controller, path, data, r
 	const instance = cloneDeep(data);
 	inheritFrom(animator, data, instance, 'base');
 	delete instance.base;
-
-	// // unpack data
-	// if ('debug' in instance)
-	// unpack(animator, relativeTo || data, instance, 'props');
 	
 	// create the instance container
 	const container = new PIXI.Container();

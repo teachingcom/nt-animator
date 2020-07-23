@@ -75686,10 +75686,7 @@ function _createInstance() {
 
             instance = (0, _cloneDeep.default)(data);
             (0, _utils.inheritFrom)(animator, data, instance, 'base');
-            delete instance.base; // // unpack data
-            // if ('debug' in instance)
-            // unpack(animator, relativeTo || data, instance, 'props');
-            // create the instance container
+            delete instance.base; // create the instance container
 
             container = new PIXI.Container();
             container.update = _utils2.noop;
