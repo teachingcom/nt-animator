@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 import cloneDeep from 'clone-deep';
-import { inheritFrom, unpack } from '../utils';
+import { inheritFrom } from '../utils';
 import { appendFunc, noop } from '../../utils';
 
 // types

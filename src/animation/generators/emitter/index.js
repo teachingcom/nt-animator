@@ -247,8 +247,6 @@ export default async function createEmitter(animator, controller, path, composit
 		// include this instance
 		controller.register(generator);
 
-		console.log(generator, controller, layer);
-
 		// attach the update function
 		return [{ displayObject: container, data: layer, update, dispose }];
 	}

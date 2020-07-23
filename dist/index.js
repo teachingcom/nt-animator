@@ -74789,8 +74789,7 @@ function _createEmitter() {
             phase = 'creating animation';
             (0, _animation.default)(animator, path, composition, layer, generator); // include this instance
 
-            controller.register(generator);
-            console.log(generator, controller, layer); // attach the update function
+            controller.register(generator); // attach the update function
 
             return _context.abrupt("return", [{
               displayObject: container,
@@ -74799,18 +74798,18 @@ function _createEmitter() {
               dispose: dispose
             }]);
 
-          case 75:
-            _context.prev = 75;
+          case 74:
+            _context.prev = 74;
             _context.t3 = _context["catch"](7);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
             throw _context.t3;
 
-          case 79:
+          case 78:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[7, 75], [15, 19]]);
+    }, _callee, null, [[7, 74], [15, 19]]);
   }));
   return _createEmitter.apply(this, arguments);
 }
