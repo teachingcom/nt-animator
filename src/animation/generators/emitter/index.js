@@ -32,6 +32,8 @@ const EMITTER_DEFAULTS = {
 	rotation: 0,
 	scaleY: 1,
 	scaleX: 1,
+	skewY: 0,
+	skewX: 0,
 	pivotX: 0.5,
 	pivotY: 0.5,
 	x: 0,
@@ -228,6 +230,12 @@ export default async function createEmitter(animator, controller, path, composit
 		// fix property names to account for aliases
 		normalizeProps(layer.props);
 		normalizeEmit(layer.emit);
+
+		// check for a delay
+		if (emit.delay > 0) {
+			emitter.emit = false;
+			setTimeout(() => emitter.emit = true, emit.delay);
+		}
 
 		// create dynamically rendered properties
 		phase = 'creating dynamic properties';

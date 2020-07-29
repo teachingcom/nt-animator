@@ -69979,7 +69979,11 @@ Object.defineProperty(exports, "__esModule", {
 exports.lookup = lookup;
 exports.MAPPINGS = void 0;
 
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
 var _converters = require("./converters");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // checks for emitter pivots
 function detectPivot(obj, value, relativeTo) {
@@ -70054,8 +70058,21 @@ var MAPPINGS = [// transforms
   apply: function apply(t, v) {
     return t.tint = v;
   }
-}, // { prop: 'hue', apply: (t, v) => t.tint = v },
-// layer pivoting
+}, // special RGBA tint -- the popmotion library
+// converts this to rgba(###) unfortunately, so we need to
+// convert it back to decimal
+{
+  prop: '__animated_tint__',
+  apply: function apply(t, v) {
+    var _v$replace$split = v.replace(/[^0-9\,\.]/g, '').split(/\,/g),
+        _v$replace$split2 = (0, _slicedToArray2.default)(_v$replace$split, 3),
+        r = _v$replace$split2[0],
+        g = _v$replace$split2[1],
+        b = _v$replace$split2[2];
+
+    t.tint = (0 | r) * 65536 + (0 | g) * 256 + (0 | b);
+  }
+}, // layer pivoting
 {
   prop: 'pivotX',
   apply: function apply(t, v) {
@@ -70129,7 +70146,7 @@ for (var _i = 0, _MAPPINGS = MAPPINGS; _i < _MAPPINGS.length; _i++) {
   var mapping = _MAPPINGS[_i];
   LOOKUP[mapping.prop] = mapping.apply;
 }
-},{"./converters":"animation/converters.js"}],"animation/expressions.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","./converters":"animation/converters.js"}],"animation/expressions.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -70900,10 +70917,10 @@ function applyExpressions(obj) {
 function applyDynamicProperties(obj, props) {
   if (!props) return;
   var hasDynamicProperties = false;
-  var update = _utils.noop;
-  obj.startingScaleY = obj.height; // if (!obj.startingScaleY) {
-  // }
-  // check and map all dynamic props
+  var update = _utils.noop; // handling locked scaled?
+  // TODOL is this needed?
+
+  obj.startingScaleY = obj.height; // check and map all dynamic props
 
   for (var id in props) {
     if ((0, _expressions.isDynamic)(props[id])) {
@@ -71034,8 +71051,12 @@ function createAnimation(animator, path, composition, layer, instance) {
             flip = _animation$flip === void 0 ? 0 : _animation$flip,
             _animation$elapsed = animation.elapsed,
             elapsed = _animation$elapsed === void 0 ? 0 : _animation$elapsed,
+            _animation$yoyo = animation.yoyo,
+            yoyo = _animation$yoyo === void 0 ? 0 : _animation$yoyo,
             _animation$duration = animation.duration,
             duration = _animation$duration === void 0 ? 1000 : _animation$duration,
+            _animation$delay = animation.delay,
+            delay = _animation$delay === void 0 ? 0 : _animation$delay,
             ease = animation.ease;
         var easings = (0, _converters.toEasing)(ease); // check for how to repeat the animation - if it's a flip then
         // we're just going to use the flip value
@@ -71045,12 +71066,16 @@ function createAnimation(animator, path, composition, layer, instance) {
         /* intentional */
         ? 'flip' : 'loop';
         var config = (0, _defineProperty2.default)({
-          timings: [],
+          times: [],
           values: keyframes || sequence || [],
           elapsed: (0, _expressions.evaluateExpression)(elapsed, duration) || 0,
           easings: easings,
           duration: duration
-        }, repeatType, (0, _utils2.isNumber)(repeating) ? repeating : Infinity); // copy all default values for the starting frame
+        }, repeatType, (0, _utils2.isNumber)(repeating) ? repeating : Infinity); // check for a few special flags
+
+        if (loop === false) config.loop = 0;
+        if (flip === false) config.flip = 0;
+        if (yoyo === false) config.yoyo = 0; // copy all default values for the starting frame
 
         var starting = {}; //TODO: create an update mapper to improve performance
         // create a timings parameter
@@ -71059,7 +71084,7 @@ function createAnimation(animator, path, composition, layer, instance) {
           var keyframe = config.values[_i]; // get the timing value, if any
 
           var timing = (0, _utils2.isNumber)(keyframe.at) ? keyframe.at : _i / config.values.length;
-          config.timings.push(timing); // remove any timing helpers, if any
+          config.times.push(timing); // remove any timing helpers, if any
 
           delete keyframe.at; // copy all default values
 
@@ -71073,35 +71098,56 @@ function createAnimation(animator, path, composition, layer, instance) {
               // for example, an emitter can change "emit.x" to tween a sub property
               // however, rotation is simply "rotation" and not "props.rotation"
               var isSubProperty = !!~prop.indexOf('.');
-              starting[prop] = isSubProperty ? (0, _deepGetSet.default)(layer, prop) : layer.props[prop];
+              starting[prop] = isSubProperty ? (0, _deepGetSet.default)(layer, prop) : layer.props[prop]; // without a value, there might be an error
+
+              if ((0, _utils2.isNil)(starting[prop])) {
+                console.warn("Missing starting animation prop for ".concat(prop, ". This might mean you're animating a property that doesn't have a known starting value"));
+              }
             } // evaluate any expressions
 
 
-            keyframe[prop] = (0, _expressions.evaluateExpression)(keyframe[prop], starting[prop]);
+            keyframe[prop] = (0, _expressions.evaluateExpression)(keyframe[prop], starting[prop]); // for tint, create new properties for the 
+            // transition and remove the keyframe prop. This
+            // will allow the animation keyframe update to 
+            // property animate the color change
+
+            if (prop === 'tint') {
+              keyframe.__animated_tint__ = decToHex(keyframe[prop]);
+              if (starting[prop]) starting.__animated_tint__ = decToHex(starting[prop]);
+              delete keyframe.tint;
+              delete starting.tint;
+            }
           }
         } // include the starting frame of animation
         // and also shift timings to account for
         // the extra frame of animation
 
 
-        config.values.unshift(starting);
-        config.timings.push(1); // create the animation that assigns
+        config.values.unshift(starting); // ensure starting and ending values
+
+        if (config.times[0] !== 0) config.times.unshift(0);
+        if (config.times.length === 1) config.times.push(1); // create the animation that assigns
         // property values
         // TODO: research the "merge" function for Popmotion
 
-        var handler = pop.keyframes(config);
-        var animator = handler.start({
-          update: function update(_update) {
-            return (0, _assign.assignDisplayObjectProps)(instance, _update);
-          }
-        }); // include a stop function
+        var activate = function activate() {
+          var handler = pop.keyframes(config);
+          var animator = handler.start({
+            update: function update(_update) {
+              return (0, _assign.assignDisplayObjectProps)(instance, _update);
+            }
+          }); // include a stop function
 
-        instance.hasAnimation = true;
-        instance.animation = {
-          stop: function stop() {
-            return animator.stop();
-          }
-        };
+          instance.hasAnimation = true;
+          instance.animation = {
+            stop: function stop() {
+              return animator.stop();
+            }
+          };
+        }; // activate as required
+
+
+        if (delay > 0) setTimeout(activate, delay);else activate();
       })();
     } // make it clear which animation failed
     catch (ex) {
@@ -71116,6 +71162,12 @@ function createAnimation(animator, path, composition, layer, instance) {
   }
 
   return updater;
+} // TODO: move else where
+
+
+function decToHex(dec) {
+  var val = dec.toString(16);
+  return ['#', "000000".substr(val.length), val].join('');
 }
 },{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","popmotion":"../node_modules/popmotion/dist/popmotion.es.js","deep-get-set":"../node_modules/deep-get-set/index.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js","../converters":"animation/converters.js"}],"animation/resources/loadImage.js":[function(require,module,exports) {
 "use strict";
@@ -71723,8 +71775,11 @@ var SPRITE_DEFAULTS = {
   rotation: 0,
   scaleY: 1,
   scaleX: 1,
+  skewY: 0,
+  skewX: 0,
   pivotX: 0.5,
   pivotY: 0.5,
+  tint: 0xffffff,
   x: 0,
   y: 0
 };
@@ -71736,7 +71791,7 @@ function createSprite(_x, _x2, _x3, _x4, _x5) {
 
 function _createSprite() {
   _createSprite = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, composition, layer) {
-    var update, dispose, phase, type, isSprite, isMarker, container, sprite, images, textures, isAnimated, _layer$props, _layer$props2;
+    var update, dispose, phase, type, isSprite, isMarker, container, sprite, _layer$props, images, textures, isAnimated, _layer$props2, _layer$props3;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -71760,7 +71815,7 @@ function _createSprite() {
             container.path = path; // create the required sprite
 
             if (!isSprite) {
-              _context.next = 32;
+              _context.next = 33;
               break;
             }
 
@@ -71788,7 +71843,10 @@ function _createSprite() {
             // create the instance of the sprite
             phase = 'creating sprite instance';
             isAnimated = images.length > 1;
-            sprite = isAnimated ? new PIXI.AnimatedSprite(textures) : new PIXI.Sprite(textures[0]); // if animated, start playback
+            sprite = isAnimated ? new PIXI.AnimatedSprite(textures) : new PIXI.Sprite(textures[0]); // set other values
+            // console.log('control loo[', layer.props>)
+
+            sprite.loop = ((_layer$props = layer.props) === null || _layer$props === void 0 ? void 0 : _layer$props.loop) !== false; // if animated, start playback
 
             container.isAnimatedSprite = isAnimated;
 
@@ -71800,17 +71858,17 @@ function _createSprite() {
               };
             }
 
-            _context.next = 33;
+            _context.next = 34;
             break;
 
-          case 32:
+          case 33:
             // markers act like normal sprites and are used to define
             // bounds and positions without needing an actual sprite
             if (isMarker) {
               sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
             }
 
-          case 33:
+          case 34:
             // set some default values
             sprite.pivot.x = sprite.width / 2;
             sprite.pivot.y = sprite.height / 2; // sync up shorthand names
@@ -71835,8 +71893,8 @@ function _createSprite() {
             if (isMarker) {
               sprite.alpha = layer.debug ? 0.5 : 0; // scale to match the preferred pixel sizes
 
-              sprite.scale.x = (((_layer$props = layer.props) === null || _layer$props === void 0 ? void 0 : _layer$props.width) || sprite.width) / sprite.width;
-              sprite.scale.y = (((_layer$props2 = layer.props) === null || _layer$props2 === void 0 ? void 0 : _layer$props2.height) || sprite.height) / sprite.height;
+              sprite.scale.x = (((_layer$props2 = layer.props) === null || _layer$props2 === void 0 ? void 0 : _layer$props2.width) || sprite.width) / sprite.width;
+              sprite.scale.y = (((_layer$props3 = layer.props) === null || _layer$props3 === void 0 ? void 0 : _layer$props3.height) || sprite.height) / sprite.height;
             } // add to the view
 
 
@@ -71852,18 +71910,18 @@ function _createSprite() {
               dispose: dispose
             }]);
 
-          case 53:
-            _context.prev = 53;
+          case 54:
+            _context.prev = 54;
             _context.t1 = _context["catch"](3);
             console.error("Failed to create sprite ".concat(path, " while ").concat(phase));
             throw _context.t1;
 
-          case 57:
+          case 58:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[3, 53], [17, 21]]);
+    }, _callee, null, [[3, 54], [17, 21]]);
   }));
   return _createSprite.apply(this, arguments);
 }
@@ -74547,6 +74605,8 @@ var EMITTER_DEFAULTS = {
   rotation: 0,
   scaleY: 1,
   scaleX: 1,
+  skewY: 0,
+  skewX: 0,
   pivotX: 0.5,
   pivotY: 0.5,
   x: 0,
@@ -74776,7 +74836,15 @@ function _createEmitter() {
             generator.isEmitter = true; // fix property names to account for aliases
 
             (0, _normalize.normalizeProps)(layer.props);
-            (0, _normalize.normalizeEmit)(layer.emit); // create dynamically rendered properties
+            (0, _normalize.normalizeEmit)(layer.emit); // check for a delay
+
+            if (emit.delay > 0) {
+              emitter.emit = false;
+              setTimeout(function () {
+                return emitter.emit = true;
+              }, emit.delay);
+            } // create dynamically rendered properties
+
 
             phase = 'creating dynamic properties';
             (0, _assign2.applyDynamicProperties)(generator, layer.props); // set container defaults
@@ -74798,18 +74866,18 @@ function _createEmitter() {
               dispose: dispose
             }]);
 
-          case 74:
-            _context.prev = 74;
+          case 75:
+            _context.prev = 75;
             _context.t3 = _context["catch"](7);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
             throw _context.t3;
 
-          case 78:
+          case 79:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[7, 74], [15, 19]]);
+    }, _callee, null, [[7, 75], [15, 19]]);
   }));
   return _createEmitter.apply(this, arguments);
 }

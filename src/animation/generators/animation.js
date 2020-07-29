@@ -2,7 +2,7 @@ import * as pop from 'popmotion';
 import deep from 'deep-get-set';
 import cloneDeep from "clone-deep";
 import { unpack, inheritFrom } from "../utils";
-import { isNumber, isArray, noop, appendFunc } from "../../utils";
+import { isNumber, isArray, noop, isNil } from "../../utils";
 import { assignDisplayObjectProps } from '../assign';
 import { evaluateExpression } from '../expressions';
 import { toEasing } from '../converters';
@@ -51,7 +51,9 @@ export default function createAnimation(animator, path, composition, layer, inst
 				loop = Infinity,
 				flip = 0,
 				elapsed = 0,
+				yoyo = 0,
 				duration = 1000,
+				delay = 0,
 				ease
 			} = animation;
 			const easings = toEasing(ease);
@@ -61,7 +63,7 @@ export default function createAnimation(animator, path, composition, layer, inst
 			const repeating = !!flip ? flip : loop;
 			const repeatType = flip === true /* intentional */ ? 'flip' : 'loop';
 			const config = {
-				timings: [ ],
+				times: [ ],
 				values: keyframes || sequence || [ ],
 				elapsed: evaluateExpression(elapsed, duration) || 0,
 				easings,
@@ -75,6 +77,11 @@ export default function createAnimation(animator, path, composition, layer, inst
 				[repeatType]: isNumber(repeating) ? repeating : Infinity
 			};
 
+			// check for a few special flags
+			if (loop === false) config.loop = 0;
+			if (flip === false) config.flip = 0;
+			if (yoyo === false) config.yoyo = 0;
+
 			// copy all default values for the starting frame
 			const starting = { };
 
@@ -86,7 +93,7 @@ export default function createAnimation(animator, path, composition, layer, inst
 
 				// get the timing value, if any
 				const timing = isNumber(keyframe.at) ? keyframe.at : i / config.values.length;
-				config.timings.push(timing);
+				config.times.push(timing);
 
 				// remove any timing helpers, if any
 				delete keyframe.at;
@@ -105,10 +112,30 @@ export default function createAnimation(animator, path, composition, layer, inst
 						// however, rotation is simply "rotation" and not "props.rotation"
 						const isSubProperty = !!~prop.indexOf('.');
 						starting[prop] = isSubProperty ? deep(layer, prop) : layer.props[prop];
+
+						// without a value, there might be an error
+						if (isNil(starting[prop])) {
+							console.warn(`Missing starting animation prop for ${prop}. This might mean you're animating a property that doesn't have a known starting value`);
+						}
 					}
 
 					// evaluate any expressions
 					keyframe[prop] = evaluateExpression(keyframe[prop], starting[prop]);
+
+					// for tint, create new properties for the 
+					// transition and remove the keyframe prop. This
+					// will allow the animation keyframe update to 
+					// property animate the color change
+					if (prop === 'tint') {
+						keyframe.__animated_tint__ = decToHex(keyframe[prop]);
+						
+						if (starting[prop])
+							starting.__animated_tint__ = decToHex(starting[prop]);
+
+						delete keyframe.tint;
+						delete starting.tint;
+					}
+
 				}
 			}
 
@@ -116,21 +143,32 @@ export default function createAnimation(animator, path, composition, layer, inst
 			// and also shift timings to account for
 			// the extra frame of animation
 			config.values.unshift(starting);
-			config.timings.push(1);
+			
+			// ensure starting and ending values
+			if (config.times[0] !== 0)
+				config.times.unshift(0);
+			if (config.times.length === 1)
+				config.times.push(1);
 
 			// create the animation that assigns
 			// property values
 			// TODO: research the "merge" function for Popmotion
-			const handler = pop.keyframes(config);
-			const animator = handler.start({
-				update: update => assignDisplayObjectProps(instance, update)
-			});
+			const activate = () => {
+				const handler = pop.keyframes(config);
+				const animator = handler.start({
+					update: update => assignDisplayObjectProps(instance, update)
+				});
 
-			// include a stop function
-			instance.hasAnimation = true;
-			instance.animation = { 
-				stop: () => animator.stop()
-			};
+				// include a stop function
+				instance.hasAnimation = true;
+				instance.animation = { 
+					stop: () => animator.stop()
+				};
+			}
+
+			// activate as required
+			if (delay > 0) setTimeout(activate, delay);
+			else activate();
 
 		}
 		// make it clear which animation failed
@@ -146,4 +184,11 @@ export default function createAnimation(animator, path, composition, layer, inst
 	}
 
 	return updater;
+}
+
+
+// TODO: move else where
+function decToHex(dec) {
+	const val = dec.toString(16);
+	return [ '#', `000000`.substr(val.length), val].join('');
 }

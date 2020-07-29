@@ -56,10 +56,9 @@ export function applyDynamicProperties(obj, props) {
 	let hasDynamicProperties = false;
 	let update = noop;
 
-
+	// handling locked scaled?
+	// TODOL is this needed?
 	obj.startingScaleY = obj.height;
-	// if (!obj.startingScaleY) {
-	// }
 
 	// check and map all dynamic props
 	for (const id in props) {

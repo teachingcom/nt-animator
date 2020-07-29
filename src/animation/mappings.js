@@ -35,8 +35,14 @@ export const MAPPINGS = [
 	{ prop: 'blendMode', apply: (t, v) => t.blendMode = toBlendMode(v) },
 	{ prop: 'tint', apply: (t, v) => t.tint = v },
 
-	// { prop: 'hue', apply: (t, v) => t.tint = v },
-	
+	// special RGBA tint -- the popmotion library
+	// converts this to rgba(###) unfortunately, so we need to
+	// convert it back to decimal
+	{ prop: '__animated_tint__', apply: (t, v) => {
+		const [r, g, b] = v.replace(/[^0-9\,\.]/g, '').split(/\,/g);
+		t.tint = ((0 | r) * 65536) + ((0 | g) * 256) + (0 | b);
+	}},
+
 	// layer pivoting
 	{ prop: 'pivotX', apply: (t, v) => t.pivot.x = detectPivot(t, v, t.width) },
 	{ prop: 'pivotY', apply: (t, v) => t.pivot.y = detectPivot(t, v, t.height) },

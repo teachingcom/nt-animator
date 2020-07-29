@@ -16,8 +16,11 @@ const SPRITE_DEFAULTS = {
 	rotation: 0,
 	scaleY: 1,
 	scaleX: 1,
+	skewY: 0,
+	skewX: 0,
 	pivotX: 0.5,
 	pivotY: 0.5,
+	tint: 0xffffff,
 	x: 0,
 	y: 0
 };
@@ -70,6 +73,10 @@ export default async function createSprite(animator, controller, path, compositi
 			sprite = isAnimated
 				? new PIXI.AnimatedSprite(textures)
 				: new PIXI.Sprite(textures[0]);
+
+			// set other values
+			// console.log('control loo[', layer.props>)
+			sprite.loop = layer.props?.loop !== false;
 
 			// if animated, start playback
 			container.isAnimatedSprite = isAnimated;
