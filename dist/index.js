@@ -71123,12 +71123,26 @@ function createAnimation(animator, path, composition, layer, instance) {
         // the extra frame of animation
 
 
-        config.values.unshift(starting); // ensure starting and ending values
+        config.values.unshift(starting); // this section is used to correct animation
+        // timing errors - this could grow unweildy so 
+        // consider throwing errors for future animation
+        // errors as opposed to fixing in code
 
-        if (config.times[0] !== 0) config.times.unshift(0);
-        if (config.times.length === 1) config.times.push(1); // create the animation that assigns
+        if (config.times.length < config.values.length) {
+          var first = config.times[0]; // if the first value is not a zero, then we'll
+          // assume the animation is missing it's start time
+
+          if (first !== 0) {
+            config.times.unshift(0);
+          } // if it's already set to zero, but there
+          // doesn't appear to be an ending time
+          else if (first === 0) {
+              config.times.push(1);
+            }
+        } // create the animation that assigns
         // property values
         // TODO: research the "merge" function for Popmotion
+
 
         var activate = function activate() {
           var handler = pop.keyframes(config);
@@ -75945,17 +75959,16 @@ var Controller = /*#__PURE__*/function () {
     var _this = this;
 
     (0, _classCallCheck2.default)(this, Controller);
-    (0, _defineProperty2.default)(this, "stopEmitters", function () {
-      var emitters = _this.emitters;
+    (0, _defineProperty2.default)(this, "stopAnimations", function () {
+      var animations = _this.animations;
 
-      var _iterator = _createForOfIteratorHelper(emitters),
+      var _iterator = _createForOfIteratorHelper(animations),
           _step;
 
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var instance = _step.value;
-          var emitter = instance.emitter;
-          emitter.emit = false;
+          var animation = _step.value;
+          animation.stop();
         }
       } catch (err) {
         _iterator.e(err);
@@ -75963,7 +75976,7 @@ var Controller = /*#__PURE__*/function () {
         _iterator.f();
       }
     });
-    (0, _defineProperty2.default)(this, "activateEmitters", function () {
+    (0, _defineProperty2.default)(this, "stopEmitters", function () {
       var emitters = _this.emitters;
 
       var _iterator2 = _createForOfIteratorHelper(emitters),
@@ -75973,10 +75986,7 @@ var Controller = /*#__PURE__*/function () {
         for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
           var instance = _step2.value;
           var emitter = instance.emitter;
-          var config = emitter.config;
-          emitter.autoUpdate = true;
-          emitter.lifetime = (0, _utils.isNumber)(config.duration) ? config.duration / 1000 : undefined;
-          emitter.emit = true;
+          emitter.emit = false;
         }
       } catch (err) {
         _iterator2.e(err);
@@ -75984,8 +75994,47 @@ var Controller = /*#__PURE__*/function () {
         _iterator2.f();
       }
     });
+    (0, _defineProperty2.default)(this, "activateEmitters", function () {
+      var emitters = _this.emitters;
+
+      var _iterator3 = _createForOfIteratorHelper(emitters),
+          _step3;
+
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var instance = _step3.value;
+          var emitter = instance.emitter;
+          var config = emitter.config;
+          emitter.autoUpdate = true;
+          emitter.lifetime = (0, _utils.isNumber)(config.duration) ? config.duration / 1000 : undefined;
+          emitter.emit = true;
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+    });
     (0, _defineProperty2.default)(this, "dispose", function () {
-      _this.obj.dispose();
+      var objects = _this.objects;
+
+      _this.stopAnimations();
+
+      _this.stopEmitters();
+
+      var _iterator4 = _createForOfIteratorHelper(objects),
+          _step4;
+
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+          var obj = _step4.value;
+          if (obj.dispose) obj.dispose();
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
     });
     (0, _defineProperty2.default)(this, "emitters", []);
     (0, _defineProperty2.default)(this, "animations", []);
@@ -75993,6 +76042,7 @@ var Controller = /*#__PURE__*/function () {
     (0, _defineProperty2.default)(this, "masks", []);
     (0, _defineProperty2.default)(this, "groups", []);
     (0, _defineProperty2.default)(this, "repeaters", []);
+    (0, _defineProperty2.default)(this, "objects", []);
   }
 
   (0, _createClass2.default)(Controller, [{
@@ -76408,7 +76458,38 @@ var DetatchedContainer = /*#__PURE__*/function (_PIXI$Container) {
 }(PIXI.Container);
 
 exports.default = DetatchedContainer;
-},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/get":"../node_modules/@babel/runtime/helpers/get.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js"}],"index.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/get":"../node_modules/@babel/runtime/helpers/get.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js"}],"pixi/utils/remove.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.removeDisplayObject = removeDisplayObject;
+
+/** helper function to remove all child objects */
+function removeDisplayObject(obj) {
+  var children = obj.children || []; // remove backwards
+
+  for (var i = children.length; i-- > 0;) {
+    var _child$children;
+
+    var child = children[i]; // dispose children first, if any
+
+    if (((_child$children = child.children) === null || _child$children === void 0 ? void 0 : _child$children.length) > 0) removeDisplayObject(child);
+  } // cleanup, if possible
+
+
+  if (obj.controller) {
+    obj.controller.dispose();
+  } // remove itself, if possible
+
+
+  if (obj.parent) {
+    var index = obj.parent.getChildIndex(obj);
+    if (!!~index) obj.parent.removeChildAt(index);
+  }
+}
+},{}],"index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -76450,6 +76531,12 @@ Object.defineProperty(exports, "createContext", {
     return _graphics.createContext;
   }
 });
+Object.defineProperty(exports, "removeDisplayObject", {
+  enumerable: true,
+  get: function () {
+    return _remove.removeDisplayObject;
+  }
+});
 exports.PIXI = void 0;
 
 var _animation = require("./animation");
@@ -76470,6 +76557,8 @@ var _findObjectsOfRole = require("./pixi/utils/find-objects-of-role");
 
 var _graphics = require("./utils/graphics");
 
+var _remove = require("./pixi/utils/remove");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // animation helper
@@ -76481,5 +76570,5 @@ var PIXI = {
 }; // helpful utils
 
 exports.PIXI = PIXI;
-},{"./animation":"animation/index.js","./pixi/responsive":"pixi/responsive.js","./pixi/stage":"pixi/stage.js","./pixi/detatched-container":"pixi/detatched-container.js","./animation/resources/loadImage":"animation/resources/loadImage.js","./common/event-emitter":"common/event-emitter.js","./pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js","./pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","./utils/graphics":"utils/graphics.js"}]},{},["index.js"], null)
+},{"./animation":"animation/index.js","./pixi/responsive":"pixi/responsive.js","./pixi/stage":"pixi/stage.js","./pixi/detatched-container":"pixi/detatched-container.js","./animation/resources/loadImage":"animation/resources/loadImage.js","./common/event-emitter":"common/event-emitter.js","./pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js","./pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","./utils/graphics":"utils/graphics.js","./pixi/utils/remove":"pixi/utils/remove.js"}]},{},["index.js"], null)
 //# sourceMappingURL=/index.js.map

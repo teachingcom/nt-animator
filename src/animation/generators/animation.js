@@ -143,12 +143,26 @@ export default function createAnimation(animator, path, composition, layer, inst
 			// and also shift timings to account for
 			// the extra frame of animation
 			config.values.unshift(starting);
-			
-			// ensure starting and ending values
-			if (config.times[0] !== 0)
-				config.times.unshift(0);
-			if (config.times.length === 1)
-				config.times.push(1);
+
+			// this section is used to correct animation
+			// timing errors - this could grow unweildy so 
+			// consider throwing errors for future animation
+			// errors as opposed to fixing in code
+			if (config.times.length < config.values.length) {
+				const first = config.times[0];
+
+				// if the first value is not a zero, then we'll
+				// assume the animation is missing it's start time
+				if (first !== 0) {
+					config.times.unshift(0);
+				}
+				// if it's already set to zero, but there
+				// doesn't appear to be an ending time
+				else if (first === 0) {
+					config.times.push(1);
+				}
+
+			}
 
 			// create the animation that assigns
 			// property values

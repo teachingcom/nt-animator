@@ -22,6 +22,13 @@ export default class Controller {
 			this.animations.push(obj.animation);
 	}
 
+	stopAnimations = () => {
+		const { animations } = this;
+		for (const animation of animations) {
+			animation.stop();
+		}
+	}
+
 	stopEmitters = () => {
 		const { emitters } = this;
 		for (const instance of emitters) {
@@ -43,7 +50,12 @@ export default class Controller {
 
 	// cleanup work
 	dispose = () => {
-		this.obj.dispose();
+		const { objects } = this;
+		this.stopAnimations();
+		this.stopEmitters();
+		for (const obj of objects) {
+			if (obj.dispose) obj.dispose();
+		}
 	}
 
 	// list of all nested layers
@@ -53,5 +65,6 @@ export default class Controller {
 	masks = [ ]
 	groups = [ ]
 	repeaters = [ ]
+	objects = [ ]
 
 }
