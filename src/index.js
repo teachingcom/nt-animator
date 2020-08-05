@@ -1,3 +1,5 @@
+// skips hello messages for PIXI
+import './pixi/utils/skip-hello';
 
 // animation helper
 export { Animator } from './animation';
