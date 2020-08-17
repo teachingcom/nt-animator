@@ -9,6 +9,7 @@ import { toEasing } from '../converters';
 
 // creates an animation
 export default function createAnimation(animator, path, composition, layer, instance) {
+	// return noop;
 
 	// check for special debugging flags
 	if (layer.animate === false) return;

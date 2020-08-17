@@ -21,7 +21,7 @@ export function getBoundsForRole(container, role, useGlobal = false) {
 	for (const match of roles) {
 
 		// get the bounding box
-		let bounds = useGlobal ? match.getBounds() : match.getLocalBounds();
+		let bounds = useGlobal ? match.getBounds(false) : match.getLocalBounds(false);
 		
 		// if not using global, still convert the points to be
 		// relative to the screen

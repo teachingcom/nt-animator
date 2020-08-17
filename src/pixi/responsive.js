@@ -42,18 +42,25 @@ export default class ResponsiveContainer extends PIXI.Container {
 
 	/** match the scaling as required */
 	render(...args) {
-		// TODO -- optimise and check for a timestamp
-		// timestamp changes with resizes
 
+		// check if the stage scale has changed
 		const stage = ResponsiveStage.findResponsiveStage(this);
-		const { width, height, scaleX, scaleY } = stage;
-		const { x, y } = this.scale;
+		if (stage.lastUpdate !== this._resizedTimestamp) {
+			this._resizedTimestamp = stage.lastUpdate;
+			
+			// update the scaling
+			const { scaleX, scaleY } = stage;
+			const { x, y } = this.scale;
 
-		// update values
-		this.x = this._relativeX * width;
-		this.y = this._relativeY * height;
-		this.scale.x = ((x / Math.abs(x)) * scaleX) + this.scaleX;
-		this.scale.y = ((y / Math.abs(y)) * scaleY) + this.scaleY;
+			// update values
+			this.scale.x = ((x / Math.abs(x)) * scaleX) + this.scaleX;
+			this.scale.y = ((y / Math.abs(y)) * scaleY) + this.scaleY;
+		}
+		
+		// match their relative positions
+		// const { width, height } = stage;
+		this.x = this._relativeX * stage._definedWidth;
+		this.y = this._relativeY * stage._definedHeight;
 
 		// perform the render
 		super.render(...args);

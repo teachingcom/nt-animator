@@ -14,6 +14,8 @@ export default async function loadSpritesheet(animator, spritesheetId, spriteshe
 }
 
 // create individual sprites from an image
+// TODO: consider converting to async or JIT since it seems
+// to be a little slow on chromebooks
 function generateSprites(image, spritesheetId, spritesheet, ext) {
 
 	// create each sprite slice
