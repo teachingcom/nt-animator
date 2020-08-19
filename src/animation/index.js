@@ -57,8 +57,8 @@ export class Animator extends EventEmitter {
 	}
 
 	/** handles a custom type */
-	install = (plugin, customizer) => {
-		this.plugins[plugin] = customizer;
+	install = (plugin, customizer, params) => {
+		this.plugins[plugin] = { customizer, params };
 	}
 
 	/** attempts to find data for a path */

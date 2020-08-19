@@ -76,6 +76,3 @@ Particles.Particle.prototype.init = function (...args) {
 
 };
 
-
-
-

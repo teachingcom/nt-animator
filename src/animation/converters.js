@@ -25,6 +25,7 @@ export const toRelative = (value, relativeTo) => {
 // misc values
 export const toRotation = rotation => rotation * RAD;
 export const toBlendMode = mode => PIXI.BLEND_MODES[mode.toUpperCase()] || PIXI.BLEND_MODES.NORMAL;
+// export const toBlendMode = mode => PIXI.BLEND_MODES.NORMAL;
 export const toAnimationSpeed = fps => fps / 60;
 
 

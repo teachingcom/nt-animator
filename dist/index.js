@@ -74782,7 +74782,8 @@ exports.toRotation = toRotation;
 
 var toBlendMode = function toBlendMode(mode) {
   return PIXI.BLEND_MODES[mode.toUpperCase()] || PIXI.BLEND_MODES.NORMAL;
-};
+}; // export const toBlendMode = mode => PIXI.BLEND_MODES.NORMAL;
+
 
 exports.toBlendMode = toBlendMode;
 
@@ -75861,7 +75862,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 // creates an animation
 function createAnimation(animator, path, composition, layer, instance) {
-  // return noop;
   // check for special debugging flags
   if (layer.animate === false) return; // find the source of animations
 
@@ -80575,6 +80575,8 @@ exports.default = createInstance;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
 var PIXI = _interopRequireWildcard(require("pixi.js"));
@@ -80603,7 +80605,10 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// types
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
 // creates an instance of a car
 function createInstance(_x, _x2, _x3, _x4, _x5) {
   return _createInstance.apply(this, arguments);
@@ -80611,7 +80616,7 @@ function createInstance(_x, _x2, _x3, _x4, _x5) {
 
 function _createInstance() {
   _createInstance = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, data, relativeTo) {
-    var instance, container, pending, i, layer, type, sprite, emitter, repeated, group, mask, plugin, custom, composite, layers, _i, _layer, didSetMask, j, target;
+    var instance, container, pending, i, layer, type, sprite, emitter, repeated, group, mask, _animator$plugins$typ, customizer, params, custom, composite, layers, _i, _layer, didSetMask, j, target;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -80676,10 +80681,12 @@ function _createInstance() {
                     } // not a valid type
                     else {
                         // check for plugins
-                        plugin = animator.plugins[type];
+                        _animator$plugins$typ = animator.plugins[type], customizer = _animator$plugins$typ.customizer, params = _animator$plugins$typ.params;
 
-                        if (plugin) {
-                          custom = plugin(animator, controller, path, data, layer);
+                        if (customizer) {
+                          custom = customizer(animator, controller, path, _objectSpread(_objectSpread({}, data), {}, {
+                            params: params
+                          }), layer);
                           pending.push(custom);
                         } // unable to create this type
                         else {
@@ -80784,7 +80791,7 @@ function _createInstance() {
   }));
   return _createInstance.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js"}],"animation/generators/controller.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js"}],"animation/generators/controller.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -81056,8 +81063,11 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
         return _ref3.apply(this, arguments);
       };
     }());
-    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "install", function (plugin, customizer) {
-      _this.plugins[plugin] = customizer;
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "install", function (plugin, customizer, params) {
+      _this.plugins[plugin] = {
+        customizer: customizer,
+        params: params
+      };
     });
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "lookup", function (resource) {
       var path = (0, _path.parsePath)(resource);

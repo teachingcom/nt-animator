@@ -12,7 +12,7 @@ import createAnimation from '../animation';
 import resolveImages from "../../resources/resolveImages";
 import createTextureFromImage from '../../resources/createTextureFromImage';
 import { normalizeProps, normalizeEmit } from '../../normalize';
-import { toColor } from '../../converters';
+import { toColor, toBlendMode } from '../../converters';
 import { toRole } from '../../utils';
 
 // emitter property mappings
@@ -43,7 +43,7 @@ const EMITTER_DEFAULTS = {
 
 /** creates an emitter instance */
 export default async function createEmitter(animator, controller, path, composition, layer) {
-
+	
 	// NOTE: emitters are added to one more container on purpose
 	// because any animations that modify scale will interfere
 	// with scaling done to fit within responsive containers
