@@ -3,6 +3,7 @@ import './pixi/utils/skip-hello';
 
 // animation helper
 export { Animator } from './animation';
+export { default as animate } from './animate';
 
 // PIXI helpers
 import ResponsiveContainer from './pixi/responsive';

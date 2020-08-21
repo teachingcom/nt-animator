@@ -237,6 +237,11 @@ export default async function createEmitter(animator, controller, path, composit
 			setTimeout(() => emitter.emit = true, emit.delay);
 		}
 
+		// don't play right away
+		if (emit.autoplay === false) {
+			emitter.emit = false;
+		}
+
 		// create dynamically rendered properties
 		phase = 'creating dynamic properties';
 		applyDynamicProperties(generator, layer.props);

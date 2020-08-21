@@ -1,4 +1,5 @@
-import * as pop from 'popmotion';
+// import * as pop from 'popmotion';
+import anime from 'animejs/lib/anime.es.js';
 import deep from 'deep-get-set';
 import cloneDeep from "clone-deep";
 import { unpack, inheritFrom } from "../utils";
@@ -6,6 +7,7 @@ import { isNumber, isArray, noop, isNil } from "../../utils";
 import { assignDisplayObjectProps } from '../assign';
 import { evaluateExpression } from '../expressions';
 import { toEasing } from '../converters';
+import animate from '../../animate';
 
 // creates an animation
 export default function createAnimation(animator, path, composition, layer, instance) {
@@ -78,9 +80,9 @@ export default function createAnimation(animator, path, composition, layer, inst
 			};
 
 			// check for a few special flags
-			if (loop === false) config.loop = 0;
-			if (flip === false) config.flip = 0;
-			if (yoyo === false) config.yoyo = 0;
+			if (loop === false) config.loop = false;
+			if (flip === false) config.flip = false;
+			if (yoyo === false) config.yoyo = false;
 
 			// copy all default values for the starting frame
 			const starting = { };
@@ -164,25 +166,13 @@ export default function createAnimation(animator, path, composition, layer, inst
 
 			}
 
-			// create the animation that assigns
-			// property values
-			// TODO: research the "merge" function for Popmotion
-			const activate = () => {
-				const handler = pop.keyframes(config);
-				const animator = handler.start({
-					update: update => assignDisplayObjectProps(instance, update)
-				});
-
-				// include a stop function
-				instance.hasAnimation = true;
-				instance.animation = { 
-					stop: () => animator.stop()
-				};
-			}
-
-			// activate as required
-			if (delay > 0) setTimeout(activate, delay);
-			else activate();
+			// set the config values
+			config.update = props => assignDisplayObjectProps(instance, props);
+			config.delay = delay;
+			
+			// create the animation
+			instance.hasAnimation = true;
+			instance.animation = animate(config);
 
 		}
 		// make it clear which animation failed

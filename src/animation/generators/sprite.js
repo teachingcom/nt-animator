@@ -75,12 +75,11 @@ export default async function createSprite(animator, controller, path, compositi
 				: new PIXI.Sprite(textures[0]);
 
 			// set other values
-			// console.log('control loo[', layer.props>)
 			sprite.loop = layer.props?.loop !== false;
 
 			// if animated, start playback
 			container.isAnimatedSprite = isAnimated;
-			if (isAnimated) {
+			if (isAnimated && layer.autoplay !== false) {
 				sprite.play();
 				
 				// disposal
