@@ -73369,40 +73369,52 @@ function _loadSpritesheet() {
 }
 
 function generateSprites(image, spritesheetId, spritesheet, ext) {
-  // create each sprite slice
-  for (var id in spritesheet) {
+  var _loop = function _loop(id) {
     var record = spritesheet[id]; // if this is not an array, skip it
 
-    if (!Array.isArray(record)) continue; // get the bounds
+    if (!Array.isArray(record)) return "continue"; // make sure it's for the image type used
 
     var _record = (0, _slicedToArray2.default)(record, 5),
         x = _record[0],
         y = _record[1],
         width = _record[2],
         height = _record[3],
-        type = _record[4]; // make sure it's for the image type used
+        type = _record[4];
+
+    if (type !== ext) return "continue"; // create a generation function
+
+    var generate = function generate() {
+      // match the canvas
+      var canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height; // // helper to display all textures and names
+      // if (displayAllTextures) {
+      // 	const label = document.createElement('h1');
+      // 	label.textContent = id;
+      // 	document.body.appendChild(label);
+      // 	document.body.appendChild(canvas);
+      // }
+      // extra data (debugging)
+
+      canvas.setAttribute('spritesheet', spritesheetId);
+      canvas.setAttribute('sprite', id); // draw the sprite
+
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(image, x, y, width, height, 0, 0, width, height); // replaces the value
+
+      canvas.isSprite = true;
+      spritesheet[id] = canvas;
+    }; // save the generator
 
 
-    if (type !== ext) continue; // match the canvas
+    spritesheet[id] = generate;
+  };
 
-    var canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height; // // helper to display all textures and names
-    // if (displayAllTextures) {
-    // 	const label = document.createElement('h1');
-    // 	label.textContent = id;
-    // 	document.body.appendChild(label);
-    // 	document.body.appendChild(canvas);
-    // }
-    // extra data (debugging)
+  // create each sprite slice
+  for (var id in spritesheet) {
+    var _ret = _loop(id);
 
-    canvas.setAttribute('spritesheet', spritesheetId);
-    canvas.setAttribute('sprite', id); // draw the sprite
-
-    var ctx = canvas.getContext('2d');
-    ctx.drawImage(image, x, y, width, height, 0, 0, width, height); // replace the bounds
-
-    spritesheet[id] = canvas;
+    if (_ret === "continue") continue;
   }
 }
 },{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","./loadImage":"animation/resources/loadImage.js"}],"animation/resources/getSpritesheet.js":[function(require,module,exports) {
@@ -73483,7 +73495,7 @@ function getSprite(_x, _x2, _x3) {
 
 function _getSprite() {
   _getSprite = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, spritesheetId, imageId) {
-    var spritesheet;
+    var spritesheet, sprite;
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -73493,9 +73505,13 @@ function _getSprite() {
 
           case 2:
             spritesheet = _context.sent;
+            sprite = spritesheet[imageId]; // check if this sprite has been generated
+
+            if (!sprite.isSprite) sprite(); // return the reference
+
             return _context.abrupt("return", spritesheet[imageId]);
 
-          case 4:
+          case 6:
           case "end":
             return _context.stop();
         }

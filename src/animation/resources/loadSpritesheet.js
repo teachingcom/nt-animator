@@ -1,5 +1,6 @@
 import loadImage from "./loadImage";
 
+
 // handle loading an external spritesheet
 export default async function loadSpritesheet(animator, spritesheetId, spritesheet, ext) {
 
@@ -21,38 +22,45 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
 	// create each sprite slice
 	for (const id in spritesheet) {
 		const record = spritesheet[id];
-
+		
 		// if this is not an array, skip it
 		if (!Array.isArray(record)) continue;
-
-		// get the bounds
-		const [ x, y, width, height, type ] = record;
-
-		// make sure it's for the image type used
-		if (type !== ext) continue;
 		
-		// match the canvas
-		const canvas = document.createElement('canvas');
-		canvas.width = width;
-		canvas.height = height;
+		// make sure it's for the image type used
+		const [ x, y, width, height, type ] = record;
+		if (type !== ext) continue;
 
-		// // helper to display all textures and names
-		// if (displayAllTextures) {
-		// 	const label = document.createElement('h1');
-		// 	label.textContent = id;
-		// 	document.body.appendChild(label);
-		// 	document.body.appendChild(canvas);
-		// }
+		// create a generation function
+		const generate = () => {
+		
+			// match the canvas
+			const canvas = document.createElement('canvas');
+			canvas.width = width;
+			canvas.height = height;
 
-		// extra data (debugging)
-		canvas.setAttribute('spritesheet', spritesheetId);
-		canvas.setAttribute('sprite', id);
+			// // helper to display all textures and names
+			// if (displayAllTextures) {
+			// 	const label = document.createElement('h1');
+			// 	label.textContent = id;
+			// 	document.body.appendChild(label);
+			// 	document.body.appendChild(canvas);
+			// }
 
-		// draw the sprite
-		const ctx = canvas.getContext('2d');
-		ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+			// extra data (debugging)
+			canvas.setAttribute('spritesheet', spritesheetId);
+			canvas.setAttribute('sprite', id);
 
-		// replace the bounds
-		spritesheet[id] = canvas;
+			// draw the sprite
+			const ctx = canvas.getContext('2d');
+			ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+			
+			// replaces the value
+			canvas.isSprite = true;
+			spritesheet[id] = canvas;
+		};
+
+		// save the generator
+		spritesheet[id] = generate;
 	}
+
 }
