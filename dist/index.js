@@ -73826,7 +73826,7 @@ function createSprite(_x, _x2, _x3, _x4, _x5) {
 
 function _createSprite() {
   _createSprite = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, composition, layer) {
-    var update, dispose, phase, type, isSprite, isMarker, container, sprite, _layer$props, images, textures, isAnimated, _layer$props2, _layer$props3;
+    var update, dispose, phase, type, isSprite, isMarker, sprite, _layer$props, images, textures, isAnimated, _layer$props2, _layer$props3;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -73843,46 +73843,47 @@ function _createSprite() {
             isMarker = !isSprite; // NOTE: sprites are added a wrapper container on purpose
             // because any animations that modify scale will interfere
             // with scaling done to fit within responsive containers
-
-            container = new PIXI.Container();
-            container.isSprite = true;
-            container.role = (0, _utils2.toRole)(layer.role);
-            container.path = path; // create the required sprite
+            // const container = new PIXI.Container();
+            // container.isSprite = true;
+            // container.role = toRole(layer.role);
+            // container.path = path;
+            // create the required sprite
 
             if (!isSprite) {
-              _context.next = 33;
+              _context.next = 30;
               break;
             }
 
             // gather all required images
             phase = 'resolving images';
-            _context.next = 15;
+            _context.next = 11;
             return (0, _resolveImages.default)(animator, path, composition, layer);
 
-          case 15:
+          case 11:
             images = _context.sent;
             // create textures for each sprite
             phase = 'generating textures';
-            _context.prev = 17;
+            _context.prev = 13;
             textures = (0, _collection.map)(images, _createTextureFromImage.default);
-            _context.next = 25;
+            _context.next = 21;
             break;
 
-          case 21:
-            _context.prev = 21;
-            _context.t0 = _context["catch"](17);
+          case 17:
+            _context.prev = 17;
+            _context.t0 = _context["catch"](13);
             console.error("Failed to create a texture for ".concat(path), composition);
             throw _context.t0;
 
-          case 25:
+          case 21:
             // create the instance of the sprite
             phase = 'creating sprite instance';
             isAnimated = images.length > 1;
             sprite = isAnimated ? new PIXI.AnimatedSprite(textures) : new PIXI.Sprite(textures[0]); // set other values
 
-            sprite.loop = ((_layer$props = layer.props) === null || _layer$props === void 0 ? void 0 : _layer$props.loop) !== false; // if animated, start playback
+            sprite.loop = ((_layer$props = layer.props) === null || _layer$props === void 0 ? void 0 : _layer$props.loop) !== false;
+            sprite.isSprite = true; // if animated, start playback
 
-            container.isAnimatedSprite = isAnimated;
+            sprite.isAnimatedSprite = isAnimated;
 
             if (isAnimated && layer.autoplay !== false) {
               sprite.play(); // disposal
@@ -73892,18 +73893,21 @@ function _createSprite() {
               };
             }
 
-            _context.next = 34;
+            _context.next = 31;
             break;
 
-          case 33:
+          case 30:
             // markers act like normal sprites and are used to define
             // bounds and positions without needing an actual sprite
             if (isMarker) {
               sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
             }
 
-          case 34:
-            // set some default values
+          case 31:
+            // shared data
+            sprite.role = (0, _utils2.toRole)(layer.role);
+            sprite.path = path; // set some default values
+
             sprite.pivot.x = sprite.width / 2;
             sprite.pivot.y = sprite.height / 2; // sync up shorthand names
 
@@ -73929,33 +73933,34 @@ function _createSprite() {
 
               sprite.scale.x = (((_layer$props2 = layer.props) === null || _layer$props2 === void 0 ? void 0 : _layer$props2.width) || sprite.width) / sprite.width;
               sprite.scale.y = (((_layer$props3 = layer.props) === null || _layer$props3 === void 0 ? void 0 : _layer$props3.height) || sprite.height) / sprite.height;
-            } // add to the view
+            } // // add to the view
+            // container.zIndex = sprite.zIndex;
+            // container.addChild(sprite);
+            // // add to the controller
+            // controller.register(container);
 
 
-            container.zIndex = sprite.zIndex;
-            container.addChild(sprite); // add to the controller
-
-            controller.register(container); // attach the update function
+            controller.register(sprite); // attach the update function
 
             return _context.abrupt("return", [{
-              displayObject: container,
+              displayObject: sprite,
               data: layer,
               update: update,
               dispose: dispose
             }]);
 
-          case 54:
-            _context.prev = 54;
+          case 51:
+            _context.prev = 51;
             _context.t1 = _context["catch"](3);
             console.error("Failed to create sprite ".concat(path, " while ").concat(phase));
             throw _context.t1;
 
-          case 58:
+          case 55:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[3, 54], [17, 21]]);
+    }, _callee, null, [[3, 51], [13, 17]]);
   }));
   return _createSprite.apply(this, arguments);
 }

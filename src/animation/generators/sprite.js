@@ -42,10 +42,10 @@ export default async function createSprite(animator, controller, path, compositi
 		// NOTE: sprites are added a wrapper container on purpose
 		// because any animations that modify scale will interfere
 		// with scaling done to fit within responsive containers
-		const container = new PIXI.Container();
-		container.isSprite = true;
-		container.role = toRole(layer.role);
-		container.path = path;
+		// const container = new PIXI.Container();
+		// container.isSprite = true;
+		// container.role = toRole(layer.role);
+		// container.path = path;
 
 		// create the required sprite
 		let sprite;
@@ -76,9 +76,10 @@ export default async function createSprite(animator, controller, path, compositi
 
 			// set other values
 			sprite.loop = layer.props?.loop !== false;
-
+			sprite.isSprite = true;
+			
 			// if animated, start playback
-			container.isAnimatedSprite = isAnimated;
+			sprite.isAnimatedSprite = isAnimated;
 			if (isAnimated && layer.autoplay !== false) {
 				sprite.play();
 				
@@ -91,6 +92,10 @@ export default async function createSprite(animator, controller, path, compositi
 		else if (isMarker) {
 			sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
 		}
+
+		// shared data
+		sprite.role = toRole(layer.role);
+		sprite.path = path;
 
 		// set some default values
 		sprite.pivot.x = sprite.width / 2;
@@ -128,15 +133,16 @@ export default async function createSprite(animator, controller, path, compositi
 			sprite.scale.y = (layer.props?.height || sprite.height) / sprite.height;
 		}
 
-		// add to the view
-		container.zIndex = sprite.zIndex;
-		container.addChild(sprite);
+		// // add to the view
+		// container.zIndex = sprite.zIndex;
+		// container.addChild(sprite);
 
-		// add to the controller
-		controller.register(container);
+		// // add to the controller
+		// controller.register(container);
+		controller.register(sprite);
 
 		// attach the update function
-		return [{ displayObject: container, data: layer, update, dispose }];
+		return [{ displayObject: sprite, data: layer, update, dispose }];
 	}
 	catch(ex) {
 		console.error(`Failed to create sprite ${path} while ${phase}`);
