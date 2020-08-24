@@ -69899,6 +69899,7 @@ function inheritFrom(animator, composition, layer, prop) {
 
   var basedOn = clone(animator, composition, base);
   (0, _deepDefaults.default)(layer, basedOn);
+  layer.basedOn = base;
   return layer;
 }
 /** clones an individual data node */
@@ -73559,13 +73560,24 @@ function resolveImages(_x, _x2, _x3, _x4) {
 
 function _resolveImages() {
   _resolveImages = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, path, composition, layer) {
-    var images, _i, _arr, source, pending, _iterator, _step, item, imageId, spritesheetId, ref, url, _promise, promise;
+    var config, relativeTo, parsed, images, _i, _arr, source, pending, _iterator, _step, item, imageId, spritesheetId, ref, url, _promise, promise;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            // normalize images as a single array
+            _context.next = 2;
+            return animator.lookup(path);
+
+          case 2:
+            config = _context.sent;
+
+            if (config.basedOn) {
+              parsed = (0, _path.parsePath)(config.basedOn);
+              if (parsed.isAbsolute) relativeTo = parsed.parts.join('/');
+            } // normalize images as a single array
+
+
             images = [];
 
             for (_i = 0, _arr = [layer.image, layer.images]; _i < _arr.length; _i++) {
@@ -73583,13 +73595,13 @@ function _resolveImages() {
 
             pending = [];
             _iterator = _createForOfIteratorHelper(images);
-            _context.prev = 7;
+            _context.prev = 11;
 
             _iterator.s();
 
-          case 9:
+          case 13:
             if ((_step = _iterator.n()).done) {
-              _context.next = 24;
+              _context.next = 28;
               break;
             }
 
@@ -73600,20 +73612,20 @@ function _resolveImages() {
             ref = (0, _path.parsePath)(item); // handle loading exernal image urls
 
             if (!ref.isUrl) {
-              _context.next = 19;
+              _context.next = 23;
               break;
             }
 
             url = (0, _path.createUrlFromRef)(ref);
             _promise = (0, _loadImage.default)(url);
             pending.push(_promise);
-            return _context.abrupt("continue", 22);
+            return _context.abrupt("continue", 26);
 
-          case 19:
+          case 23:
             // check for an image relative to the current resource
             if (ref.isLocal) {
               imageId = item;
-              spritesheetId = path;
+              spritesheetId = relativeTo || path;
             } // check for an image shared through the project
             else if (ref.isAbsolute) {
                 spritesheetId = ref.parts.shift();
@@ -73624,40 +73636,40 @@ function _resolveImages() {
             promise = (0, _getSprite.default)(animator, spritesheetId, imageId);
             pending.push(promise);
 
-          case 22:
-            _context.next = 9;
-            break;
-
-          case 24:
-            _context.next = 29;
-            break;
-
           case 26:
-            _context.prev = 26;
-            _context.t0 = _context["catch"](7);
+            _context.next = 13;
+            break;
+
+          case 28:
+            _context.next = 33;
+            break;
+
+          case 30:
+            _context.prev = 30;
+            _context.t0 = _context["catch"](11);
 
             _iterator.e(_context.t0);
 
-          case 29:
-            _context.prev = 29;
+          case 33:
+            _context.prev = 33;
 
             _iterator.f();
 
-            return _context.finish(29);
+            return _context.finish(33);
 
-          case 32:
-            _context.next = 34;
+          case 36:
+            _context.next = 38;
             return Promise.all(pending);
 
-          case 34:
+          case 38:
             return _context.abrupt("return", _context.sent);
 
-          case 35:
+          case 39:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[7, 26, 29, 32]]);
+    }, _callee, null, [[11, 30, 33, 36]]);
   }));
   return _resolveImages.apply(this, arguments);
 }
@@ -77818,8 +77830,7 @@ function _createInstance() {
             path = path.replace(/^\/*/, ''); // unpack all data
 
             instance = (0, _cloneDeep.default)(data);
-            (0, _utils.inheritFrom)(animator, data, instance, 'base');
-            delete instance.base; // create the instance container
+            if (data && 'base' in data) (0, _utils.inheritFrom)(animator, data, instance, 'base'); // create the instance container
 
             container = new PIXI.Container();
             container.update = _utils2.noop;
@@ -77830,9 +77841,9 @@ function _createInstance() {
 
             i = instance.compose.length;
 
-          case 9:
+          case 8:
             if (!(i-- > 0)) {
-              _context.next = 19;
+              _context.next = 18;
               break;
             }
 
@@ -77841,13 +77852,13 @@ function _createInstance() {
             delete layer.base; // check if hidden
 
             if (!(layer.hide || layer.hidden)) {
-              _context.next = 15;
+              _context.next = 14;
               break;
             }
 
-            return _context.abrupt("continue", 17);
+            return _context.abrupt("continue", 16);
 
-          case 15:
+          case 14:
             // sprite layers
             type = layer.type;
 
@@ -77886,23 +77897,23 @@ function _createInstance() {
                           }
                       }
 
-          case 17:
-            _context.next = 9;
+          case 16:
+            _context.next = 8;
             break;
 
-          case 19:
-            _context.next = 21;
+          case 18:
+            _context.next = 20;
             return Promise.all(pending);
 
-          case 21:
+          case 20:
             composite = _context.sent;
             layers = (0, _collection.flatten)(composite); // append each layer
 
             _i = layers.length;
 
-          case 24:
+          case 23:
             if (!(_i-- > 0)) {
-              _context.next = 46;
+              _context.next = 45;
               break;
             }
 
@@ -77913,7 +77924,7 @@ function _createInstance() {
             container.addChildAt(_layer.displayObject, 0); // if it's a mask, then apply to previous layers
 
             if (!_layer.displayObject.isMask) {
-              _context.next = 44;
+              _context.next = 43;
               break;
             }
 
@@ -77921,9 +77932,9 @@ function _createInstance() {
 
             j = _i + 1;
 
-          case 32:
+          case 31:
             if (!(j < layers.length)) {
-              _context.next = 43;
+              _context.next = 42;
               break;
             }
 
@@ -77933,48 +77944,48 @@ function _createInstance() {
             // masks to work from the bottom?
 
             if (!((target.displayObject.zIndex || 0) > (_layer.displayObject.zIndex || 0))) {
-              _context.next = 36;
+              _context.next = 35;
               break;
             }
 
-            return _context.abrupt("continue", 40);
+            return _context.abrupt("continue", 39);
 
-          case 36:
+          case 35:
             if (!(!!target.data.ignoreMask || !!target.data.breakMask)) {
-              _context.next = 38;
+              _context.next = 37;
               break;
             }
 
-            return _context.abrupt("continue", 40);
+            return _context.abrupt("continue", 39);
 
-          case 38:
+          case 37:
             // apply the mask
             target.displayObject.mask = _layer.displayObject;
             didSetMask = true;
 
-          case 40:
+          case 39:
             j++;
-            _context.next = 32;
+            _context.next = 31;
             break;
 
-          case 43:
+          case 42:
             // if there's an idle mask
             if (!didSetMask) {
               console.warn("Unused mask created for ".concat(path, ". Mask will be hidden"));
               _layer.displayObject.visible = false;
             }
 
-          case 44:
-            _context.next = 24;
+          case 43:
+            _context.next = 23;
             break;
 
-          case 46:
+          case 45:
             // update based on ordering
             container.sortChildren(); // return the final layer
 
             return _context.abrupt("return", container);
 
-          case 48:
+          case 47:
           case "end":
             return _context.stop();
         }
@@ -78157,6 +78168,8 @@ var _expressions = require("./expressions");
 
 var _controller = _interopRequireDefault(require("./generators/controller"));
 
+var _utils = require("./utils");
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -78263,7 +78276,11 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
     });
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "lookup", function (resource) {
       var path = (0, _path.parsePath)(resource);
-      return (0, _path.resolvePath)(_this.manifest, path.parts);
+      var resolved = (0, _path.resolvePath)(_this.manifest, path.parts); // check for an inherited source
+
+      if (resolved && 'base' in resolved) (0, _utils.inheritFrom)((0, _assertThisInitialized2.default)(_this), _this.manifest, resolved, 'base'); // resunt the 
+
+      return resolved;
     });
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "evaluateExpression", function (value) {
       return (0, _expressions.evaluateExpression)(value);
@@ -78366,7 +78383,7 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
 }(_eventEmitter.EventEmitter);
 
 exports.Animator = Animator;
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","../common/event-emitter":"common/event-emitter.js","./path":"animation/path.js","./rng":"animation/rng.js","./generators":"animation/generators/index.js","./resources/getSprite":"animation/resources/getSprite.js","./resources/getSpritesheet":"animation/resources/getSpritesheet.js","./expressions":"animation/expressions.js","./generators/controller":"animation/generators/controller.js"}],"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","../common/event-emitter":"common/event-emitter.js","./path":"animation/path.js","./rng":"animation/rng.js","./generators":"animation/generators/index.js","./resources/getSprite":"animation/resources/getSprite.js","./resources/getSpritesheet":"animation/resources/getSpritesheet.js","./expressions":"animation/expressions.js","./generators/controller":"animation/generators/controller.js","./utils":"animation/utils.js"}],"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js":[function(require,module,exports) {
 var arrayLikeToArray = require("./arrayLikeToArray");
 
 function _arrayWithoutHoles(arr) {

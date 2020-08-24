@@ -7,6 +7,7 @@ import getSprite from "./resources/getSprite";
 import getSpritesheet from "./resources/getSpritesheet";
 import { setRandomizer, evaluateExpression } from './expressions';
 import Controller from './generators/controller';
+import { inheritFrom } from './utils';
 
 /** handles creating PIXI animations using defined files */
 export class Animator extends EventEmitter {
@@ -64,7 +65,14 @@ export class Animator extends EventEmitter {
 	/** attempts to find data for a path */
 	lookup = resource => {
 		const path = parsePath(resource);
-		return resolvePath(this.manifest, path.parts);
+		const resolved = resolvePath(this.manifest, path.parts);
+		
+		// check for an inherited source
+		if (resolved && 'base' in resolved)
+			inheritFrom(this, this.manifest, resolved, 'base');
+
+		// resunt the 
+		return resolved;
 	}
 
 	/** evaluates an expression */

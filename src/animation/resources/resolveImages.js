@@ -7,6 +7,15 @@ import { evaluateExpression } from "../expressions";
 
 /** loads all images for a layer */
 export default async function resolveImages(animator, path, composition, layer) {
+	const config = await animator.lookup(path);
+	
+	// check for a based on path
+	let relativeTo;
+	if (config.basedOn) {
+		const parsed = parsePath(config.basedOn);
+		if (parsed.isAbsolute)
+			relativeTo = parsed.parts.join('/');
+	}
 
 	// normalize images as a single array
 	let images = [ ];
@@ -47,7 +56,7 @@ export default async function resolveImages(animator, path, composition, layer) 
 		// check for an image relative to the current resource
 		if (ref.isLocal) {
 			imageId = item;
-			spritesheetId = path;
+			spritesheetId = relativeTo || path;
 		}
 		// check for an image shared through the project
 		else if (ref.isAbsolute) {

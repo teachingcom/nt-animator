@@ -13,6 +13,7 @@ export function inheritFrom(animator, composition, layer, prop) {
 	// apply the inherited properties
 	const basedOn = clone(animator, composition, base);
 	deepDefaults(layer, basedOn);
+	layer.basedOn = base;
 	return layer;
 }
 

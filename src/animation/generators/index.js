@@ -11,17 +11,17 @@ import createMask from './mask';
 import { flatten } from '../../utils/collection';
 import createRepeater from './repeater';
 
+
 // creates an instance of a car
 export default async function createInstance(animator, controller, path, data, relativeTo) {
-
 	// format the path
 	path = path.replace(/^\/*/, '');
 	
 	// unpack all data
 	const instance = cloneDeep(data);
-	inheritFrom(animator, data, instance, 'base');
-	delete instance.base;
-	
+	if (data && 'base' in data)
+		inheritFrom(animator, data, instance, 'base');
+
 	// create the instance container
 	const container = new PIXI.Container();
 	container.update = noop;
