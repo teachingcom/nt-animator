@@ -1,4 +1,3 @@
-const IMAGE_RESOURCE_TIMEOUT = 3000;
 
 // resources that are currently loading
 const pending = { };
@@ -28,26 +27,25 @@ export default async function loadImage(url) {
 		pending[url] = [{resolve, reject}];
 
 		// create resolution actions
-		const timeout = setTimeout(reject, IMAGE_RESOURCE_TIMEOUT);
 		const handle = success =>
 			() => {
-
+				
 				// all finished, resolve the result
-				images[url] = img;
+				images[url] = success ? img : null;
 
 				// execute all waiting requests
 				try {
 					for (const handler of pending[url]) {
-						const action = handler[success ? 'resolve' : 'reject'];
-						action(img);
+						const { resolve } = handler;
+						resolve(success ? img : null);
 					}
 				}
 				// cleanup
 				finally {
-					clearTimeout(timeout);
 					delete pending[url];
 				}
 			};
+
 
 		// make the exernal image request
 		img.onload = handle(true);

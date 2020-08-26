@@ -11,6 +11,7 @@ import createInstance from '.';
 import { evaluateExpression } from '../expressions';
 import { normalizeProps, normalizeTo } from '../normalize';
 import { unpack, toRole } from '../utils';
+import cloneDeep from 'clone-deep';
 
 // default parameters to create a sprite
 const GROUP_DEFAULTS = {

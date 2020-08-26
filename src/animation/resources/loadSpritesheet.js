@@ -1,4 +1,5 @@
 import loadImage from "./loadImage";
+import { createPlaceholderImage } from "../../utils/graphics";
 
 
 // handle loading an external spritesheet
@@ -7,11 +8,23 @@ export default async function loadSpritesheet(animator, spritesheetId, spriteshe
 	// load the image first
 	// for now, only expect PNG images
 	const url = `${animator.baseUrl}${spritesheetId}.${ext}`;
+	
+	// attempt to load the image
 	const image = await loadImage(url);
 
-	// with the image, create slices based on the spritesheet
-	if (!spritesheet.__initialized__)
+	// prepare the spritesheet
+	if (!spritesheet.__initialized__) {
+
+		// if the image failed to load, and we're not using placeholder
+		// images, then crash here
+		if (!image && !animator.ignoreImageLoadErrors)
+			throw new ImageRequestFailedException();
+		
+		// create a spritesheet with the image. If the image is
+		// null then placeholders will be created with
+		// the same dimensions
 		generateSprites(image, spritesheetId, spritesheet, ext);
+	}
 }
 
 // create individual sprites from an image
@@ -52,7 +65,23 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
 
 			// draw the sprite
 			const ctx = canvas.getContext('2d');
-			ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+
+			// try and draw the required sprite
+			try {
+				// an image was found
+				if (!!image) {
+					ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+				}
+				// create a fake image
+				else {
+					createPlaceholderImage({ width, height, canvas, ctx });
+				}
+			}
+			// if this failed, just draw a placeholder
+			catch (ex) {
+				createPlaceholderImage({ width, height, canvas, ctx });
+			}
+
 			
 			// replaces the value
 			canvas.isSprite = true;
@@ -64,3 +93,5 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
 	}
 
 }
+
+function ImageRequestFailedException() { }

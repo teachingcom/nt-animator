@@ -73223,8 +73223,7 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-var IMAGE_RESOURCE_TIMEOUT = 3000; // resources that are currently loading
-
+// resources that are currently loading
 var pending = {};
 var images = {};
 /** handles loading an external image url 
@@ -73270,12 +73269,10 @@ function _loadImage() {
                 reject: reject
               }]; // create resolution actions
 
-              var timeout = setTimeout(reject, IMAGE_RESOURCE_TIMEOUT);
-
               var handle = function handle(success) {
                 return function () {
                   // all finished, resolve the result
-                  images[url] = img; // execute all waiting requests
+                  images[url] = success ? img : null; // execute all waiting requests
 
                   try {
                     var _iterator = _createForOfIteratorHelper(pending[url]),
@@ -73284,8 +73281,9 @@ function _loadImage() {
                     try {
                       for (_iterator.s(); !(_step = _iterator.n()).done;) {
                         var handler = _step.value;
-                        var action = handler[success ? 'resolve' : 'reject'];
-                        action(img);
+                        var _resolve = handler.resolve;
+
+                        _resolve(success ? img : null);
                       }
                     } catch (err) {
                       _iterator.e(err);
@@ -73294,7 +73292,6 @@ function _loadImage() {
                     }
                   } // cleanup
                   finally {
-                    clearTimeout(timeout);
                     delete pending[url];
                   }
                 };
@@ -73315,7 +73312,81 @@ function _loadImage() {
   }));
   return _loadImage.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js"}],"animation/resources/loadSpritesheet.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js"}],"utils/graphics.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createContext = createContext;
+exports.createPlaceholderImage = createPlaceholderImage;
+
+var _converters = require("../animation/converters");
+
+/** creates a rendering surface */
+function createContext() {
+  var canvas = document.createElement('canvas');
+  var ctx = canvas.getContext('2d');
+
+  function reset() {
+    canvas.width = canvas.width;
+  }
+
+  function resize(width, height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  return {
+    canvas: canvas,
+    ctx: ctx,
+    reset: reset,
+    resize: resize
+  };
+}
+/** generates a placeholder image */
+
+
+function createPlaceholderImage(_ref) {
+  var _ref$width = _ref.width,
+      width = _ref$width === void 0 ? 100 : _ref$width,
+      _ref$height = _ref.height,
+      height = _ref$height === void 0 ? 100 : _ref$height,
+      _ref$canvas = _ref.canvas,
+      canvas = _ref$canvas === void 0 ? document.createElement('canvas') : _ref$canvas,
+      _ref$ctx = _ref.ctx,
+      ctx = _ref$ctx === void 0 ? canvas.getContext('2d') : _ref$ctx,
+      _ref$background = _ref.background,
+      background = _ref$background === void 0 ? 0x000000 : _ref$background,
+      _ref$color = _ref.color,
+      color = _ref$color === void 0 ? 0xffffff : _ref$color;
+  // match size
+  canvas.width = width;
+  canvas.height = height;
+  /** generates a placeholder image */
+
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "#".concat((0, _converters.toColor)(color));
+  ctx.fillStyle = "#".concat((0, _converters.toColor)(background)); // background
+
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(0, 0, width, height); // paint a temp sprite
+
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(width, 0);
+  ctx.lineTo(width, height);
+  ctx.lineTo(0, height);
+  ctx.lineTo(0, 0);
+  ctx.lineTo(width, height);
+  ctx.moveTo(width, 0);
+  ctx.lineTo(0, height);
+  ctx.globalAlpha = 1;
+  ctx.stroke(); // give back the generated image
+
+  return canvas;
+}
+},{"../animation/converters":"animation/converters.js"}],"animation/resources/loadSpritesheet.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -73330,6 +73401,8 @@ var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/sli
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
 var _loadImage = _interopRequireDefault(require("./loadImage"));
+
+var _graphics = require("../../utils/graphics");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -73350,16 +73423,33 @@ function _loadSpritesheet() {
           case 0:
             // load the image first
             // for now, only expect PNG images
-            url = "".concat(animator.baseUrl).concat(spritesheetId, ".").concat(ext);
+            url = "".concat(animator.baseUrl).concat(spritesheetId, ".").concat(ext); // attempt to load the image
+
             _context.next = 3;
             return (0, _loadImage.default)(url);
 
           case 3:
             image = _context.sent;
-            // with the image, create slices based on the spritesheet
-            if (!spritesheet.__initialized__) generateSprites(image, spritesheetId, spritesheet, ext);
 
-          case 5:
+            if (spritesheet.__initialized__) {
+              _context.next = 8;
+              break;
+            }
+
+            if (!(!image && !animator.ignoreImageLoadErrors)) {
+              _context.next = 7;
+              break;
+            }
+
+            throw new ImageRequestFailedException();
+
+          case 7:
+            // create a spritesheet with the image. If the image is
+            // null then placeholders will be created with
+            // the same dimensions
+            generateSprites(image, spritesheetId, spritesheet, ext);
+
+          case 8:
           case "end":
             return _context.stop();
         }
@@ -73400,8 +73490,31 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
       canvas.setAttribute('spritesheet', spritesheetId);
       canvas.setAttribute('sprite', id); // draw the sprite
 
-      var ctx = canvas.getContext('2d');
-      ctx.drawImage(image, x, y, width, height, 0, 0, width, height); // replaces the value
+      var ctx = canvas.getContext('2d'); // try and draw the required sprite
+
+      try {
+        // an image was found
+        if (!!image) {
+          ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+        } // create a fake image
+        else {
+            (0, _graphics.createPlaceholderImage)({
+              width: width,
+              height: height,
+              canvas: canvas,
+              ctx: ctx
+            });
+          }
+      } // if this failed, just draw a placeholder
+      catch (ex) {
+        (0, _graphics.createPlaceholderImage)({
+          width: width,
+          height: height,
+          canvas: canvas,
+          ctx: ctx
+        });
+      } // replaces the value
+
 
       canvas.isSprite = true;
       spritesheet[id] = canvas;
@@ -73418,7 +73531,9 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
     if (_ret === "continue") continue;
   }
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","./loadImage":"animation/resources/loadImage.js"}],"animation/resources/getSpritesheet.js":[function(require,module,exports) {
+
+function ImageRequestFailedException() {}
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","./loadImage":"animation/resources/loadImage.js","../../utils/graphics":"utils/graphics.js"}],"animation/resources/getSpritesheet.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -77110,36 +77225,7 @@ function _createGroup() {
   }));
   return _createGroup.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../utils":"animation/utils.js",".":"animation/generators/index.js","../normalize":"animation/normalize.js"}],"utils/graphics.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createContext = createContext;
-
-/** creates a rendering surface */
-function createContext() {
-  var canvas = document.createElement('canvas');
-  var ctx = canvas.getContext('2d');
-
-  function reset() {
-    canvas.width = canvas.width;
-  }
-
-  function resize(width, height) {
-    canvas.width = width;
-    canvas.height = height;
-  }
-
-  return {
-    canvas: canvas,
-    ctx: ctx,
-    reset: reset,
-    resize: resize
-  };
-}
-},{}],"animation/generators/mask.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../utils":"animation/utils.js",".":"animation/generators/index.js","../normalize":"animation/normalize.js"}],"animation/generators/mask.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -77493,6 +77579,8 @@ var _normalize = require("../normalize");
 
 var _utils2 = require("../utils");
 
+var _cloneDeep = _interopRequireDefault(require("clone-deep"));
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -77769,7 +77857,7 @@ function findPivot(container) {
 
   return pivot;
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../../pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js",".":"animation/generators/index.js","../expressions":"animation/expressions.js","../normalize":"animation/normalize.js","../utils":"animation/utils.js"}],"animation/generators/index.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../../pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js",".":"animation/generators/index.js","../expressions":"animation/expressions.js","../normalize":"animation/normalize.js","../utils":"animation/utils.js","clone-deep":"../node_modules/clone-deep/index.js"}],"animation/generators/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -78636,6 +78724,12 @@ Object.defineProperty(exports, "createContext", {
   enumerable: true,
   get: function () {
     return _graphics.createContext;
+  }
+});
+Object.defineProperty(exports, "createPlaceholderImage", {
+  enumerable: true,
+  get: function () {
+    return _graphics.createPlaceholderImage;
   }
 });
 Object.defineProperty(exports, "removeDisplayObject", {
