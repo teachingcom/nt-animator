@@ -39,14 +39,6 @@ export default async function createSprite(animator, controller, path, compositi
 		const isSprite = type === 'sprite';
 		const isMarker = !isSprite;
 
-		// NOTE: sprites are added a wrapper container on purpose
-		// because any animations that modify scale will interfere
-		// with scaling done to fit within responsive containers
-		// const container = new PIXI.Container();
-		// container.isSprite = true;
-		// container.role = toRole(layer.role);
-		// container.path = path;
-
 		// create the required sprite
 		let sprite;
 		if (isSprite) {
@@ -91,6 +83,7 @@ export default async function createSprite(animator, controller, path, compositi
 		// bounds and positions without needing an actual sprite
 		else if (isMarker) {
 			sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
+			sprite.visible = false;
 		}
 
 		// shared data
@@ -133,12 +126,7 @@ export default async function createSprite(animator, controller, path, compositi
 			sprite.scale.y = (layer.props?.height || sprite.height) / sprite.height;
 		}
 
-		// // add to the view
-		// container.zIndex = sprite.zIndex;
-		// container.addChild(sprite);
-
-		// // add to the controller
-		// controller.register(container);
+		// add to the controller
 		controller.register(sprite);
 
 		// attach the update function

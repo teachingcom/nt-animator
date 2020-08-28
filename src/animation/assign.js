@@ -99,7 +99,7 @@ export function applyDynamicProperties(obj, props) {
 
 	// create the handler function
 	const updateProperties = () => {
-		const stage = ResponsiveStage.findResponsiveStage(obj) || MISSING_STAGE;
+		const stage = obj.__responsive_stage__ = obj.__responsive_stage__ || ResponsiveStage.findResponsiveStage(obj) || MISSING_STAGE;
 		update(obj, stage);
 	};
 

@@ -95,6 +95,10 @@ export default async function createGroup(animator, controller, path, compositio
 		group.pivot.x = 0;
 		group.pivot.y = 0;
 
+		// bakes a layer to a single object
+		if (layer.merge)
+			group.cacheAsBitmap = true;
+
 		// include this instance
 		controller.register(container);
 
