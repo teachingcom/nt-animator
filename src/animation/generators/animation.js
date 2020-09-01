@@ -1,7 +1,5 @@
 // import * as pop from 'popmotion';
-import anime from 'animejs/lib/anime.es.js';
-import deep from 'deep-get-set';
-import cloneDeep from "clone-deep";
+import fastCopy from 'fast-copy';
 import { unpack, inheritFrom } from "../utils";
 import { isNumber, isArray, noop, isNil } from "../../utils";
 import { assignDisplayObjectProps } from '../assign';
@@ -38,7 +36,7 @@ export default function createAnimation(animator, path, composition, layer, inst
 		try {
 
 			// unpack any variables
-			const animation = cloneDeep(animations[i]);
+			const animation = fastCopy(animations[i]);
 			inheritFrom(animator, composition, animation, 'base');
 
 			// REFACTOR: don't create object just for array prop - 

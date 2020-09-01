@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import cloneDeep from 'clone-deep';
+import fastCopy from 'fast-copy';
 import { inheritFrom } from '../utils';
 import { appendFunc, noop } from '../../utils';
 
@@ -11,14 +11,13 @@ import createMask from './mask';
 import { flatten } from '../../utils/collection';
 import createRepeater from './repeater';
 
-
 // creates an instance of a car
 export default async function createInstance(animator, controller, path, data, relativeTo) {
 	// format the path
 	path = path.replace(/^\/*/, '');
 	
 	// unpack all data
-	const instance = cloneDeep(data);
+	const instance = fastCopy(data);
 	if (data && 'base' in data)
 		inheritFrom(animator, data, instance, 'base');
 

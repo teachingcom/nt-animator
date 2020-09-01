@@ -10,7 +10,6 @@ import './overrides';
 
 import createAnimation from '../animation';
 import resolveImages from "../../resources/resolveImages";
-import createTextureFromImage from '../../resources/createTextureFromImage';
 import { normalizeProps, normalizeEmit } from '../../normalize';
 import { toColor, toBlendMode } from '../../converters';
 import { toRole } from '../../utils';
@@ -74,19 +73,19 @@ export default async function createEmitter(animator, controller, path, composit
 
 		// gather all required images
 		phase = 'resolving images';
-		const images = await resolveImages(animator, path, composition, layer);
+		const textures = await resolveImages(animator, path, composition, layer);
 
-		// create textures for each sprite
-		phase = 'generating textures';
-		let textures;
-		try {
-			textures = map(images, createTextureFromImage);
-		}
-		// had a problem
-		catch (ex) {
-			console.error(`Failed to create a texture for ${path}`, composition);
-			throw ex;
-		}
+		// // create textures for each sprite
+		// phase = 'generating textures';
+		// let textures;
+		// try {
+		// 	textures = map(images, createTextureFromImage);
+		// }
+		// // had a problem
+		// catch (ex) {
+		// 	console.error(`Failed to create a texture for ${path}`, composition);
+		// 	throw ex;
+		// }
 		
 		// create the instance of the sprite
 		phase = 'configuring emitter';
@@ -269,4 +268,3 @@ export default async function createEmitter(animator, controller, path, composit
 	}
 
 }
-

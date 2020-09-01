@@ -1,4 +1,4 @@
-import cloneDeep from "clone-deep";
+import fastCopy from 'fast-copy';
 import deepDefaults from 'deep-defaults';
 
 import { isString, isIterable } from "../utils";
@@ -25,7 +25,7 @@ export function clone(animator, data, path) {
 
 	const source = path.isAbsolute ? animator.manifest : data;
 	const cloned = resolvePath(source, path.parts);
-	return cloneDeep(cloned);
+	return fastCopy(cloned);
 }
 
 /** converts a role string to an array */

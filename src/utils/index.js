@@ -1,4 +1,4 @@
-import cloneDeep from "clone-deep";
+import fastCopy from 'fast-copy';
 
 // helper math values
 export const TAU = Math.PI * 2;
@@ -56,7 +56,7 @@ export function setDefaults(target, prop, defaults) {
 
 	// nothing has been assigned
 	if (!assignTo) {
-		target[prop] = cloneDeep(defaults);
+		target[prop] = fastCopy(defaults);
 		return;
 	}
 

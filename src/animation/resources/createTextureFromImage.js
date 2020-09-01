@@ -9,7 +9,6 @@ export default function createTextureFromImage(img) {
 	let spritesheet;
 	let sprite;
 
-	// attempt to load the texture
 	try {
 		if (!img) {
 			throw new InvalidTextureRequestException();

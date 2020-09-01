@@ -44863,167 +44863,1002 @@ var EventEmitter = function EventEmitter() {
 };
 
 exports.EventEmitter = EventEmitter;
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js"}],"../node_modules/kind-of/index.js":[function(require,module,exports) {
-var toString = Object.prototype.toString;
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js"}],"../node_modules/fast-copy/dist/fast-copy.js":[function(require,module,exports) {
+var define;
+var global = arguments[3];
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global = global || self, global['fast-copy'] = factory());
+}(this, (function () { 'use strict';
 
-module.exports = function kindOf(val) {
-  if (val === void 0) return 'undefined';
-  if (val === null) return 'null';
-  var type = typeof val;
-  if (type === 'boolean') return 'boolean';
-  if (type === 'string') return 'string';
-  if (type === 'number') return 'number';
-  if (type === 'symbol') return 'symbol';
+  var toStringFunction = Function.prototype.toString;
+  var create = Object.create, defineProperty = Object.defineProperty, getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor, getOwnPropertyNames = Object.getOwnPropertyNames, getOwnPropertySymbols = Object.getOwnPropertySymbols, getPrototypeOf = Object.getPrototypeOf;
+  var _a = Object.prototype, hasOwnProperty = _a.hasOwnProperty, propertyIsEnumerable = _a.propertyIsEnumerable;
+  /**
+   * @enum
+   *
+   * @const {Object} SUPPORTS
+   *
+   * @property {boolean} SYMBOL_PROPERTIES are symbol properties supported
+   * @property {boolean} WEAKMAP is WeakMap supported
+   */
+  var SUPPORTS = {
+      SYMBOL_PROPERTIES: typeof getOwnPropertySymbols === 'function',
+      WEAKMAP: typeof WeakMap === 'function',
+  };
+  /**
+   * @function createCache
+   *
+   * @description
+   * get a new cache object to prevent circular references
+   *
+   * @returns the new cache object
+   */
+  var createCache = function () {
+      if (SUPPORTS.WEAKMAP) {
+          return new WeakMap();
+      }
+      // tiny implementation of WeakMap
+      var object = create({
+          has: function (key) { return !!~object._keys.indexOf(key); },
+          set: function (key, value) {
+              object._keys.push(key);
+              object._values.push(value);
+          },
+          get: function (key) { return object._values[object._keys.indexOf(key)]; },
+      });
+      object._keys = [];
+      object._values = [];
+      return object;
+  };
+  /**
+   * @function getCleanClone
+   *
+   * @description
+   * get an empty version of the object with the same prototype it has
+   *
+   * @param object the object to build a clean clone from
+   * @param realm the realm the object resides in
+   * @returns the empty cloned object
+   */
+  var getCleanClone = function (object, realm) {
+      if (!object.constructor) {
+          return create(null);
+      }
+      var Constructor = object.constructor;
+      var prototype = object.__proto__ || getPrototypeOf(object);
+      if (Constructor === realm.Object) {
+          return prototype === realm.Object.prototype ? {} : create(prototype);
+      }
+      if (~toStringFunction.call(Constructor).indexOf('[native code]')) {
+          try {
+              return new Constructor();
+          }
+          catch (_a) { }
+      }
+      return create(prototype);
+  };
+  /**
+   * @function getObjectCloneLoose
+   *
+   * @description
+   * get a copy of the object based on loose rules, meaning all enumerable keys
+   * and symbols are copied, but property descriptors are not considered
+   *
+   * @param object the object to clone
+   * @param realm the realm the object resides in
+   * @param handleCopy the function that handles copying the object
+   * @returns the copied object
+   */
+  var getObjectCloneLoose = function (object, realm, handleCopy, cache) {
+      var clone = getCleanClone(object, realm);
+      // set in the cache immediately to be able to reuse the object recursively
+      cache.set(object, clone);
+      for (var key in object) {
+          if (hasOwnProperty.call(object, key)) {
+              clone[key] = handleCopy(object[key], cache);
+          }
+      }
+      if (SUPPORTS.SYMBOL_PROPERTIES) {
+          var symbols = getOwnPropertySymbols(object);
+          var length_1 = symbols.length;
+          if (length_1) {
+              for (var index = 0, symbol = void 0; index < length_1; index++) {
+                  symbol = symbols[index];
+                  if (propertyIsEnumerable.call(object, symbol)) {
+                      clone[symbol] = handleCopy(object[symbol], cache);
+                  }
+              }
+          }
+      }
+      return clone;
+  };
+  /**
+   * @function getObjectCloneStrict
+   *
+   * @description
+   * get a copy of the object based on strict rules, meaning all keys and symbols
+   * are copied based on the original property descriptors
+   *
+   * @param object the object to clone
+   * @param realm the realm the object resides in
+   * @param handleCopy the function that handles copying the object
+   * @returns the copied object
+   */
+  var getObjectCloneStrict = function (object, realm, handleCopy, cache) {
+      var clone = getCleanClone(object, realm);
+      // set in the cache immediately to be able to reuse the object recursively
+      cache.set(object, clone);
+      var properties = SUPPORTS.SYMBOL_PROPERTIES
+          ? getOwnPropertyNames(object).concat(getOwnPropertySymbols(object))
+          : getOwnPropertyNames(object);
+      var length = properties.length;
+      if (length) {
+          for (var index = 0, property = void 0, descriptor = void 0; index < length; index++) {
+              property = properties[index];
+              if (property !== 'callee' && property !== 'caller') {
+                  descriptor = getOwnPropertyDescriptor(object, property);
+                  if (descriptor) {
+                      // Only clone the value if actually a value, not a getter / setter.
+                      if (!descriptor.get && !descriptor.set) {
+                          descriptor.value = handleCopy(object[property], cache);
+                      }
+                      try {
+                          defineProperty(clone, property, descriptor);
+                      }
+                      catch (error) {
+                          // Tee above can fail on node in edge cases, so fall back to the loose assignment.
+                          clone[property] = descriptor.value;
+                      }
+                  }
+                  else {
+                      // In extra edge cases where the property descriptor cannot be retrived, fall back to
+                      // the loose assignment.
+                      clone[property] = handleCopy(object[property], cache);
+                  }
+              }
+          }
+      }
+      return clone;
+  };
+  /**
+   * @function getRegExpFlags
+   *
+   * @description
+   * get the flags to apply to the copied regexp
+   *
+   * @param regExp the regexp to get the flags of
+   * @returns the flags for the regexp
+   */
+  var getRegExpFlags = function (regExp) {
+      var flags = '';
+      if (regExp.global) {
+          flags += 'g';
+      }
+      if (regExp.ignoreCase) {
+          flags += 'i';
+      }
+      if (regExp.multiline) {
+          flags += 'm';
+      }
+      if (regExp.unicode) {
+          flags += 'u';
+      }
+      if (regExp.sticky) {
+          flags += 'y';
+      }
+      return flags;
+  };
 
-  if (type === 'function') {
-    return isGeneratorFn(val) ? 'generatorfunction' : 'function';
+  // utils
+  var isArray = Array.isArray;
+  var GLOBAL_THIS = (function () {
+      if (typeof self !== 'undefined') {
+          return self;
+      }
+      if (typeof window !== 'undefined') {
+          return window;
+      }
+      if (typeof global !== 'undefined') {
+          return global;
+      }
+      if (console && console.error) {
+          console.error('Unable to locate global object, returning "this".');
+      }
+  })();
+  /**
+   * @function copy
+   *
+   * @description
+   * copy an object deeply as much as possible
+   *
+   * If `strict` is applied, then all properties (including non-enumerable ones)
+   * are copied with their original property descriptors on both objects and arrays.
+   *
+   * The object is compared to the global constructors in the `realm` provided,
+   * and the native constructor is always used to ensure that extensions of native
+   * objects (allows in ES2015+) are maintained.
+   *
+   * @param object the object to copy
+   * @param [options] the options for copying with
+   * @param [options.isStrict] should the copy be strict
+   * @param [options.realm] the realm (this) object the object is copied from
+   * @returns the copied object
+   */
+  function copy(object, options) {
+      // manually coalesced instead of default parameters for performance
+      var isStrict = !!(options && options.isStrict);
+      var realm = (options && options.realm) || GLOBAL_THIS;
+      var getObjectClone = isStrict
+          ? getObjectCloneStrict
+          : getObjectCloneLoose;
+      /**
+       * @function handleCopy
+       *
+       * @description
+       * copy the object recursively based on its type
+       *
+       * @param object the object to copy
+       * @returns the copied object
+       */
+      var handleCopy = function (object, cache) {
+          if (!object || typeof object !== 'object') {
+              return object;
+          }
+          if (cache.has(object)) {
+              return cache.get(object);
+          }
+          var Constructor = object.constructor;
+          // plain objects
+          if (Constructor === realm.Object) {
+              return getObjectClone(object, realm, handleCopy, cache);
+          }
+          var clone;
+          // arrays
+          if (isArray(object)) {
+              // if strict, include non-standard properties
+              if (isStrict) {
+                  return getObjectCloneStrict(object, realm, handleCopy, cache);
+              }
+              var length_1 = object.length;
+              clone = new Constructor();
+              cache.set(object, clone);
+              for (var index = 0; index < length_1; index++) {
+                  clone[index] = handleCopy(object[index], cache);
+              }
+              return clone;
+          }
+          // dates
+          if (object instanceof realm.Date) {
+              return new Constructor(object.getTime());
+          }
+          // regexps
+          if (object instanceof realm.RegExp) {
+              clone = new Constructor(object.source, object.flags || getRegExpFlags(object));
+              clone.lastIndex = object.lastIndex;
+              return clone;
+          }
+          // maps
+          if (realm.Map && object instanceof realm.Map) {
+              clone = new Constructor();
+              cache.set(object, clone);
+              object.forEach(function (value, key) {
+                  clone.set(key, handleCopy(value, cache));
+              });
+              return clone;
+          }
+          // sets
+          if (realm.Set && object instanceof realm.Set) {
+              clone = new Constructor();
+              cache.set(object, clone);
+              object.forEach(function (value) {
+                  clone.add(handleCopy(value, cache));
+              });
+              return clone;
+          }
+          // blobs
+          if (realm.Blob && object instanceof realm.Blob) {
+              clone = new Blob([object], { type: object.type });
+              return clone;
+          }
+          // buffers (node-only)
+          if (realm.Buffer && realm.Buffer.isBuffer(object)) {
+              clone = realm.Buffer.allocUnsafe
+                  ? realm.Buffer.allocUnsafe(object.length)
+                  : new Constructor(object.length);
+              cache.set(object, clone);
+              object.copy(clone);
+              return clone;
+          }
+          // arraybuffers / dataviews
+          if (realm.ArrayBuffer) {
+              // dataviews
+              if (realm.ArrayBuffer.isView(object)) {
+                  clone = new Constructor(object.buffer.slice(0));
+                  cache.set(object, clone);
+                  return clone;
+              }
+              // arraybuffers
+              if (object instanceof realm.ArrayBuffer) {
+                  clone = object.slice(0);
+                  cache.set(object, clone);
+                  return clone;
+              }
+          }
+          // if the object cannot / should not be cloned, don't
+          if (
+          // promise-like
+          typeof object.then === 'function' ||
+              // errors
+              object instanceof Error ||
+              // weakmaps
+              (realm.WeakMap && object instanceof realm.WeakMap) ||
+              // weaksets
+              (realm.WeakSet && object instanceof realm.WeakSet)) {
+              return object;
+          }
+          // assume anything left is a custom constructor
+          return getObjectClone(object, realm, handleCopy, cache);
+      };
+      return handleCopy(object, createCache());
   }
+  /**
+   * @function strictCopy
+   *
+   * @description
+   * copy the object with `strict` option pre-applied
+   *
+   * @param object the object to copy
+   * @param [options] the options for copying with
+   * @param [options.realm] the realm (this) object the object is copied from
+   * @returns the copied object
+   */
+  copy.strict = function strictCopy(object, options) {
+      return copy(object, {
+          isStrict: true,
+          realm: options ? options.realm : void 0,
+      });
+  };
 
-  if (isArray(val)) return 'array';
-  if (isBuffer(val)) return 'buffer';
-  if (isArguments(val)) return 'arguments';
-  if (isDate(val)) return 'date';
-  if (isError(val)) return 'error';
-  if (isRegexp(val)) return 'regexp';
+  return copy;
 
-  switch (ctorName(val)) {
-    case 'Symbol':
-      return 'symbol';
-
-    case 'Promise':
-      return 'promise';
-    // Set, Map, WeakSet, WeakMap
-
-    case 'WeakMap':
-      return 'weakmap';
-
-    case 'WeakSet':
-      return 'weakset';
-
-    case 'Map':
-      return 'map';
-
-    case 'Set':
-      return 'set';
-    // 8-bit typed arrays
-
-    case 'Int8Array':
-      return 'int8array';
-
-    case 'Uint8Array':
-      return 'uint8array';
-
-    case 'Uint8ClampedArray':
-      return 'uint8clampedarray';
-    // 16-bit typed arrays
-
-    case 'Int16Array':
-      return 'int16array';
-
-    case 'Uint16Array':
-      return 'uint16array';
-    // 32-bit typed arrays
-
-    case 'Int32Array':
-      return 'int32array';
-
-    case 'Uint32Array':
-      return 'uint32array';
-
-    case 'Float32Array':
-      return 'float32array';
-
-    case 'Float64Array':
-      return 'float64array';
-  }
-
-  if (isGeneratorObj(val)) {
-    return 'generator';
-  } // Non-plain objects
+})));
 
 
-  type = toString.call(val);
+},{}],"utils/index.js":[function(require,module,exports) {
+"use strict";
 
-  switch (type) {
-    case '[object Object]':
-      return 'object';
-    // iterators
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.isNil = isNil;
+exports.isSet = isSet;
+exports.isArray = isArray;
+exports.isObject = isObject;
+exports.isIterable = isIterable;
+exports.isString = isString;
+exports.isNumber = isNumber;
+exports.isBoolean = isBoolean;
+exports.setDefaults = setDefaults;
+exports.appendFunc = appendFunc;
+exports.noop = exports.RAD = exports.TAU = void 0;
 
-    case '[object Map Iterator]':
-      return 'mapiterator';
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
-    case '[object Set Iterator]':
-      return 'setiterator';
+var _fastCopy = _interopRequireDefault(require("fast-copy"));
 
-    case '[object String Iterator]':
-      return 'stringiterator';
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-    case '[object Array Iterator]':
-      return 'arrayiterator';
-  } // other
+// helper math values
+var TAU = Math.PI * 2;
+exports.TAU = TAU;
+var RAD = Math.PI / 180;
+/** checks if an object is non-null and not undefined */
 
+exports.RAD = RAD;
 
-  return type.slice(8, -1).toLowerCase().replace(/\s/g, '');
-};
-
-function ctorName(val) {
-  return typeof val.constructor === 'function' ? val.constructor.name : null;
+function isNil(obj) {
+  return obj === null || obj === undefined;
 }
+/** checks if an object has a value */
 
-function isArray(val) {
-  if (Array.isArray) return Array.isArray(val);
-  return val instanceof Array;
+
+function isSet(obj) {
+  return !isNil(obj);
 }
+/** checks if an object is an array */
 
-function isError(val) {
-  return val instanceof Error || typeof val.message === 'string' && val.constructor && typeof val.constructor.stackTraceLimit === 'number';
+
+function isArray(obj) {
+  return Array.isArray(obj);
 }
+/** checks if an object is just an object */
 
-function isDate(val) {
-  if (val instanceof Date) return true;
-  return typeof val.toDateString === 'function' && typeof val.getDate === 'function' && typeof val.setDate === 'function';
+
+function isObject(obj) {
+  return (0, _typeof2.default)(obj) === 'object';
 }
+/** checks if an object can be iterated over */
 
-function isRegexp(val) {
-  if (val instanceof RegExp) return true;
-  return typeof val.flags === 'string' && typeof val.ignoreCase === 'boolean' && typeof val.multiline === 'boolean' && typeof val.global === 'boolean';
+
+function isIterable(obj) {
+  return isObject(obj) || isArray(obj);
 }
+/** checks if n object is a string */
 
-function isGeneratorFn(name, val) {
-  return ctorName(name) === 'GeneratorFunction';
+
+function isString(obj) {
+  return typeof obj === 'string' || obj instanceof String;
 }
+/** checks if an object is a number */
 
-function isGeneratorObj(val) {
-  return typeof val.throw === 'function' && typeof val.return === 'function' && typeof val.next === 'function';
+
+function isNumber(obj) {
+  return typeof obj === 'number' || obj instanceof Number;
 }
+/** checks if an object is a boolean value */
 
-function isArguments(val) {
-  try {
-    if (typeof val.length === 'number' && typeof val.callee === 'function') {
-      return true;
-    }
-  } catch (err) {
-    if (err.message.indexOf('callee') !== -1) {
-      return true;
-    }
-  }
 
-  return false;
+function isBoolean(obj) {
+  return obj === true || obj === false;
 }
-/**
- * If you need to support Safari 5-7 (8-10 yr-old browser),
- * take a look at https://github.com/feross/is-buffer
+/** non-action function */
+
+
+var noop = function noop() {};
+/** assigns default values to another object
+ * NOTE: this is a shallow copy
  */
 
 
-function isBuffer(val) {
-  if (val.constructor && typeof val.constructor.isBuffer === 'function') {
-    return val.constructor.isBuffer(val);
+exports.noop = noop;
+
+function setDefaults(target, prop, defaults) {
+  var assignTo = target[prop]; // nothing has been assigned
+
+  if (!assignTo) {
+    target[prop] = (0, _fastCopy.default)(defaults);
+    return;
+  } // set each missing value
+
+
+  for (var id in defaults) {
+    if (assignTo[id] === undefined) assignTo[id] = defaults[id];
+  }
+}
+/** Merges two functions into sequential calls */
+
+
+function appendFunc(baseFunction, includedFunction) {
+  return includedFunction ? function () {
+    baseFunction.apply(void 0, arguments);
+    includedFunction.apply(void 0, arguments);
+  } : baseFunction;
+}
+},{"@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js"}],"animation/path.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createUrlFromRef = createUrlFromRef;
+exports.parsePath = parsePath;
+exports.resolvePath = resolvePath;
+
+var _utils = require("../utils");
+
+/** creates a url from a reference */
+function createUrlFromRef(ref) {
+  // nothing fancy, just remove the prefix
+  return ref.path.substr(2);
+}
+/** parses a animation file path
+ * TODO: cache path parsing?
+*/
+
+
+function parsePath(path) {
+  // identify the type
+  var isUrl = path.substr(0, 2) === ':/';
+  var isAbsolute = !isUrl && path.substr(0, 2) === '//';
+  var isRelative = !isAbsolute && path.substr(0, 1) === '/';
+  var isLocal = !(isAbsolute || isUrl || isRelative); // trim off the prefix
+
+  var index = isUrl ? 2 : isAbsolute ? 2 : isRelative ? 1 : 0; // create each part of the resource path
+
+  var parts = path.substr(index).split(/\/+/g);
+  return {
+    path: path,
+    parts: parts,
+    isAbsolute: isAbsolute,
+    isRelative: isRelative,
+    isLocal: isLocal,
+    isUrl: isUrl
+  };
+}
+/** resolves an animation path to a data element
+ * TODO: cache path resolve?
+ */
+
+
+function resolvePath(data, parts) {
+  if ((0, _utils.isString)(parts)) {
+    parts = parsePath(parts);
   }
 
-  return false;
+  var block = data;
+
+  for (var i = 0; i < parts.length; i++) {
+    block = block && block[parts[i]];
+  }
+
+  return block;
 }
-},{}],"../node_modules/base64-js/index.js":[function(require,module,exports) {
+},{"../utils":"utils/index.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+module.exports = _arrayWithHoles;
+},{}],"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js":[function(require,module,exports) {
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+module.exports = _iterableToArrayLimit;
+},{}],"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":[function(require,module,exports) {
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+
+  return arr2;
+}
+
+module.exports = _arrayLikeToArray;
+},{}],"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js":[function(require,module,exports) {
+var arrayLikeToArray = require("./arrayLikeToArray");
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+
+module.exports = _unsupportedIterableToArray;
+},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/nonIterableRest.js":[function(require,module,exports) {
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableRest;
+},{}],"../node_modules/@babel/runtime/helpers/slicedToArray.js":[function(require,module,exports) {
+var arrayWithHoles = require("./arrayWithHoles");
+
+var iterableToArrayLimit = require("./iterableToArrayLimit");
+
+var unsupportedIterableToArray = require("./unsupportedIterableToArray");
+
+var nonIterableRest = require("./nonIterableRest");
+
+function _slicedToArray(arr, i) {
+  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
+}
+
+module.exports = _slicedToArray;
+},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArrayLimit":"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"../node_modules/json-stringify-safe/stringify.js":[function(require,module,exports) {
+exports = module.exports = stringify
+exports.getSerialize = serializer
+
+function stringify(obj, replacer, spaces, cycleReplacer) {
+  return JSON.stringify(obj, serializer(replacer, cycleReplacer), spaces)
+}
+
+function serializer(replacer, cycleReplacer) {
+  var stack = [], keys = []
+
+  if (cycleReplacer == null) cycleReplacer = function(key, value) {
+    if (stack[0] === value) return "[Circular ~]"
+    return "[Circular ~." + keys.slice(0, stack.indexOf(value)).join(".") + "]"
+  }
+
+  return function(key, value) {
+    if (stack.length > 0) {
+      var thisPos = stack.indexOf(this)
+      ~thisPos ? stack.splice(thisPos + 1) : stack.push(this)
+      ~thisPos ? keys.splice(thisPos, Infinity, key) : keys.push(key)
+      if (~stack.indexOf(value)) value = cycleReplacer.call(this, key, value)
+    }
+    else stack.push(value)
+
+    return replacer == null ? value : replacer.call(this, key, value)
+  }
+}
+
+},{}],"../node_modules/random-seed/index.js":[function(require,module,exports) {
+/*
+ * random-seed
+ * https://github.com/skratchdot/random-seed
+ *
+ * This code was originally written by Steve Gibson and can be found here:
+ *
+ * https://www.grc.com/otg/uheprng.htm
+ *
+ * It was slightly modified for use in node, to pass jshint, and a few additional
+ * helper functions were added.
+ *
+ * Copyright (c) 2013 skratchdot
+ * Dual Licensed under the MIT license and the original GRC copyright/license
+ * included below.
+ */
+
+/*	============================================================================
+									Gibson Research Corporation
+				UHEPRNG - Ultra High Entropy Pseudo-Random Number Generator
+	============================================================================
+	LICENSE AND COPYRIGHT:  THIS CODE IS HEREBY RELEASED INTO THE PUBLIC DOMAIN
+	Gibson Research Corporation releases and disclaims ALL RIGHTS AND TITLE IN
+	THIS CODE OR ANY DERIVATIVES. Anyone may be freely use it for any purpose.
+	============================================================================
+	This is GRC's cryptographically strong PRNG (pseudo-random number generator)
+	for JavaScript. It is driven by 1536 bits of entropy, stored in an array of
+	48, 32-bit JavaScript variables.  Since many applications of this generator,
+	including ours with the "Off The Grid" Latin Square generator, may require
+	the deteriministic re-generation of a sequence of PRNs, this PRNG's initial
+	entropic state can be read and written as a static whole, and incrementally
+	evolved by pouring new source entropy into the generator's internal state.
+	----------------------------------------------------------------------------
+	ENDLESS THANKS are due Johannes Baagoe for his careful development of highly
+	robust JavaScript implementations of JS PRNGs.  This work was based upon his
+	JavaScript "Alea" PRNG which is based upon the extremely robust Multiply-
+	With-Carry (MWC) PRNG invented by George Marsaglia. MWC Algorithm References:
+	http://www.GRC.com/otg/Marsaglia_PRNGs.pdf
+	http://www.GRC.com/otg/Marsaglia_MWC_Generators.pdf
+	----------------------------------------------------------------------------
+	The quality of this algorithm's pseudo-random numbers have been verified by
+	multiple independent researchers. It handily passes the fermilab.ch tests as
+	well as the "diehard" and "dieharder" test suites.  For individuals wishing
+	to further verify the quality of this algorithm's pseudo-random numbers, a
+	256-megabyte file of this algorithm's output may be downloaded from GRC.com,
+	and a Microsoft Windows scripting host (WSH) version of this algorithm may be
+	downloaded and run from the Windows command prompt to generate unique files
+	of any size:
+	The Fermilab "ENT" tests: http://fourmilab.ch/random/
+	The 256-megabyte sample PRN file at GRC: https://www.GRC.com/otg/uheprng.bin
+	The Windows scripting host version: https://www.GRC.com/otg/wsh-uheprng.js
+	----------------------------------------------------------------------------
+	Qualifying MWC multipliers are: 187884, 686118, 898134, 1104375, 1250205,
+	1460910 and 1768863. (We use the largest one that's < 2^21)
+	============================================================================ */
+'use strict';
+
+var stringify = require('json-stringify-safe');
+/*	============================================================================
+This is based upon Johannes Baagoe's carefully designed and efficient hash
+function for use with JavaScript.  It has a proven "avalanche" effect such
+that every bit of the input affects every bit of the output 50% of the time,
+which is good.	See: http://baagoe.com/en/RandomMusings/hash/avalanche.xhtml
+============================================================================
+*/
+
+
+var Mash = function () {
+  var n = 0xefc8249d;
+
+  var mash = function (data) {
+    if (data) {
+      data = data.toString();
+
+      for (var i = 0; i < data.length; i++) {
+        n += data.charCodeAt(i);
+        var h = 0.02519603282416938 * n;
+        n = h >>> 0;
+        h -= n;
+        h *= n;
+        n = h >>> 0;
+        h -= n;
+        n += h * 0x100000000; // 2^32
+      }
+
+      return (n >>> 0) * 2.3283064365386963e-10; // 2^-32
+    } else {
+      n = 0xefc8249d;
+    }
+  };
+
+  return mash;
+};
+
+var uheprng = function (seed) {
+  return function () {
+    var o = 48; // set the 'order' number of ENTROPY-holding 32-bit values
+
+    var c = 1; // init the 'carry' used by the multiply-with-carry (MWC) algorithm
+
+    var p = o; // init the 'phase' (max-1) of the intermediate variable pointer
+
+    var s = new Array(o); // declare our intermediate variables array
+
+    var i; // general purpose local
+
+    var j; // general purpose local
+
+    var k = 0; // general purpose local
+    // when our "uheprng" is initially invoked our PRNG state is initialized from the
+    // browser's own local PRNG. This is okay since although its generator might not
+    // be wonderful, it's useful for establishing large startup entropy for our usage.
+
+    var mash = new Mash(); // get a pointer to our high-performance "Mash" hash
+    // fill the array with initial mash hash values
+
+    for (i = 0; i < o; i++) {
+      s[i] = mash(Math.random());
+    } // this PRIVATE (internal access only) function is the heart of the multiply-with-carry
+    // (MWC) PRNG algorithm. When called it returns a pseudo-random number in the form of a
+    // 32-bit JavaScript fraction (0.0 to <1.0) it is a PRIVATE function used by the default
+    // [0-1] return function, and by the random 'string(n)' function which returns 'n'
+    // characters from 33 to 126.
+
+
+    var rawprng = function () {
+      if (++p >= o) {
+        p = 0;
+      }
+
+      var t = 1768863 * s[p] + c * 2.3283064365386963e-10; // 2^-32
+
+      return s[p] = t - (c = t | 0);
+    }; // this EXPORTED function is the default function returned by this library.
+    // The values returned are integers in the range from 0 to range-1. We first
+    // obtain two 32-bit fractions (from rawprng) to synthesize a single high
+    // resolution 53-bit prng (0 to <1), then we multiply this by the caller's
+    // "range" param and take the "floor" to return a equally probable integer.
+
+
+    var random = function (range) {
+      return Math.floor(range * (rawprng() + (rawprng() * 0x200000 | 0) * 1.1102230246251565e-16)); // 2^-53
+    }; // this EXPORTED function 'string(n)' returns a pseudo-random string of
+    // 'n' printable characters ranging from chr(33) to chr(126) inclusive.
+
+
+    random.string = function (count) {
+      var i;
+      var s = '';
+
+      for (i = 0; i < count; i++) {
+        s += String.fromCharCode(33 + random(94));
+      }
+
+      return s;
+    }; // this PRIVATE "hash" function is used to evolve the generator's internal
+    // entropy state. It is also called by the EXPORTED addEntropy() function
+    // which is used to pour entropy into the PRNG.
+
+
+    var hash = function () {
+      var args = Array.prototype.slice.call(arguments);
+
+      for (i = 0; i < args.length; i++) {
+        for (j = 0; j < o; j++) {
+          s[j] -= mash(args[i]);
+
+          if (s[j] < 0) {
+            s[j] += 1;
+          }
+        }
+      }
+    }; // this EXPORTED "clean string" function removes leading and trailing spaces and non-printing
+    // control characters, including any embedded carriage-return (CR) and line-feed (LF) characters,
+    // from any string it is handed. this is also used by the 'hashstring' function (below) to help
+    // users always obtain the same EFFECTIVE uheprng seeding key.
+
+
+    random.cleanString = function (inStr) {
+      inStr = inStr.replace(/(^\s*)|(\s*$)/gi, ''); // remove any/all leading spaces
+
+      inStr = inStr.replace(/[\x00-\x1F]/gi, ''); // remove any/all control characters
+
+      inStr = inStr.replace(/\n /, '\n'); // remove any/all trailing spaces
+
+      return inStr; // return the cleaned up result
+    }; // this EXPORTED "hash string" function hashes the provided character string after first removing
+    // any leading or trailing spaces and ignoring any embedded carriage returns (CR) or Line Feeds (LF)
+
+
+    random.hashString = function (inStr) {
+      inStr = random.cleanString(inStr);
+      mash(inStr); // use the string to evolve the 'mash' state
+
+      for (i = 0; i < inStr.length; i++) {
+        // scan through the characters in our string
+        k = inStr.charCodeAt(i); // get the character code at the location
+
+        for (j = 0; j < o; j++) {
+          //	"mash" it into the UHEPRNG state
+          s[j] -= mash(k);
+
+          if (s[j] < 0) {
+            s[j] += 1;
+          }
+        }
+      }
+    }; // this EXPORTED function allows you to seed the random generator.
+
+
+    random.seed = function (seed) {
+      if (typeof seed === 'undefined' || seed === null) {
+        seed = Math.random();
+      }
+
+      if (typeof seed !== 'string') {
+        seed = stringify(seed, function (key, value) {
+          if (typeof value === 'function') {
+            return value.toString();
+          }
+
+          return value;
+        });
+      }
+
+      random.initState();
+      random.hashString(seed);
+    }; // this handy exported function is used to add entropy to our uheprng at any time
+
+
+    random.addEntropy = function ()
+    /* accept zero or more arguments */
+    {
+      var args = [];
+
+      for (i = 0; i < arguments.length; i++) {
+        args.push(arguments[i]);
+      }
+
+      hash(k++ + new Date().getTime() + args.join('') + Math.random());
+    }; // if we want to provide a deterministic startup context for our PRNG,
+    // but without directly setting the internal state variables, this allows
+    // us to initialize the mash hash and PRNG's internal state before providing
+    // some hashing input
+
+
+    random.initState = function () {
+      mash(); // pass a null arg to force mash hash to init
+
+      for (i = 0; i < o; i++) {
+        s[i] = mash(' '); // fill the array with initial mash hash values
+      }
+
+      c = 1; // init our multiply-with-carry carry
+
+      p = o; // init our phase
+    }; // we use this (optional) exported function to signal the JavaScript interpreter
+    // that we're finished using the "Mash" hash function so that it can free up the
+    // local "instance variables" is will have been maintaining.  It's not strictly
+    // necessary, of course, but it's good JavaScript citizenship.
+
+
+    random.done = function () {
+      mash = null;
+    }; // if we called "uheprng" with a seed value, then execute random.seed() before returning
+
+
+    if (typeof seed !== 'undefined') {
+      random.seed(seed);
+    } // Returns a random integer between 0 (inclusive) and range (exclusive)
+
+
+    random.range = function (range) {
+      return random(range);
+    }; // Returns a random float between 0 (inclusive) and 1 (exclusive)
+
+
+    random.random = function () {
+      return random(Number.MAX_VALUE - 1) / Number.MAX_VALUE;
+    }; // Returns a random float between min (inclusive) and max (exclusive)
+
+
+    random.floatBetween = function (min, max) {
+      return random.random() * (max - min) + min;
+    }; // Returns a random integer between min (inclusive) and max (inclusive)
+
+
+    random.intBetween = function (min, max) {
+      return Math.floor(random.random() * (max - min + 1)) + min;
+    }; // when our main outer "uheprng" function is called, after setting up our
+    // initial variables and entropic state, we return an "instance pointer"
+    // to the internal anonymous function which can then be used to access
+    // the uheprng's various exported functions.  As with the ".done" function
+    // above, we should set the returned value to 'null' once we're finished
+    // using any of these functions.
+
+
+    return random;
+  }();
+}; // Modification for use in node:
+
+
+uheprng.create = function (seed) {
+  return new uheprng(seed);
+};
+
+module.exports = uheprng;
+},{"json-stringify-safe":"../node_modules/json-stringify-safe/stringify.js"}],"animation/rng.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _randomSeed = _interopRequireDefault(require("random-seed"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Random = function Random(_seed) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, Random);
+  (0, _defineProperty2.default)(this, "activate", function (seed) {
+    _this.seed = seed;
+    _this.rng = _randomSeed.default.create(seed);
+  });
+  (0, _defineProperty2.default)(this, "random", function () {
+    return _this.rng.random();
+  });
+  (0, _defineProperty2.default)(this, "int", function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    var _ref = args.length === 1 ? [0, args[1]] : args,
+        _ref2 = (0, _slicedToArray2.default)(_ref, 2),
+        min = _ref2[0],
+        max = _ref2[1];
+
+    return _this.rng.intBetween(min, max);
+  });
+  this.activate(_seed);
+}
+/** sets the random seed to use */
+;
+
+exports.default = Random;
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","random-seed":"../node_modules/random-seed/index.js"}],"../node_modules/base64-js/index.js":[function(require,module,exports) {
 'use strict'
 
 exports.byteLength = byteLength
@@ -47063,840 +47898,7 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":"../node_modules/base64-js/index.js","ieee754":"../node_modules/ieee754/index.js","isarray":"../node_modules/isarray/index.js","buffer":"../node_modules/buffer/index.js"}],"../node_modules/shallow-clone/index.js":[function(require,module,exports) {
-var Buffer = require("buffer").Buffer;
-/*!
- * shallow-clone <https://github.com/jonschlinkert/shallow-clone>
- *
- * Copyright (c) 2015-present, Jon Schlinkert.
- * Released under the MIT License.
- */
-'use strict';
-
-var valueOf = Symbol.prototype.valueOf;
-
-var typeOf = require('kind-of');
-
-function clone(val, deep) {
-  switch (typeOf(val)) {
-    case 'array':
-      return val.slice();
-
-    case 'object':
-      return Object.assign({}, val);
-
-    case 'date':
-      return new val.constructor(Number(val));
-
-    case 'map':
-      return new Map(val);
-
-    case 'set':
-      return new Set(val);
-
-    case 'buffer':
-      return cloneBuffer(val);
-
-    case 'symbol':
-      return cloneSymbol(val);
-
-    case 'arraybuffer':
-      return cloneArrayBuffer(val);
-
-    case 'float32array':
-    case 'float64array':
-    case 'int16array':
-    case 'int32array':
-    case 'int8array':
-    case 'uint16array':
-    case 'uint32array':
-    case 'uint8clampedarray':
-    case 'uint8array':
-      return cloneTypedArray(val);
-
-    case 'regexp':
-      return cloneRegExp(val);
-
-    case 'error':
-      return Object.create(val);
-
-    default:
-      {
-        return val;
-      }
-  }
-}
-
-function cloneRegExp(val) {
-  var flags = val.flags !== void 0 ? val.flags : /\w+$/.exec(val) || void 0;
-  var re = new val.constructor(val.source, flags);
-  re.lastIndex = val.lastIndex;
-  return re;
-}
-
-function cloneArrayBuffer(val) {
-  var res = new val.constructor(val.byteLength);
-  new Uint8Array(res).set(new Uint8Array(val));
-  return res;
-}
-
-function cloneTypedArray(val, deep) {
-  return new val.constructor(val.buffer, val.byteOffset, val.length);
-}
-
-function cloneBuffer(val) {
-  var len = val.length;
-  var buf = Buffer.allocUnsafe ? Buffer.allocUnsafe(len) : Buffer.from(len);
-  val.copy(buf);
-  return buf;
-}
-
-function cloneSymbol(val) {
-  return valueOf ? Object(valueOf.call(val)) : {};
-}
-/**
- * Expose `clone`
- */
-
-
-module.exports = clone;
-},{"kind-of":"../node_modules/kind-of/index.js","buffer":"../node_modules/buffer/index.js"}],"../node_modules/isobject/index.js":[function(require,module,exports) {
-/*!
- * isobject <https://github.com/jonschlinkert/isobject>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-'use strict';
-
-module.exports = function isObject(val) {
-  return val != null && typeof val === 'object' && Array.isArray(val) === false;
-};
-},{}],"../node_modules/is-plain-object/index.js":[function(require,module,exports) {
-/*!
- * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
- *
- * Copyright (c) 2014-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-'use strict';
-
-var isObject = require('isobject');
-
-function isObjectObject(o) {
-  return isObject(o) === true && Object.prototype.toString.call(o) === '[object Object]';
-}
-
-module.exports = function isPlainObject(o) {
-  var ctor, prot;
-  if (isObjectObject(o) === false) return false; // If has modified constructor
-
-  ctor = o.constructor;
-  if (typeof ctor !== 'function') return false; // If has modified prototype
-
-  prot = ctor.prototype;
-  if (isObjectObject(prot) === false) return false; // If constructor does not have an Object-specific method
-
-  if (prot.hasOwnProperty('isPrototypeOf') === false) {
-    return false;
-  } // Most likely a plain Object
-
-
-  return true;
-};
-},{"isobject":"../node_modules/isobject/index.js"}],"../node_modules/clone-deep/index.js":[function(require,module,exports) {
-'use strict';
-/**
- * Module dependenices
- */
-
-var clone = require('shallow-clone');
-
-var typeOf = require('kind-of');
-
-var isPlainObject = require('is-plain-object');
-
-function cloneDeep(val, instanceClone) {
-  switch (typeOf(val)) {
-    case 'object':
-      return cloneObjectDeep(val, instanceClone);
-
-    case 'array':
-      return cloneArrayDeep(val, instanceClone);
-
-    default:
-      {
-        return clone(val);
-      }
-  }
-}
-
-function cloneObjectDeep(val, instanceClone) {
-  if (typeof instanceClone === 'function') {
-    return instanceClone(val);
-  }
-
-  if (instanceClone || isPlainObject(val)) {
-    var res = new val.constructor();
-
-    for (var key in val) {
-      res[key] = cloneDeep(val[key], instanceClone);
-    }
-
-    return res;
-  }
-
-  return val;
-}
-
-function cloneArrayDeep(val, instanceClone) {
-  var res = new val.constructor(val.length);
-
-  for (var i = 0; i < val.length; i++) {
-    res[i] = cloneDeep(val[i], instanceClone);
-  }
-
-  return res;
-}
-/**
- * Expose `cloneDeep`
- */
-
-
-module.exports = cloneDeep;
-},{"shallow-clone":"../node_modules/shallow-clone/index.js","kind-of":"../node_modules/kind-of/index.js","is-plain-object":"../node_modules/is-plain-object/index.js"}],"utils/index.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.isNil = isNil;
-exports.isSet = isSet;
-exports.isArray = isArray;
-exports.isObject = isObject;
-exports.isIterable = isIterable;
-exports.isString = isString;
-exports.isNumber = isNumber;
-exports.isBoolean = isBoolean;
-exports.setDefaults = setDefaults;
-exports.appendFunc = appendFunc;
-exports.noop = exports.RAD = exports.TAU = void 0;
-
-var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
-
-var _cloneDeep = _interopRequireDefault(require("clone-deep"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// helper math values
-var TAU = Math.PI * 2;
-exports.TAU = TAU;
-var RAD = Math.PI / 180;
-/** checks if an object is non-null and not undefined */
-
-exports.RAD = RAD;
-
-function isNil(obj) {
-  return obj === null || obj === undefined;
-}
-/** checks if an object has a value */
-
-
-function isSet(obj) {
-  return !isNil(obj);
-}
-/** checks if an object is an array */
-
-
-function isArray(obj) {
-  return Array.isArray(obj);
-}
-/** checks if an object is just an object */
-
-
-function isObject(obj) {
-  return (0, _typeof2.default)(obj) === 'object';
-}
-/** checks if an object can be iterated over */
-
-
-function isIterable(obj) {
-  return isObject(obj) || isArray(obj);
-}
-/** checks if n object is a string */
-
-
-function isString(obj) {
-  return typeof obj === 'string' || obj instanceof String;
-}
-/** checks if an object is a number */
-
-
-function isNumber(obj) {
-  return typeof obj === 'number' || obj instanceof Number;
-}
-/** checks if an object is a boolean value */
-
-
-function isBoolean(obj) {
-  return obj === true || obj === false;
-}
-/** non-action function */
-
-
-var noop = function noop() {};
-/** assigns default values to another object
- * NOTE: this is a shallow copy
- */
-
-
-exports.noop = noop;
-
-function setDefaults(target, prop, defaults) {
-  var assignTo = target[prop]; // nothing has been assigned
-
-  if (!assignTo) {
-    target[prop] = (0, _cloneDeep.default)(defaults);
-    return;
-  } // set each missing value
-
-
-  for (var id in defaults) {
-    if (assignTo[id] === undefined) assignTo[id] = defaults[id];
-  }
-}
-/** Merges two functions into sequential calls */
-
-
-function appendFunc(baseFunction, includedFunction) {
-  return includedFunction ? function () {
-    baseFunction.apply(void 0, arguments);
-    includedFunction.apply(void 0, arguments);
-  } : baseFunction;
-}
-},{"@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","clone-deep":"../node_modules/clone-deep/index.js"}],"animation/path.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createUrlFromRef = createUrlFromRef;
-exports.parsePath = parsePath;
-exports.resolvePath = resolvePath;
-
-var _utils = require("../utils");
-
-/** creates a url from a reference */
-function createUrlFromRef(ref) {
-  // nothing fancy, just remove the prefix
-  return ref.path.substr(2);
-}
-/** parses a animation file path
- * TODO: cache path parsing?
-*/
-
-
-function parsePath(path) {
-  // identify the type
-  var isUrl = path.substr(0, 2) === ':/';
-  var isAbsolute = !isUrl && path.substr(0, 2) === '//';
-  var isRelative = !isAbsolute && path.substr(0, 1) === '/';
-  var isLocal = !(isAbsolute || isUrl || isRelative); // trim off the prefix
-
-  var index = isUrl ? 2 : isAbsolute ? 2 : isRelative ? 1 : 0; // create each part of the resource path
-
-  var parts = path.substr(index).split(/\/+/g);
-  return {
-    path: path,
-    parts: parts,
-    isAbsolute: isAbsolute,
-    isRelative: isRelative,
-    isLocal: isLocal,
-    isUrl: isUrl
-  };
-}
-/** resolves an animation path to a data element
- * TODO: cache path resolve?
- */
-
-
-function resolvePath(data, parts) {
-  if ((0, _utils.isString)(parts)) {
-    parts = parsePath(parts);
-  }
-
-  var block = data;
-
-  for (var i = 0; i < parts.length; i++) {
-    block = block && block[parts[i]];
-  }
-
-  return block;
-}
-},{"../utils":"utils/index.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
-
-module.exports = _arrayWithHoles;
-},{}],"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js":[function(require,module,exports) {
-function _iterableToArrayLimit(arr, i) {
-  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
-  var _arr = [];
-  var _n = true;
-  var _d = false;
-  var _e = undefined;
-
-  try {
-    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-      _arr.push(_s.value);
-
-      if (i && _arr.length === i) break;
-    }
-  } catch (err) {
-    _d = true;
-    _e = err;
-  } finally {
-    try {
-      if (!_n && _i["return"] != null) _i["return"]();
-    } finally {
-      if (_d) throw _e;
-    }
-  }
-
-  return _arr;
-}
-
-module.exports = _iterableToArrayLimit;
-},{}],"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":[function(require,module,exports) {
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) {
-    arr2[i] = arr[i];
-  }
-
-  return arr2;
-}
-
-module.exports = _arrayLikeToArray;
-},{}],"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js":[function(require,module,exports) {
-var arrayLikeToArray = require("./arrayLikeToArray");
-
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return arrayLikeToArray(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(o);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
-}
-
-module.exports = _unsupportedIterableToArray;
-},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/nonIterableRest.js":[function(require,module,exports) {
-function _nonIterableRest() {
-  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}
-
-module.exports = _nonIterableRest;
-},{}],"../node_modules/@babel/runtime/helpers/slicedToArray.js":[function(require,module,exports) {
-var arrayWithHoles = require("./arrayWithHoles");
-
-var iterableToArrayLimit = require("./iterableToArrayLimit");
-
-var unsupportedIterableToArray = require("./unsupportedIterableToArray");
-
-var nonIterableRest = require("./nonIterableRest");
-
-function _slicedToArray(arr, i) {
-  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
-}
-
-module.exports = _slicedToArray;
-},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArrayLimit":"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"../node_modules/json-stringify-safe/stringify.js":[function(require,module,exports) {
-exports = module.exports = stringify
-exports.getSerialize = serializer
-
-function stringify(obj, replacer, spaces, cycleReplacer) {
-  return JSON.stringify(obj, serializer(replacer, cycleReplacer), spaces)
-}
-
-function serializer(replacer, cycleReplacer) {
-  var stack = [], keys = []
-
-  if (cycleReplacer == null) cycleReplacer = function(key, value) {
-    if (stack[0] === value) return "[Circular ~]"
-    return "[Circular ~." + keys.slice(0, stack.indexOf(value)).join(".") + "]"
-  }
-
-  return function(key, value) {
-    if (stack.length > 0) {
-      var thisPos = stack.indexOf(this)
-      ~thisPos ? stack.splice(thisPos + 1) : stack.push(this)
-      ~thisPos ? keys.splice(thisPos, Infinity, key) : keys.push(key)
-      if (~stack.indexOf(value)) value = cycleReplacer.call(this, key, value)
-    }
-    else stack.push(value)
-
-    return replacer == null ? value : replacer.call(this, key, value)
-  }
-}
-
-},{}],"../node_modules/random-seed/index.js":[function(require,module,exports) {
-/*
- * random-seed
- * https://github.com/skratchdot/random-seed
- *
- * This code was originally written by Steve Gibson and can be found here:
- *
- * https://www.grc.com/otg/uheprng.htm
- *
- * It was slightly modified for use in node, to pass jshint, and a few additional
- * helper functions were added.
- *
- * Copyright (c) 2013 skratchdot
- * Dual Licensed under the MIT license and the original GRC copyright/license
- * included below.
- */
-
-/*	============================================================================
-									Gibson Research Corporation
-				UHEPRNG - Ultra High Entropy Pseudo-Random Number Generator
-	============================================================================
-	LICENSE AND COPYRIGHT:  THIS CODE IS HEREBY RELEASED INTO THE PUBLIC DOMAIN
-	Gibson Research Corporation releases and disclaims ALL RIGHTS AND TITLE IN
-	THIS CODE OR ANY DERIVATIVES. Anyone may be freely use it for any purpose.
-	============================================================================
-	This is GRC's cryptographically strong PRNG (pseudo-random number generator)
-	for JavaScript. It is driven by 1536 bits of entropy, stored in an array of
-	48, 32-bit JavaScript variables.  Since many applications of this generator,
-	including ours with the "Off The Grid" Latin Square generator, may require
-	the deteriministic re-generation of a sequence of PRNs, this PRNG's initial
-	entropic state can be read and written as a static whole, and incrementally
-	evolved by pouring new source entropy into the generator's internal state.
-	----------------------------------------------------------------------------
-	ENDLESS THANKS are due Johannes Baagoe for his careful development of highly
-	robust JavaScript implementations of JS PRNGs.  This work was based upon his
-	JavaScript "Alea" PRNG which is based upon the extremely robust Multiply-
-	With-Carry (MWC) PRNG invented by George Marsaglia. MWC Algorithm References:
-	http://www.GRC.com/otg/Marsaglia_PRNGs.pdf
-	http://www.GRC.com/otg/Marsaglia_MWC_Generators.pdf
-	----------------------------------------------------------------------------
-	The quality of this algorithm's pseudo-random numbers have been verified by
-	multiple independent researchers. It handily passes the fermilab.ch tests as
-	well as the "diehard" and "dieharder" test suites.  For individuals wishing
-	to further verify the quality of this algorithm's pseudo-random numbers, a
-	256-megabyte file of this algorithm's output may be downloaded from GRC.com,
-	and a Microsoft Windows scripting host (WSH) version of this algorithm may be
-	downloaded and run from the Windows command prompt to generate unique files
-	of any size:
-	The Fermilab "ENT" tests: http://fourmilab.ch/random/
-	The 256-megabyte sample PRN file at GRC: https://www.GRC.com/otg/uheprng.bin
-	The Windows scripting host version: https://www.GRC.com/otg/wsh-uheprng.js
-	----------------------------------------------------------------------------
-	Qualifying MWC multipliers are: 187884, 686118, 898134, 1104375, 1250205,
-	1460910 and 1768863. (We use the largest one that's < 2^21)
-	============================================================================ */
-'use strict';
-
-var stringify = require('json-stringify-safe');
-/*	============================================================================
-This is based upon Johannes Baagoe's carefully designed and efficient hash
-function for use with JavaScript.  It has a proven "avalanche" effect such
-that every bit of the input affects every bit of the output 50% of the time,
-which is good.	See: http://baagoe.com/en/RandomMusings/hash/avalanche.xhtml
-============================================================================
-*/
-
-
-var Mash = function () {
-  var n = 0xefc8249d;
-
-  var mash = function (data) {
-    if (data) {
-      data = data.toString();
-
-      for (var i = 0; i < data.length; i++) {
-        n += data.charCodeAt(i);
-        var h = 0.02519603282416938 * n;
-        n = h >>> 0;
-        h -= n;
-        h *= n;
-        n = h >>> 0;
-        h -= n;
-        n += h * 0x100000000; // 2^32
-      }
-
-      return (n >>> 0) * 2.3283064365386963e-10; // 2^-32
-    } else {
-      n = 0xefc8249d;
-    }
-  };
-
-  return mash;
-};
-
-var uheprng = function (seed) {
-  return function () {
-    var o = 48; // set the 'order' number of ENTROPY-holding 32-bit values
-
-    var c = 1; // init the 'carry' used by the multiply-with-carry (MWC) algorithm
-
-    var p = o; // init the 'phase' (max-1) of the intermediate variable pointer
-
-    var s = new Array(o); // declare our intermediate variables array
-
-    var i; // general purpose local
-
-    var j; // general purpose local
-
-    var k = 0; // general purpose local
-    // when our "uheprng" is initially invoked our PRNG state is initialized from the
-    // browser's own local PRNG. This is okay since although its generator might not
-    // be wonderful, it's useful for establishing large startup entropy for our usage.
-
-    var mash = new Mash(); // get a pointer to our high-performance "Mash" hash
-    // fill the array with initial mash hash values
-
-    for (i = 0; i < o; i++) {
-      s[i] = mash(Math.random());
-    } // this PRIVATE (internal access only) function is the heart of the multiply-with-carry
-    // (MWC) PRNG algorithm. When called it returns a pseudo-random number in the form of a
-    // 32-bit JavaScript fraction (0.0 to <1.0) it is a PRIVATE function used by the default
-    // [0-1] return function, and by the random 'string(n)' function which returns 'n'
-    // characters from 33 to 126.
-
-
-    var rawprng = function () {
-      if (++p >= o) {
-        p = 0;
-      }
-
-      var t = 1768863 * s[p] + c * 2.3283064365386963e-10; // 2^-32
-
-      return s[p] = t - (c = t | 0);
-    }; // this EXPORTED function is the default function returned by this library.
-    // The values returned are integers in the range from 0 to range-1. We first
-    // obtain two 32-bit fractions (from rawprng) to synthesize a single high
-    // resolution 53-bit prng (0 to <1), then we multiply this by the caller's
-    // "range" param and take the "floor" to return a equally probable integer.
-
-
-    var random = function (range) {
-      return Math.floor(range * (rawprng() + (rawprng() * 0x200000 | 0) * 1.1102230246251565e-16)); // 2^-53
-    }; // this EXPORTED function 'string(n)' returns a pseudo-random string of
-    // 'n' printable characters ranging from chr(33) to chr(126) inclusive.
-
-
-    random.string = function (count) {
-      var i;
-      var s = '';
-
-      for (i = 0; i < count; i++) {
-        s += String.fromCharCode(33 + random(94));
-      }
-
-      return s;
-    }; // this PRIVATE "hash" function is used to evolve the generator's internal
-    // entropy state. It is also called by the EXPORTED addEntropy() function
-    // which is used to pour entropy into the PRNG.
-
-
-    var hash = function () {
-      var args = Array.prototype.slice.call(arguments);
-
-      for (i = 0; i < args.length; i++) {
-        for (j = 0; j < o; j++) {
-          s[j] -= mash(args[i]);
-
-          if (s[j] < 0) {
-            s[j] += 1;
-          }
-        }
-      }
-    }; // this EXPORTED "clean string" function removes leading and trailing spaces and non-printing
-    // control characters, including any embedded carriage-return (CR) and line-feed (LF) characters,
-    // from any string it is handed. this is also used by the 'hashstring' function (below) to help
-    // users always obtain the same EFFECTIVE uheprng seeding key.
-
-
-    random.cleanString = function (inStr) {
-      inStr = inStr.replace(/(^\s*)|(\s*$)/gi, ''); // remove any/all leading spaces
-
-      inStr = inStr.replace(/[\x00-\x1F]/gi, ''); // remove any/all control characters
-
-      inStr = inStr.replace(/\n /, '\n'); // remove any/all trailing spaces
-
-      return inStr; // return the cleaned up result
-    }; // this EXPORTED "hash string" function hashes the provided character string after first removing
-    // any leading or trailing spaces and ignoring any embedded carriage returns (CR) or Line Feeds (LF)
-
-
-    random.hashString = function (inStr) {
-      inStr = random.cleanString(inStr);
-      mash(inStr); // use the string to evolve the 'mash' state
-
-      for (i = 0; i < inStr.length; i++) {
-        // scan through the characters in our string
-        k = inStr.charCodeAt(i); // get the character code at the location
-
-        for (j = 0; j < o; j++) {
-          //	"mash" it into the UHEPRNG state
-          s[j] -= mash(k);
-
-          if (s[j] < 0) {
-            s[j] += 1;
-          }
-        }
-      }
-    }; // this EXPORTED function allows you to seed the random generator.
-
-
-    random.seed = function (seed) {
-      if (typeof seed === 'undefined' || seed === null) {
-        seed = Math.random();
-      }
-
-      if (typeof seed !== 'string') {
-        seed = stringify(seed, function (key, value) {
-          if (typeof value === 'function') {
-            return value.toString();
-          }
-
-          return value;
-        });
-      }
-
-      random.initState();
-      random.hashString(seed);
-    }; // this handy exported function is used to add entropy to our uheprng at any time
-
-
-    random.addEntropy = function ()
-    /* accept zero or more arguments */
-    {
-      var args = [];
-
-      for (i = 0; i < arguments.length; i++) {
-        args.push(arguments[i]);
-      }
-
-      hash(k++ + new Date().getTime() + args.join('') + Math.random());
-    }; // if we want to provide a deterministic startup context for our PRNG,
-    // but without directly setting the internal state variables, this allows
-    // us to initialize the mash hash and PRNG's internal state before providing
-    // some hashing input
-
-
-    random.initState = function () {
-      mash(); // pass a null arg to force mash hash to init
-
-      for (i = 0; i < o; i++) {
-        s[i] = mash(' '); // fill the array with initial mash hash values
-      }
-
-      c = 1; // init our multiply-with-carry carry
-
-      p = o; // init our phase
-    }; // we use this (optional) exported function to signal the JavaScript interpreter
-    // that we're finished using the "Mash" hash function so that it can free up the
-    // local "instance variables" is will have been maintaining.  It's not strictly
-    // necessary, of course, but it's good JavaScript citizenship.
-
-
-    random.done = function () {
-      mash = null;
-    }; // if we called "uheprng" with a seed value, then execute random.seed() before returning
-
-
-    if (typeof seed !== 'undefined') {
-      random.seed(seed);
-    } // Returns a random integer between 0 (inclusive) and range (exclusive)
-
-
-    random.range = function (range) {
-      return random(range);
-    }; // Returns a random float between 0 (inclusive) and 1 (exclusive)
-
-
-    random.random = function () {
-      return random(Number.MAX_VALUE - 1) / Number.MAX_VALUE;
-    }; // Returns a random float between min (inclusive) and max (exclusive)
-
-
-    random.floatBetween = function (min, max) {
-      return random.random() * (max - min) + min;
-    }; // Returns a random integer between min (inclusive) and max (inclusive)
-
-
-    random.intBetween = function (min, max) {
-      return Math.floor(random.random() * (max - min + 1)) + min;
-    }; // when our main outer "uheprng" function is called, after setting up our
-    // initial variables and entropic state, we return an "instance pointer"
-    // to the internal anonymous function which can then be used to access
-    // the uheprng's various exported functions.  As with the ".done" function
-    // above, we should set the returned value to 'null' once we're finished
-    // using any of these functions.
-
-
-    return random;
-  }();
-}; // Modification for use in node:
-
-
-uheprng.create = function (seed) {
-  return new uheprng(seed);
-};
-
-module.exports = uheprng;
-},{"json-stringify-safe":"../node_modules/json-stringify-safe/stringify.js"}],"animation/rng.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
-
-var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
-
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
-var _randomSeed = _interopRequireDefault(require("random-seed"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Random = function Random(_seed) {
-  var _this = this;
-
-  (0, _classCallCheck2.default)(this, Random);
-  (0, _defineProperty2.default)(this, "activate", function (seed) {
-    _this.seed = seed;
-    _this.rng = _randomSeed.default.create(seed);
-  });
-  (0, _defineProperty2.default)(this, "random", function () {
-    return _this.rng.random();
-  });
-  (0, _defineProperty2.default)(this, "int", function () {
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    var _ref = args.length === 1 ? [0, args[1]] : args,
-        _ref2 = (0, _slicedToArray2.default)(_ref, 2),
-        min = _ref2[0],
-        max = _ref2[1];
-
-    return _this.rng.intBetween(min, max);
-  });
-  this.activate(_seed);
-}
-/** sets the random seed to use */
-;
-
-exports.default = Random;
-},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","random-seed":"../node_modules/random-seed/index.js"}],"../node_modules/lodash/lodash.js":[function(require,module,exports) {
+},{"base64-js":"../node_modules/base64-js/index.js","ieee754":"../node_modules/ieee754/index.js","isarray":"../node_modules/isarray/index.js","buffer":"../node_modules/buffer/index.js"}],"../node_modules/lodash/lodash.js":[function(require,module,exports) {
 var global = arguments[3];
 var Buffer = require("buffer").Buffer;
 var define;
@@ -65065,7 +65067,7 @@ exports.clone = clone;
 exports.toRole = toRole;
 exports.unpack = unpack;
 
-var _cloneDeep = _interopRequireDefault(require("clone-deep"));
+var _fastCopy = _interopRequireDefault(require("fast-copy"));
 
 var _deepDefaults = _interopRequireDefault(require("deep-defaults"));
 
@@ -65097,7 +65099,7 @@ function clone(animator, data, path) {
 
   var source = path.isAbsolute ? animator.manifest : data;
   var cloned = (0, _path.resolvePath)(source, path.parts);
-  return (0, _cloneDeep.default)(cloned);
+  return (0, _fastCopy.default)(cloned);
 }
 /** converts a role string to an array */
 
@@ -65135,7 +65137,1196 @@ function unpack(animator, root, source, prop) {
       }
     }
 }
-},{"clone-deep":"../node_modules/clone-deep/index.js","deep-defaults":"../node_modules/deep-defaults/lib/index.js","../utils":"utils/index.js","./path":"animation/path.js","./errors":"animation/errors.js"}],"../node_modules/animejs/lib/anime.es.js":[function(require,module,exports) {
+},{"fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-defaults":"../node_modules/deep-defaults/lib/index.js","../utils":"utils/index.js","./path":"animation/path.js","./errors":"animation/errors.js"}],"utils/collection.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.flatten = flatten;
+exports.map = map;
+exports.first = first;
+
+var _ = require(".");
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+// single depth flattening
+function flatten(collection) {
+  var items = [];
+
+  var _iterator = _createForOfIteratorHelper(collection),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var item = _step.value;
+      if ((0, _.isArray)(item)) items = items.concat(item);else items.push(item);
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  return items;
+} // simple map function
+
+
+function map(source, action) {
+  var keep = [];
+  if ((0, _.isArray)(source)) for (var i = 0; i < source.length; i++) {
+    keep.push(action(source[i], i));
+  } else for (var _i in source) {
+    keep.push(action(source[_i], _i));
+  }
+  return keep;
+}
+/** finds the first item in a collection */
+
+
+function first() {
+  for (var _len = arguments.length, items = new Array(_len), _key = 0; _key < _len; _key++) {
+    items[_key] = arguments[_key];
+  }
+
+  items = flatten(items);
+
+  var _iterator2 = _createForOfIteratorHelper(items),
+      _step2;
+
+  try {
+    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+      var item = _step2.value;
+      if (!(0, _.isNil)(item)) return item;
+    }
+  } catch (err) {
+    _iterator2.e(err);
+  } finally {
+    _iterator2.f();
+  }
+}
+},{".":"utils/index.js"}],"animation/converters.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.toEasing = exports.toAnimationSpeed = exports.toBlendMode = exports.toRotation = exports.toRelative = exports.toColor = void 0;
+
+var PIXI = _interopRequireWildcard(require("pixi.js"));
+
+var _utils = require("../utils");
+
+var _collection = require("../utils/collection");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+// calculations
+var toColor = function toColor(value) {
+  // already a hex string
+  if ((0, _utils.isString)(value)) return value; // parse decimals as hex
+
+  var hex = parseInt(value, 10).toString(16);
+  return '000000'.substr(hex.length) + hex;
+}; // makes a value relative to another
+// TODO: how to make this convenient for pivot points
+
+
+exports.toColor = toColor;
+
+var toRelative = function toRelative(value, relativeTo) {
+  return value * relativeTo;
+}; // misc values
+
+
+exports.toRelative = toRelative;
+
+var toRotation = function toRotation(rotation) {
+  return rotation * _utils.RAD;
+};
+
+exports.toRotation = toRotation;
+
+var toBlendMode = function toBlendMode(mode) {
+  return PIXI.BLEND_MODES[mode.toUpperCase()] || PIXI.BLEND_MODES.NORMAL;
+};
+
+exports.toBlendMode = toBlendMode;
+
+var toAnimationSpeed = function toAnimationSpeed(fps) {
+  return fps / 60;
+}; // creating the easing value
+
+
+exports.toAnimationSpeed = toAnimationSpeed;
+
+var toEasing = function toEasing(ease) {
+  // allow for a complex bezier
+  if ((0, _utils.isArray)(ease)) {
+    // if the first value is a number, assume cubic bezier
+    if ((0, _utils.isNumber)(ease[0])) return "cubicBezier(".concat(ease.join(','), ")"); // otherwise, map each
+
+    return (0, _collection.map)(ease, toEasing);
+  } // looks wacky, but it's juset converting snake case to
+  // camel case and prefixing with "ease"
+  // so, "in_out" or "inOut" becomes "easeInOut"
+  else if ((0, _utils.isString)(ease)) {
+      // dont' convert this
+      if (ease === 'linear') return ease; // format the names, just in case
+
+      ease = ease.replace(/\_.{1}/g, function (str) {
+        return str.substr(1).toUpperCase();
+      });
+      if (ease.substr(0, 4) !== 'ease') ease = "ease" + ease[0].toUpperCase() + ease.substr(1); // TODO: fix animation files
+      // missing required ending
+
+      if (ease === 'easeIn' || ease === 'easeOut' || ease === 'easeInOut') ease += 'Quad';
+    } // check for an easing or just use linear
+
+
+  return ease;
+};
+
+exports.toEasing = toEasing;
+},{"pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","../utils":"utils/index.js","../utils/collection":"utils/collection.js"}],"animation/mappings.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.lookup = lookup;
+exports.MAPPINGS = void 0;
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var _converters = require("./converters");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// checks for emitter pivots
+function detectPivot(obj, value, relativeTo) {
+  return value * (obj.isEmitter ? 1 : relativeTo);
+}
+/** gets a mapping using a property name */
+
+
+function lookup(prop) {
+  var mapping = LOOKUP[prop];
+
+  if (!mapping) {
+    throw new Error("Mapping ".concat(prop, " was not found"));
+  }
+
+  return mapping;
+}
+/** a series of mapping from a property name to PIXI object value */
+
+
+var MAPPINGS = [// transforms
+{
+  prop: 'x',
+  apply: function apply(t, v) {
+    return t.x = v;
+  }
+}, {
+  prop: 'y',
+  apply: function apply(t, v) {
+    return t.y = v;
+  }
+}, {
+  prop: 'z',
+  apply: function apply(t, v) {
+    return t.zIndex = v;
+  }
+}, {
+  prop: 'rotation',
+  apply: function apply(t, v) {
+    return t.rotation = (0, _converters.toRotation)(v);
+  }
+}, // animation
+{
+  prop: 'fps',
+  apply: function apply(t, v) {
+    return t.animationSpeed = (0, _converters.toAnimationSpeed)(v);
+  }
+}, // { prop: '// currentFrame', apply: ? }?
+// colors and styling
+{
+  prop: 'alpha',
+  apply: function apply(t, v) {
+    return t.alpha = v;
+  }
+}, {
+  prop: 'opacity',
+  apply: function apply(t, v) {
+    return t.alpha = v;
+  }
+}, {
+  prop: 'blend',
+  apply: function apply(t, v) {
+    return t.blendMode = (0, _converters.toBlendMode)(v);
+  }
+}, {
+  prop: 'blendMode',
+  apply: function apply(t, v) {
+    return t.blendMode = (0, _converters.toBlendMode)(v);
+  }
+}, {
+  prop: 'tint',
+  apply: function apply(t, v) {
+    return t.tint = v;
+  }
+}, // special RGBA tint -- the popmotion library
+// converts this to rgba(###) unfortunately, so we need to
+// convert it back to decimal
+{
+  prop: '__animated_tint__',
+  apply: function apply(t, v) {
+    var _v$replace$split = v.replace(/[^0-9\,\.]/g, '').split(/\,/g),
+        _v$replace$split2 = (0, _slicedToArray2.default)(_v$replace$split, 3),
+        r = _v$replace$split2[0],
+        g = _v$replace$split2[1],
+        b = _v$replace$split2[2];
+
+    t.tint = (0 | r) * 65536 + (0 | g) * 256 + (0 | b);
+  }
+}, // layer pivoting
+{
+  prop: 'pivotX',
+  apply: function apply(t, v) {
+    return t.pivot.x = detectPivot(t, v, t.width);
+  }
+}, {
+  prop: 'pivotY',
+  apply: function apply(t, v) {
+    return t.pivot.y = detectPivot(t, v, t.height);
+  }
+}, // layer scaling
+{
+  prop: 'scaleX',
+  apply: function apply(t, v) {
+    return t.scale.x = v;
+  }
+}, {
+  prop: 'scaleY',
+  apply: function apply(t, v) {
+    return t.scale.y = v;
+  }
+}, // layer scaling
+{
+  prop: 'skewX',
+  apply: function apply(t, v) {
+    return t.skew.x = v;
+  }
+}, {
+  prop: 'skewY',
+  apply: function apply(t, v) {
+    return t.skew.y = v;
+  }
+}, // emitter props
+{
+  prop: 'emit.y',
+  apply: function apply(t, v) {
+    return t.emitter.spawnPos.y = v;
+  }
+}, {
+  prop: 'emit.x',
+  apply: function apply(t, v) {
+    return t.emitter.spawnPos.x = v;
+  }
+}, // emitter bounds (rectangles)
+{
+  prop: 'emit.rect.width',
+  apply: function apply(t, v) {
+    return t.emitter.spawnRect.width = v;
+  }
+}, {
+  prop: 'emit.rect.height',
+  apply: function apply(t, v) {
+    return t.emitter.spawnRect.height = v;
+  }
+}, {
+  prop: 'emit.rect.x',
+  apply: function apply(t, v) {
+    return t.emitter.spawnRect.x = v;
+  }
+}, {
+  prop: 'emit.rect.y',
+  apply: function apply(t, v) {
+    return t.emitter.spawnRect.x = v;
+  }
+}]; // quick lookup table
+
+exports.MAPPINGS = MAPPINGS;
+var LOOKUP = {};
+
+for (var _i = 0, _MAPPINGS = MAPPINGS; _i < _MAPPINGS.length; _i++) {
+  var mapping = _MAPPINGS[_i];
+  LOOKUP[mapping.prop] = mapping.apply;
+}
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","./converters":"animation/converters.js"}],"animation/expressions.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.setRandomizer = setRandomizer;
+exports.addTo = addTo;
+exports.subtractBy = subtractBy;
+exports.multiplyBy = multiplyBy;
+exports.divideBy = divideBy;
+exports.percentOf = percentOf;
+exports.range = range;
+exports.expression = expression;
+exports.pick = pick;
+exports.sequence = sequence;
+exports.getRelativeArgs = getRelativeArgs;
+exports.relativeX = relativeX;
+exports.relativeY = relativeY;
+exports.getRandom = getRandom;
+exports.isExpression = isExpression;
+exports.isDynamic = isDynamic;
+exports.evaluateExpression = evaluateExpression;
+exports.createDynamicExpression = createDynamicExpression;
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var _utils = require("../utils");
+
+var mappings = _interopRequireWildcard(require("./mappings"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// defaults to standard Math random function
+var randomizer = Math;
+/** assigns a randomizer to use for the random expression */
+
+function setRandomizer(val) {
+  randomizer = val;
+}
+/** expression types */
+
+
+var EXPRESSIONS = {
+  ':+': addTo,
+  ':-': subtractBy,
+  ':*': multiplyBy,
+  ':/': divideBy,
+  ':%': percentOf,
+  ':exp': expression,
+  ':pick': pick,
+  ':seq': sequence,
+  ':sequence': sequence,
+  ':range': range
+};
+var DYNAMICS = {
+  ':rnd': getRandom,
+  ':rx': relativeX,
+  ':ry': relativeY
+};
+
+function addTo(add, relativeTo) {
+  return relativeTo + add;
+}
+
+function subtractBy(subtract, relativeTo) {
+  return relativeTo - subtract;
+}
+
+function multiplyBy(multiply, relativeTo) {
+  return relativeTo * multiply;
+}
+
+function divideBy(divide, relativeTo) {
+  return relativeTo / divide;
+}
+
+function percentOf(percent, relativeTo) {
+  return relativeTo * (percent / 100);
+}
+
+function range() {
+  for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
+    params[_key] = arguments[_key];
+  }
+
+  // sort out the params
+  var toInt = !~params.indexOf('decimal'); // extract the value
+
+  var min = params[0],
+      max = params[1];
+
+  if (isNaN(max)) {
+    max = min;
+    min = 0;
+  } // randomize
+
+
+  var value = randomizer.random() * (max - min) + min;
+  return toInt ? 0 | value : value;
+}
+
+function expression() {
+  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
+  }
+
+  var val = args[0];
+
+  for (var i = 1; i < args.length; i += 2) {
+    var action = EXPRESSIONS[args[i]];
+    val = action(val, args[i + 1]);
+  }
+
+  return isNaN(val) ? 0 : val;
+}
+
+function pick() {
+  for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+    args[_key3] = arguments[_key3];
+  }
+
+  return args[Math.floor(args.length * randomizer.random())];
+} // TODO: this is just a temp solution -- because each
+// sequence array would be unique, there isn't actually any way
+// to keep a shared sequence without an identity - this uses
+// the array as a string for a reference
+
+
+var SEQUENCES = {};
+
+function sequence() {
+  for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+    args[_key4] = arguments[_key4];
+  }
+
+  // create a key to allow for a shared list
+  var key = args.join('::');
+  var sequence = SEQUENCES[key]; // if not shared yet, share it now
+
+  if (!sequence) {
+    SEQUENCES[key] = sequence = args; // check if shuffled
+
+    if (sequence[0] === ':shuffle') {
+      sequence.shift();
+      shuffle(sequence);
+    }
+  } // cycle the item
+
+
+  var selected = sequence.pop();
+  sequence.unshift(selected);
+  return selected;
+} // extract args
+
+
+function getRelativeArgs(args) {
+  var _args = (0, _slicedToArray2.default)(args, 2),
+      min = _args[0],
+      max = _args[1];
+
+  var param1 = args[2];
+  var param2 = args[3];
+  var flip = param1 === 'flip' || param2 === 'flip';
+  var toInt = param1 === 'int' || param2 === 'int';
+  return [min, max, flip, toInt];
+} // value is relative to the x position on screen
+
+
+function relativeX(obj, stage, prop) {
+  var bounds = obj.getBounds();
+
+  for (var _len5 = arguments.length, args = new Array(_len5 > 3 ? _len5 - 3 : 0), _key5 = 3; _key5 < _len5; _key5++) {
+    args[_key5 - 3] = arguments[_key5];
+  }
+
+  calculateRelative(obj, prop, args, bounds.x, stage.width);
+} // value is relative to the x position on screen
+
+
+function relativeY(obj, stage, prop) {
+  var bounds = obj.getBounds();
+
+  for (var _len6 = arguments.length, args = new Array(_len6 > 3 ? _len6 - 3 : 0), _key6 = 3; _key6 < _len6; _key6++) {
+    args[_key6 - 3] = arguments[_key6];
+  }
+
+  calculateRelative(obj, prop, args, bounds.y, stage.height);
+} // calculates a relative position from bounds and a relative value
+
+
+function calculateRelative(obj, prop, args, at, relativeTo) {
+  var _getRelativeArgs = getRelativeArgs(args),
+      _getRelativeArgs2 = (0, _slicedToArray2.default)(_getRelativeArgs, 4),
+      min = _getRelativeArgs2[0],
+      max = _getRelativeArgs2[1],
+      flip = _getRelativeArgs2[2],
+      toInt = _getRelativeArgs2[3]; // calculate the percent
+
+
+  var percent; // flips at center
+
+  if (flip) {
+    var cx = relativeTo / 2;
+    percent = Math.abs((at - cx) / cx);
+  } // full range
+  else {
+      percent = at / relativeTo;
+    } // specials
+
+
+  if (prop === 'visible') {
+    obj.visible = percent > min && percent < max;
+    return;
+  }
+
+  var value = (max - min) * percent + min;
+  if (!isFinite(value) || isNaN(value)) return; // assign the value
+
+  var mapping = mappings.lookup(prop);
+  mapping(obj, toInt ? 0 | value : value);
+}
+/** returns a random number in a range */
+
+
+function getRandom(obj, stage, prop) {
+  var mapping = mappings.lookup(prop); // check for a cached value
+
+  var cacheKey = "___cache_".concat(prop, "___");
+  var cached = obj[cacheKey]; // apply the cached value
+
+  if (cached !== undefined) {
+    mapping(obj, cached);
+    return;
+  } // sort out the params
+
+
+  for (var _len7 = arguments.length, params = new Array(_len7 > 3 ? _len7 - 3 : 0), _key7 = 3; _key7 < _len7; _key7++) {
+    params[_key7 - 3] = arguments[_key7];
+  }
+
+  var toInt = !~params.indexOf('decimal');
+  var isVariable = !!~params.indexOf('var'); // extract the value
+
+  var min = params[0],
+      max = params[1];
+
+  if (isNaN(max)) {
+    max = min;
+    min = 0;
+  } // randomize
+
+
+  var value = randomizer.random() * (max - min) + min;
+  var result = toInt ? 0 | value : value; // cache, if needed
+
+  if (!isVariable) {
+    obj[cacheKey] = result;
+  } // save the result
+
+
+  mapping(obj, result);
+}
+/** checks if a node appears to be an expression */
+
+
+function isExpression(value) {
+  return (0, _utils.isArray)(value) && (0, _utils.isString)(value[0]) && !!EXPRESSIONS[value[0]];
+}
+/** checks if a node appears to be an expression */
+
+
+function isDynamic(value) {
+  return (0, _utils.isArray)(value) && (0, _utils.isString)(value[0]) && !!DYNAMICS[value[0]];
+}
+/** evaluates an expression node */
+
+
+function evaluateExpression(expression) {
+  if (!isExpression(expression)) return expression;
+
+  var _expression = (0, _slicedToArray2.default)(expression, 1),
+      token = _expression[0];
+
+  var handler = EXPRESSIONS[token];
+  var rest = expression.slice(1);
+
+  for (var _len8 = arguments.length, args = new Array(_len8 > 1 ? _len8 - 1 : 0), _key8 = 1; _key8 < _len8; _key8++) {
+    args[_key8 - 1] = arguments[_key8];
+  }
+
+  rest.push.apply(rest, args); // this expression will probably fail
+
+  if (!handler) {
+    console.error("No expression handler was found for token ".concat(token));
+    return null;
+  }
+
+  try {
+    return handler.apply(this, rest);
+  } catch (ex) {
+    console.error("Failed to evaluate expression ".concat(token, " with ").concat(rest.join(', ')));
+    throw ex;
+  }
+}
+/** generates a function for dynamic evaluation */
+
+
+function createDynamicExpression(prop, source) {
+  var expression = source[prop]; // not a dynamic property
+
+  if (!isDynamic(expression)) return expression;
+
+  var _expression2 = (0, _slicedToArray2.default)(expression, 1),
+      token = _expression2[0];
+
+  var handler = DYNAMICS[token];
+  var rest = expression.slice(1); // include the property name to update
+
+  rest.unshift(prop); // include any extra configs
+
+  for (var _len9 = arguments.length, args = new Array(_len9 > 2 ? _len9 - 2 : 0), _key9 = 2; _key9 < _len9; _key9++) {
+    args[_key9 - 2] = arguments[_key9];
+  }
+
+  rest.push.apply(rest, args); // create the handler function
+
+  return function () {
+    for (var _len10 = arguments.length, params = new Array(_len10), _key10 = 0; _key10 < _len10; _key10++) {
+      params[_key10] = arguments[_key10];
+    }
+
+    var args = [].concat(params).concat(rest);
+    return handler.apply(null, args);
+  };
+} // shuffle an array without changing the reference
+
+
+function shuffle(items) {
+  var shuffled = [];
+
+  for (var i = items.length; i-- > 0;) {
+    var index = Math.floor(items.length & randomizer.random());
+    shuffled.push.apply(shuffled, items.splice(index, 1));
+  } // repopulate the array
+
+
+  items.push.apply(items, shuffled);
+}
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js","./mappings":"animation/mappings.js"}],"../node_modules/@babel/runtime/helpers/superPropBase.js":[function(require,module,exports) {
+var getPrototypeOf = require("./getPrototypeOf");
+
+function _superPropBase(object, property) {
+  while (!Object.prototype.hasOwnProperty.call(object, property)) {
+    object = getPrototypeOf(object);
+    if (object === null) break;
+  }
+
+  return object;
+}
+
+module.exports = _superPropBase;
+},{"./getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js"}],"../node_modules/@babel/runtime/helpers/get.js":[function(require,module,exports) {
+var superPropBase = require("./superPropBase");
+
+function _get(target, property, receiver) {
+  if (typeof Reflect !== "undefined" && Reflect.get) {
+    module.exports = _get = Reflect.get;
+  } else {
+    module.exports = _get = function _get(target, property, receiver) {
+      var base = superPropBase(target, property);
+      if (!base) return;
+      var desc = Object.getOwnPropertyDescriptor(base, property);
+
+      if (desc.get) {
+        return desc.get.call(receiver);
+      }
+
+      return desc.value;
+    };
+  }
+
+  return _get(target, property, receiver || target);
+}
+
+module.exports = _get;
+},{"./superPropBase":"../node_modules/@babel/runtime/helpers/superPropBase.js"}],"pixi/responsive.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _get3 = _interopRequireDefault(require("@babel/runtime/helpers/get"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var PIXI = _interopRequireWildcard(require("pixi.js"));
+
+var _stage = _interopRequireDefault(require("./stage"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+/** Handles responsive scaling for a container relative to a stage */
+var ResponsiveContainer = /*#__PURE__*/function (_PIXI$Container) {
+  (0, _inherits2.default)(ResponsiveContainer, _PIXI$Container);
+
+  var _super = _createSuper(ResponsiveContainer);
+
+  function ResponsiveContainer() {
+    var _this;
+
+    (0, _classCallCheck2.default)(this, ResponsiveContainer);
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _super.call.apply(_super, [this].concat(args));
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "_relativeX", 0);
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "_relativeY", 0);
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "scaleX", 0);
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "scaleY", 0);
+    return _this;
+  }
+
+  (0, _createClass2.default)(ResponsiveContainer, [{
+    key: "render",
+
+    /** match the scaling as required */
+    value: function render() {
+      var _get2;
+
+      // check if the stage scale has changed
+      var stage = _stage.default.findResponsiveStage(this);
+
+      if (stage.lastUpdate !== this._resizedTimestamp) {
+        this._resizedTimestamp = stage.lastUpdate; // update the scaling
+
+        var scaleX = stage.scaleX,
+            scaleY = stage.scaleY;
+        var _this$scale = this.scale,
+            x = _this$scale.x,
+            y = _this$scale.y; // update values
+
+        this.scale.x = x / Math.abs(x) * scaleX + this.scaleX;
+        this.scale.y = y / Math.abs(y) * scaleY + this.scaleY;
+      } // match their relative positions
+      // const { width, height } = stage;
+
+
+      this.x = this._relativeX * stage._definedWidth;
+      this.y = this._relativeY * stage._definedHeight; // perform the render
+
+      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+
+      (_get2 = (0, _get3.default)((0, _getPrototypeOf2.default)(ResponsiveContainer.prototype), "render", this)).call.apply(_get2, [this].concat(args));
+    }
+  }, {
+    key: "relativeX",
+
+    /** returns the relative position for a container 
+     * @returns {number} the relative position value
+    */
+    get: function get() {
+      return this._relativeX;
+    }
+    /** changes the relative position for a container 
+     * @param {number} value The percenage value to use 0-1
+    */
+    ,
+    set: function set(value) {
+      this._relativeX = value;
+    }
+    /** returns the relative position for a container 
+     * @returns {number} the relative position value
+    */
+
+  }, {
+    key: "relativeY",
+    get: function get() {
+      return this._relativeY;
+    }
+    /** changes the relative position for a container 
+     * @param {number} value The percenage value to use 0-1
+    */
+    ,
+    set: function set(value) {
+      this._relativeY = value;
+    } // internal position tracking
+
+  }]);
+  return ResponsiveContainer;
+}(PIXI.Container);
+
+exports.default = ResponsiveContainer;
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/get":"../node_modules/@babel/runtime/helpers/get.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./stage":"pixi/stage.js"}],"pixi/utils/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.findResponsiveStage = void 0;
+
+// This function is generated to be flat as opposed to using
+// a loop since it's performed each frame of animation by
+// many children
+// generates a function simiar to
+// function findResponsiveState(container) {
+//   if (!container.parent) return;
+//   if (container.parent.isResponsiveState) return container.parent;
+//   if (!container.parent.parent) return;
+//   if (container.parent.parent.isResponsiveState) return container.parent.parent;
+// ... and so on
+
+/** Searches PIXI ancestors looking for a ResponsiveStage */
+var findResponsiveStage = function () {
+  var MAXIMUM_LOOKUPS = 10;
+  var code = []; // create a check for the maximum number of lookups to perform
+
+  for (var i = 1; i < MAXIMUM_LOOKUPS; i++) {
+    // string together a series of .parent checks
+    var refs = [];
+
+    for (var j = 0; j < i; j++) {
+      refs.push('parent');
+    }
+
+    var ref = refs.join('.'); // create the condition to check for a parent
+    // and check if it's a ResponsiveStage
+
+    code.push("\n\t\t\tif (!container.".concat(ref, ") return;\n\t\t\tif (container.").concat(ref, ".isResponsiveStage) return container.").concat(ref, "\n\t\t"));
+  }
+  /** pre-compiled parent lookup */
+
+
+  return new Function('container', code.join(';'));
+}();
+
+exports.findResponsiveStage = findResponsiveStage;
+},{}],"pixi/stage.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var PIXI = _interopRequireWildcard(require("pixi.js"));
+
+var _responsive = _interopRequireDefault(require("./responsive"));
+
+var _utils = require("./utils");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+/** @typedef ResponsiveStageOptions
+ * @property {number} [height] Uses the provided height as the default scaling value for the stage
+ * @property {number} [width] Uses the provided width as the default scaling value for the stage
+*/
+
+/** creates a responsive stage for child elements to use */
+var ResponsiveStage = /*#__PURE__*/function (_PIXI$Container) {
+  (0, _inherits2.default)(ResponsiveStage, _PIXI$Container);
+
+  var _super = _createSuper(ResponsiveStage);
+
+  /** Creates a responsive stage that bases container sizes on a default size
+   * @param {ResponsiveStageOptions} options Options for creating a responsive stage
+   */
+  function ResponsiveStage(options) {
+    var _this;
+
+    (0, _classCallCheck2.default)(this, ResponsiveStage);
+
+    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
+    }
+
+    _this = _super.call.apply(_super, [this].concat(args));
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "_definedWidth", 0);
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "_definedHeight", 0);
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "isResponsiveStage", true);
+    _this.options = options;
+    return _this;
+  }
+  /** the defined width for this stage */
+
+
+  (0, _createClass2.default)(ResponsiveStage, [{
+    key: "resize",
+
+    /** resizes the stage */
+    value: function resize(width, height) {
+      var options = this.options; // track when last updated
+
+      this.lastUpdate = +new Date(); // update scaling values
+
+      this._definedWidth = width;
+      this._definedHeight = height;
+      this.scaleX = width / options.width;
+      this.scaleY = height / options.height; // if either value wasn't provided, replace it
+      // with the other value or 1
+
+      if (!('height' in options)) this.scaleY = this.scaleX || 1;
+      if (!('width' in options)) this.scaleX = this.scaleY || 1;
+    }
+    /** finds a responsive stage for a responsive container
+     * @type {ResponsiveContainer}
+     * @returns {ResponsiveStage | null} The stage, if any
+     */
+
+  }, {
+    key: "width",
+    get: function get() {
+      return this._definedWidth;
+    }
+    /** the defined size for this stage */
+
+  }, {
+    key: "height",
+    get: function get() {
+      return this._definedHeight;
+    } // defined scaling of the container
+
+  }], [{
+    key: "findResponsiveStage",
+    value: function findResponsiveStage(container) {
+      return (0, _utils.findResponsiveStage)(container);
+    }
+  }]);
+  return ResponsiveStage;
+}(PIXI.Container);
+
+exports.default = ResponsiveStage;
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./responsive":"pixi/responsive.js","./utils":"pixi/utils/index.js"}],"animation/assign.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.assignIf = assignIf;
+exports.assignDisplayObjectProps = assignDisplayObjectProps;
+exports.applyExpressions = applyExpressions;
+exports.applyDynamicProperties = applyDynamicProperties;
+
+var _utils = require("../utils");
+
+var _expressions = require("./expressions");
+
+var _stage = _interopRequireDefault(require("../pixi/stage"));
+
+var _mappings = require("./mappings");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var MISSING_STAGE = {
+  width: 0,
+  height: 0
+};
+var DYNAMIC_PROPERTY_DEFAULTS = {
+  x: 0,
+  y: 0,
+  z: 0,
+  rotation: 0,
+  skewX: 0,
+  skewY: 0,
+  pivotX: 0,
+  pivotY: 0,
+  scaleX: 1,
+  scaleY: 1,
+  anchorX: 0.5,
+  anchorY: 0.5
+};
+/** executes an assignment function only when the condtion passes */
+
+function assignIf(value, condition, target, action) {
+  for (var _len = arguments.length, args = new Array(_len > 4 ? _len - 4 : 0), _key = 4; _key < _len; _key++) {
+    args[_key - 4] = arguments[_key];
+  }
+
+  if (condition(value)) action.apply(void 0, [target, value].concat(args));
+}
+/** assigns common properties for a display object */
+
+
+function assignDisplayObjectProps(target, props) {
+  if (!props) return; // update each property
+
+  var _iterator = _createForOfIteratorHelper(_mappings.MAPPINGS),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var mapping = _step.value;
+
+      if (props[mapping.prop] !== undefined) {
+        mapping.apply(target, props[mapping.prop]);
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+}
+/** evaluates simple expressions */
+
+
+function applyExpressions(obj) {
+  for (var prop in obj) {
+    obj[prop] = (0, _expressions.evaluateExpression)(obj[prop]);
+  }
+}
+/** handles adding dynamically rendered properties */
+
+
+function applyDynamicProperties(obj, props) {
+  if (!props) return;
+  var hasDynamicProperties = false;
+  var update = _utils.noop; // handling locked scaled?
+  // TODOL is this needed?
+
+  obj.startingScaleY = obj.height; // check and map all dynamic props
+
+  for (var id in props) {
+    if ((0, _expressions.isDynamic)(props[id])) {
+      var handler = (0, _expressions.createDynamicExpression)(id, props);
+      hasDynamicProperties = true; // append the update function
+
+      update = (0, _utils.appendFunc)(update, handler);
+      props[id] = DYNAMIC_PROPERTY_DEFAULTS[id];
+    }
+  } // check for special functions
+
+
+  if (props.lockWidth) {
+    hasDynamicProperties = true; // create the update function
+
+    update = (0, _utils.appendFunc)(update, function (obj, stage) {
+      obj.scale.x = Math.min(10, obj.width / obj.getBounds().width * (props.scaleX || 1)) * (stage.scaleX || 1);
+    });
+  } // check for special functions
+
+
+  if (props.lockHeight) {
+    hasDynamicProperties = true; // create the update function
+
+    update = (0, _utils.appendFunc)(update, function (obj, stage) {
+      obj.scale.y = Math.min(10, obj.height / obj.getBounds().height * (props.scaleY || 1)) * (stage.scaleY || 1);
+    });
+  } // if nothing was found, just skip
+
+
+  if (!hasDynamicProperties) {
+    return;
+  } // create the handler function
+
+
+  var updateProperties = function updateProperties() {
+    var stage = obj.__responsiveStage__ = obj.__responsiveStage__ || _stage.default.findResponsiveStage(obj);
+
+    update(obj, stage || MISSING_STAGE);
+  }; // set the initial values
+
+
+  updateProperties(); // override the existing render function
+
+  var __render__ = obj.render;
+
+  obj.render = function () {
+    updateProperties(); // render normally
+
+    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    return __render__.apply(obj, args);
+  };
+}
+},{"../utils":"utils/index.js","./expressions":"animation/expressions.js","../pixi/stage":"pixi/stage.js","./mappings":"animation/mappings.js"}],"../node_modules/@babel/runtime/helpers/iterableToArray.js":[function(require,module,exports) {
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+module.exports = _iterableToArray;
+},{}],"../node_modules/@babel/runtime/helpers/toArray.js":[function(require,module,exports) {
+var arrayWithHoles = require("./arrayWithHoles");
+
+var iterableToArray = require("./iterableToArray");
+
+var unsupportedIterableToArray = require("./unsupportedIterableToArray");
+
+var nonIterableRest = require("./nonIterableRest");
+
+function _toArray(arr) {
+  return arrayWithHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableRest();
+}
+
+module.exports = _toArray;
+},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArray":"../node_modules/@babel/runtime/helpers/iterableToArray.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"../node_modules/animejs/lib/anime.es.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -66875,1229 +68066,7 @@ anime.random = function (min, max) {
 
 var _default = anime;
 exports.default = _default;
-},{}],"../node_modules/deep-get-set/index.js":[function(require,module,exports) {
-var hasOwnProp = Object.prototype.hasOwnProperty;
-
-module.exports = deep;
-
-function deep (obj, path, value) {
-  if (arguments.length === 3) return set.apply(null, arguments);
-  return get.apply(null, arguments);
-}
-
-function get (obj, path) {
-  var keys = Array.isArray(path) ? path : path.split('.');
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-    if (!obj || !hasOwnProp.call(obj, key)) {
-      obj = undefined;
-      break;
-    }
-    obj = obj[key];
-  }
-  return obj;
-}
-
-function set (obj, path, value) {
-  var keys = Array.isArray(path) ? path : path.split('.');
-  for (var i = 0; i < keys.length - 1; i++) {
-    var key = keys[i];
-    if (deep.p && !hasOwnProp.call(obj, key)) obj[key] = {};
-    obj = obj[key];
-  }
-  obj[keys[i]] = value;
-  return value;
-}
-
-},{}],"utils/collection.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.flatten = flatten;
-exports.map = map;
-exports.first = first;
-
-var _ = require(".");
-
-function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-// single depth flattening
-function flatten(collection) {
-  var items = [];
-
-  var _iterator = _createForOfIteratorHelper(collection),
-      _step;
-
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var item = _step.value;
-      if ((0, _.isArray)(item)) items = items.concat(item);else items.push(item);
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-
-  return items;
-} // simple map function
-
-
-function map(source, action) {
-  var keep = [];
-  if ((0, _.isArray)(source)) for (var i = 0; i < source.length; i++) {
-    keep.push(action(source[i], i));
-  } else for (var _i in source) {
-    keep.push(action(source[_i], _i));
-  }
-  return keep;
-}
-/** finds the first item in a collection */
-
-
-function first() {
-  for (var _len = arguments.length, items = new Array(_len), _key = 0; _key < _len; _key++) {
-    items[_key] = arguments[_key];
-  }
-
-  items = flatten(items);
-
-  var _iterator2 = _createForOfIteratorHelper(items),
-      _step2;
-
-  try {
-    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-      var item = _step2.value;
-      if (!(0, _.isNil)(item)) return item;
-    }
-  } catch (err) {
-    _iterator2.e(err);
-  } finally {
-    _iterator2.f();
-  }
-}
-},{".":"utils/index.js"}],"animation/converters.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.toEasing = exports.toAnimationSpeed = exports.toBlendMode = exports.toRotation = exports.toRelative = exports.toColor = void 0;
-
-var PIXI = _interopRequireWildcard(require("pixi.js"));
-
-var _utils = require("../utils");
-
-var _collection = require("../utils/collection");
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-// calculations
-var toColor = function toColor(value) {
-  // already a hex string
-  if ((0, _utils.isString)(value)) return value; // parse decimals as hex
-
-  var hex = parseInt(value, 10).toString(16);
-  return '000000'.substr(hex.length) + hex;
-}; // makes a value relative to another
-// TODO: how to make this convenient for pivot points
-
-
-exports.toColor = toColor;
-
-var toRelative = function toRelative(value, relativeTo) {
-  return value * relativeTo;
-}; // misc values
-
-
-exports.toRelative = toRelative;
-
-var toRotation = function toRotation(rotation) {
-  return rotation * _utils.RAD;
-};
-
-exports.toRotation = toRotation;
-
-var toBlendMode = function toBlendMode(mode) {
-  return PIXI.BLEND_MODES[mode.toUpperCase()] || PIXI.BLEND_MODES.NORMAL;
-};
-
-exports.toBlendMode = toBlendMode;
-
-var toAnimationSpeed = function toAnimationSpeed(fps) {
-  return fps / 60;
-}; // creating the easing value
-
-
-exports.toAnimationSpeed = toAnimationSpeed;
-
-var toEasing = function toEasing(ease) {
-  // allow for a complex bezier
-  if ((0, _utils.isArray)(ease)) {
-    // if the first value is a number, assume cubic bezier
-    if ((0, _utils.isNumber)(ease[0])) return "cubicBezier(".concat(ease.join(','), ")"); // otherwise, map each
-
-    return (0, _collection.map)(ease, toEasing);
-  } // looks wacky, but it's juset converting snake case to
-  // camel case and prefixing with "ease"
-  // so, "in_out" or "inOut" becomes "easeInOut"
-  else if ((0, _utils.isString)(ease)) {
-      // dont' convert this
-      if (ease === 'linear') return ease; // format the names, just in case
-
-      ease = ease.replace(/\_.{1}/g, function (str) {
-        return str.substr(1).toUpperCase();
-      });
-      if (ease.substr(0, 4) !== 'ease') ease = "ease" + ease[0].toUpperCase() + ease.substr(1); // TODO: fix animation files
-      // missing required ending
-
-      if (ease === 'easeIn' || ease === 'easeOut' || ease === 'easeInOut') ease += 'Quad';
-    } // check for an easing or just use linear
-
-
-  return ease;
-};
-
-exports.toEasing = toEasing;
-},{"pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","../utils":"utils/index.js","../utils/collection":"utils/collection.js"}],"animation/mappings.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.lookup = lookup;
-exports.MAPPINGS = void 0;
-
-var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
-
-var _converters = require("./converters");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// checks for emitter pivots
-function detectPivot(obj, value, relativeTo) {
-  return value * (obj.isEmitter ? 1 : relativeTo);
-}
-/** gets a mapping using a property name */
-
-
-function lookup(prop) {
-  var mapping = LOOKUP[prop];
-
-  if (!mapping) {
-    throw new Error("Mapping ".concat(prop, " was not found"));
-  }
-
-  return mapping;
-}
-/** a series of mapping from a property name to PIXI object value */
-
-
-var MAPPINGS = [// transforms
-{
-  prop: 'x',
-  apply: function apply(t, v) {
-    return t.x = v;
-  }
-}, {
-  prop: 'y',
-  apply: function apply(t, v) {
-    return t.y = v;
-  }
-}, {
-  prop: 'z',
-  apply: function apply(t, v) {
-    return t.zIndex = v;
-  }
-}, {
-  prop: 'rotation',
-  apply: function apply(t, v) {
-    return t.rotation = (0, _converters.toRotation)(v);
-  }
-}, // animation
-{
-  prop: 'fps',
-  apply: function apply(t, v) {
-    return t.animationSpeed = (0, _converters.toAnimationSpeed)(v);
-  }
-}, // { prop: '// currentFrame', apply: ? }?
-// colors and styling
-{
-  prop: 'alpha',
-  apply: function apply(t, v) {
-    return t.alpha = v;
-  }
-}, {
-  prop: 'opacity',
-  apply: function apply(t, v) {
-    return t.alpha = v;
-  }
-}, {
-  prop: 'blend',
-  apply: function apply(t, v) {
-    return t.blendMode = (0, _converters.toBlendMode)(v);
-  }
-}, {
-  prop: 'blendMode',
-  apply: function apply(t, v) {
-    return t.blendMode = (0, _converters.toBlendMode)(v);
-  }
-}, {
-  prop: 'tint',
-  apply: function apply(t, v) {
-    return t.tint = v;
-  }
-}, // special RGBA tint -- the popmotion library
-// converts this to rgba(###) unfortunately, so we need to
-// convert it back to decimal
-{
-  prop: '__animated_tint__',
-  apply: function apply(t, v) {
-    var _v$replace$split = v.replace(/[^0-9\,\.]/g, '').split(/\,/g),
-        _v$replace$split2 = (0, _slicedToArray2.default)(_v$replace$split, 3),
-        r = _v$replace$split2[0],
-        g = _v$replace$split2[1],
-        b = _v$replace$split2[2];
-
-    t.tint = (0 | r) * 65536 + (0 | g) * 256 + (0 | b);
-  }
-}, // layer pivoting
-{
-  prop: 'pivotX',
-  apply: function apply(t, v) {
-    return t.pivot.x = detectPivot(t, v, t.width);
-  }
-}, {
-  prop: 'pivotY',
-  apply: function apply(t, v) {
-    return t.pivot.y = detectPivot(t, v, t.height);
-  }
-}, // layer scaling
-{
-  prop: 'scaleX',
-  apply: function apply(t, v) {
-    return t.scale.x = v;
-  }
-}, {
-  prop: 'scaleY',
-  apply: function apply(t, v) {
-    return t.scale.y = v;
-  }
-}, // layer scaling
-{
-  prop: 'skewX',
-  apply: function apply(t, v) {
-    return t.skew.x = v;
-  }
-}, {
-  prop: 'skewY',
-  apply: function apply(t, v) {
-    return t.skew.y = v;
-  }
-}, // emitter props
-{
-  prop: 'emit.y',
-  apply: function apply(t, v) {
-    return t.emitter.spawnPos.y = v;
-  }
-}, {
-  prop: 'emit.x',
-  apply: function apply(t, v) {
-    return t.emitter.spawnPos.x = v;
-  }
-}, // emitter bounds (rectangles)
-{
-  prop: 'emit.rect.width',
-  apply: function apply(t, v) {
-    return t.emitter.spawnRect.width = v;
-  }
-}, {
-  prop: 'emit.rect.height',
-  apply: function apply(t, v) {
-    return t.emitter.spawnRect.height = v;
-  }
-}, {
-  prop: 'emit.rect.x',
-  apply: function apply(t, v) {
-    return t.emitter.spawnRect.x = v;
-  }
-}, {
-  prop: 'emit.rect.y',
-  apply: function apply(t, v) {
-    return t.emitter.spawnRect.x = v;
-  }
-}]; // quick lookup table
-
-exports.MAPPINGS = MAPPINGS;
-var LOOKUP = {};
-
-for (var _i = 0, _MAPPINGS = MAPPINGS; _i < _MAPPINGS.length; _i++) {
-  var mapping = _MAPPINGS[_i];
-  LOOKUP[mapping.prop] = mapping.apply;
-}
-},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","./converters":"animation/converters.js"}],"animation/expressions.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.setRandomizer = setRandomizer;
-exports.addTo = addTo;
-exports.subtractBy = subtractBy;
-exports.multiplyBy = multiplyBy;
-exports.divideBy = divideBy;
-exports.percentOf = percentOf;
-exports.range = range;
-exports.expression = expression;
-exports.pick = pick;
-exports.sequence = sequence;
-exports.getRelativeArgs = getRelativeArgs;
-exports.relativeX = relativeX;
-exports.relativeY = relativeY;
-exports.getRandom = getRandom;
-exports.isExpression = isExpression;
-exports.isDynamic = isDynamic;
-exports.evaluateExpression = evaluateExpression;
-exports.createDynamicExpression = createDynamicExpression;
-
-var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
-
-var _utils = require("../utils");
-
-var mappings = _interopRequireWildcard(require("./mappings"));
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// defaults to standard Math random function
-var randomizer = Math;
-/** assigns a randomizer to use for the random expression */
-
-function setRandomizer(val) {
-  randomizer = val;
-}
-/** expression types */
-
-
-var EXPRESSIONS = {
-  ':+': addTo,
-  ':-': subtractBy,
-  ':*': multiplyBy,
-  ':/': divideBy,
-  ':%': percentOf,
-  ':exp': expression,
-  ':pick': pick,
-  ':seq': sequence,
-  ':sequence': sequence,
-  ':range': range
-};
-var DYNAMICS = {
-  ':rnd': getRandom,
-  ':rx': relativeX,
-  ':ry': relativeY
-};
-
-function addTo(add, relativeTo) {
-  return relativeTo + add;
-}
-
-function subtractBy(subtract, relativeTo) {
-  return relativeTo - subtract;
-}
-
-function multiplyBy(multiply, relativeTo) {
-  return relativeTo * multiply;
-}
-
-function divideBy(divide, relativeTo) {
-  return relativeTo / divide;
-}
-
-function percentOf(percent, relativeTo) {
-  return relativeTo * (percent / 100);
-}
-
-function range() {
-  for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
-    params[_key] = arguments[_key];
-  }
-
-  // sort out the params
-  var toInt = !~params.indexOf('decimal'); // extract the value
-
-  var min = params[0],
-      max = params[1];
-
-  if (isNaN(max)) {
-    max = min;
-    min = 0;
-  } // randomize
-
-
-  var value = randomizer.random() * (max - min) + min;
-  return toInt ? 0 | value : value;
-}
-
-function expression() {
-  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    args[_key2] = arguments[_key2];
-  }
-
-  var val = args[0];
-
-  for (var i = 1; i < args.length; i += 2) {
-    var action = EXPRESSIONS[args[i]];
-    val = action(val, args[i + 1]);
-  }
-
-  return isNaN(val) ? 0 : val;
-}
-
-function pick() {
-  for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-    args[_key3] = arguments[_key3];
-  }
-
-  return args[Math.floor(args.length * randomizer.random())];
-} // TODO: this is just a temp solution -- because each
-// sequence array would be unique, there isn't actually any way
-// to keep a shared sequence without an identity - this uses
-// the array as a string for a reference
-
-
-var SEQUENCES = {};
-
-function sequence() {
-  for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-    args[_key4] = arguments[_key4];
-  }
-
-  // create a key to allow for a shared list
-  var key = args.join('::');
-  var sequence = SEQUENCES[key]; // if not shared yet, share it now
-
-  if (!sequence) {
-    SEQUENCES[key] = sequence = args; // check if shuffled
-
-    if (sequence[0] === ':shuffle') {
-      sequence.shift();
-      shuffle(sequence);
-    }
-  } // cycle the item
-
-
-  var selected = sequence.pop();
-  sequence.unshift(selected);
-  return selected;
-} // extract args
-
-
-function getRelativeArgs(args) {
-  var _args = (0, _slicedToArray2.default)(args, 2),
-      min = _args[0],
-      max = _args[1];
-
-  var param1 = args[2];
-  var param2 = args[3];
-  var flip = param1 === 'flip' || param2 === 'flip';
-  var toInt = param1 === 'int' || param2 === 'int';
-  return [min, max, flip, toInt];
-} // value is relative to the x position on screen
-
-
-function relativeX(obj, stage, prop) {
-  var bounds = obj.getBounds();
-
-  for (var _len5 = arguments.length, args = new Array(_len5 > 3 ? _len5 - 3 : 0), _key5 = 3; _key5 < _len5; _key5++) {
-    args[_key5 - 3] = arguments[_key5];
-  }
-
-  calculateRelative(obj, prop, args, bounds.x, stage.width);
-} // value is relative to the x position on screen
-
-
-function relativeY(obj, stage, prop) {
-  var bounds = obj.getBounds();
-
-  for (var _len6 = arguments.length, args = new Array(_len6 > 3 ? _len6 - 3 : 0), _key6 = 3; _key6 < _len6; _key6++) {
-    args[_key6 - 3] = arguments[_key6];
-  }
-
-  calculateRelative(obj, prop, args, bounds.y, stage.height);
-} // calculates a relative position from bounds and a relative value
-
-
-function calculateRelative(obj, prop, args, at, relativeTo) {
-  var _getRelativeArgs = getRelativeArgs(args),
-      _getRelativeArgs2 = (0, _slicedToArray2.default)(_getRelativeArgs, 4),
-      min = _getRelativeArgs2[0],
-      max = _getRelativeArgs2[1],
-      flip = _getRelativeArgs2[2],
-      toInt = _getRelativeArgs2[3]; // calculate the percent
-
-
-  var percent; // flips at center
-
-  if (flip) {
-    var cx = relativeTo / 2;
-    percent = Math.abs((at - cx) / cx);
-  } // full range
-  else {
-      percent = at / relativeTo;
-    } // specials
-
-
-  if (prop === 'visible') {
-    obj.visible = percent > min && percent < max;
-    return;
-  }
-
-  var value = (max - min) * percent + min;
-  if (!isFinite(value) || isNaN(value)) return; // assign the value
-
-  var mapping = mappings.lookup(prop);
-  mapping(obj, toInt ? 0 | value : value);
-}
-/** returns a random number in a range */
-
-
-function getRandom(obj, stage, prop) {
-  var mapping = mappings.lookup(prop); // check for a cached value
-
-  var cacheKey = "___cache_".concat(prop, "___");
-  var cached = obj[cacheKey]; // apply the cached value
-
-  if (cached !== undefined) {
-    mapping(obj, cached);
-    return;
-  } // sort out the params
-
-
-  for (var _len7 = arguments.length, params = new Array(_len7 > 3 ? _len7 - 3 : 0), _key7 = 3; _key7 < _len7; _key7++) {
-    params[_key7 - 3] = arguments[_key7];
-  }
-
-  var toInt = !~params.indexOf('decimal');
-  var isVariable = !!~params.indexOf('var'); // extract the value
-
-  var min = params[0],
-      max = params[1];
-
-  if (isNaN(max)) {
-    max = min;
-    min = 0;
-  } // randomize
-
-
-  var value = randomizer.random() * (max - min) + min;
-  var result = toInt ? 0 | value : value; // cache, if needed
-
-  if (!isVariable) {
-    obj[cacheKey] = result;
-  } // save the result
-
-
-  mapping(obj, result);
-}
-/** checks if a node appears to be an expression */
-
-
-function isExpression(value) {
-  return (0, _utils.isArray)(value) && (0, _utils.isString)(value[0]) && !!EXPRESSIONS[value[0]];
-}
-/** checks if a node appears to be an expression */
-
-
-function isDynamic(value) {
-  return (0, _utils.isArray)(value) && (0, _utils.isString)(value[0]) && !!DYNAMICS[value[0]];
-}
-/** evaluates an expression node */
-
-
-function evaluateExpression(expression) {
-  if (!isExpression(expression)) return expression;
-
-  var _expression = (0, _slicedToArray2.default)(expression, 1),
-      token = _expression[0];
-
-  var handler = EXPRESSIONS[token];
-  var rest = expression.slice(1);
-
-  for (var _len8 = arguments.length, args = new Array(_len8 > 1 ? _len8 - 1 : 0), _key8 = 1; _key8 < _len8; _key8++) {
-    args[_key8 - 1] = arguments[_key8];
-  }
-
-  rest.push.apply(rest, args); // this expression will probably fail
-
-  if (!handler) {
-    console.error("No expression handler was found for token ".concat(token));
-    return null;
-  }
-
-  try {
-    return handler.apply(this, rest);
-  } catch (ex) {
-    console.error("Failed to evaluate expression ".concat(token, " with ").concat(rest.join(', ')));
-    throw ex;
-  }
-}
-/** generates a function for dynamic evaluation */
-
-
-function createDynamicExpression(prop, source) {
-  var expression = source[prop]; // not a dynamic property
-
-  if (!isDynamic(expression)) return expression;
-
-  var _expression2 = (0, _slicedToArray2.default)(expression, 1),
-      token = _expression2[0];
-
-  var handler = DYNAMICS[token];
-  var rest = expression.slice(1); // include the property name to update
-
-  rest.unshift(prop); // include any extra configs
-
-  for (var _len9 = arguments.length, args = new Array(_len9 > 2 ? _len9 - 2 : 0), _key9 = 2; _key9 < _len9; _key9++) {
-    args[_key9 - 2] = arguments[_key9];
-  }
-
-  rest.push.apply(rest, args); // create the handler function
-
-  return function () {
-    for (var _len10 = arguments.length, params = new Array(_len10), _key10 = 0; _key10 < _len10; _key10++) {
-      params[_key10] = arguments[_key10];
-    }
-
-    var args = [].concat(params).concat(rest);
-    return handler.apply(null, args);
-  };
-} // shuffle an array without changing the reference
-
-
-function shuffle(items) {
-  var shuffled = [];
-
-  for (var i = items.length; i-- > 0;) {
-    var index = Math.floor(items.length & randomizer.random());
-    shuffled.push.apply(shuffled, items.splice(index, 1));
-  } // repopulate the array
-
-
-  items.push.apply(items, shuffled);
-}
-},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js","./mappings":"animation/mappings.js"}],"../node_modules/@babel/runtime/helpers/superPropBase.js":[function(require,module,exports) {
-var getPrototypeOf = require("./getPrototypeOf");
-
-function _superPropBase(object, property) {
-  while (!Object.prototype.hasOwnProperty.call(object, property)) {
-    object = getPrototypeOf(object);
-    if (object === null) break;
-  }
-
-  return object;
-}
-
-module.exports = _superPropBase;
-},{"./getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js"}],"../node_modules/@babel/runtime/helpers/get.js":[function(require,module,exports) {
-var superPropBase = require("./superPropBase");
-
-function _get(target, property, receiver) {
-  if (typeof Reflect !== "undefined" && Reflect.get) {
-    module.exports = _get = Reflect.get;
-  } else {
-    module.exports = _get = function _get(target, property, receiver) {
-      var base = superPropBase(target, property);
-      if (!base) return;
-      var desc = Object.getOwnPropertyDescriptor(base, property);
-
-      if (desc.get) {
-        return desc.get.call(receiver);
-      }
-
-      return desc.value;
-    };
-  }
-
-  return _get(target, property, receiver || target);
-}
-
-module.exports = _get;
-},{"./superPropBase":"../node_modules/@babel/runtime/helpers/superPropBase.js"}],"pixi/responsive.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
-
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
-var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
-
-var _get3 = _interopRequireDefault(require("@babel/runtime/helpers/get"));
-
-var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
-
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
-
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
-var PIXI = _interopRequireWildcard(require("pixi.js"));
-
-var _stage = _interopRequireDefault(require("./stage"));
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-/** Handles responsive scaling for a container relative to a stage */
-var ResponsiveContainer = /*#__PURE__*/function (_PIXI$Container) {
-  (0, _inherits2.default)(ResponsiveContainer, _PIXI$Container);
-
-  var _super = _createSuper(ResponsiveContainer);
-
-  function ResponsiveContainer() {
-    var _this;
-
-    (0, _classCallCheck2.default)(this, ResponsiveContainer);
-
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    _this = _super.call.apply(_super, [this].concat(args));
-    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "_relativeX", 0);
-    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "_relativeY", 0);
-    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "scaleX", 0);
-    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "scaleY", 0);
-    return _this;
-  }
-
-  (0, _createClass2.default)(ResponsiveContainer, [{
-    key: "render",
-
-    /** match the scaling as required */
-    value: function render() {
-      var _get2;
-
-      // check if the stage scale has changed
-      var stage = _stage.default.findResponsiveStage(this);
-
-      if (stage.lastUpdate !== this._resizedTimestamp) {
-        this._resizedTimestamp = stage.lastUpdate; // update the scaling
-
-        var scaleX = stage.scaleX,
-            scaleY = stage.scaleY;
-        var _this$scale = this.scale,
-            x = _this$scale.x,
-            y = _this$scale.y; // update values
-
-        this.scale.x = x / Math.abs(x) * scaleX + this.scaleX;
-        this.scale.y = y / Math.abs(y) * scaleY + this.scaleY;
-      } // match their relative positions
-      // const { width, height } = stage;
-
-
-      this.x = this._relativeX * stage._definedWidth;
-      this.y = this._relativeY * stage._definedHeight; // perform the render
-
-      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        args[_key2] = arguments[_key2];
-      }
-
-      (_get2 = (0, _get3.default)((0, _getPrototypeOf2.default)(ResponsiveContainer.prototype), "render", this)).call.apply(_get2, [this].concat(args));
-    }
-  }, {
-    key: "relativeX",
-
-    /** returns the relative position for a container 
-     * @returns {number} the relative position value
-    */
-    get: function get() {
-      return this._relativeX;
-    }
-    /** changes the relative position for a container 
-     * @param {number} value The percenage value to use 0-1
-    */
-    ,
-    set: function set(value) {
-      this._relativeX = value;
-    }
-    /** returns the relative position for a container 
-     * @returns {number} the relative position value
-    */
-
-  }, {
-    key: "relativeY",
-    get: function get() {
-      return this._relativeY;
-    }
-    /** changes the relative position for a container 
-     * @param {number} value The percenage value to use 0-1
-    */
-    ,
-    set: function set(value) {
-      this._relativeY = value;
-    } // internal position tracking
-
-  }]);
-  return ResponsiveContainer;
-}(PIXI.Container);
-
-exports.default = ResponsiveContainer;
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/get":"../node_modules/@babel/runtime/helpers/get.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./stage":"pixi/stage.js"}],"pixi/utils/index.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.findResponsiveStage = void 0;
-
-// This function is generated to be flat as opposed to using
-// a loop since it's performed each frame of animation by
-// many children
-// generates a function simiar to
-// function findResponsiveState(container) {
-//   if (!container.parent) return;
-//   if (container.parent.isResponsiveState) return container.parent;
-//   if (!container.parent.parent) return;
-//   if (container.parent.parent.isResponsiveState) return container.parent.parent;
-// ... and so on
-
-/** Searches PIXI ancestors looking for a ResponsiveStage */
-var findResponsiveStage = function () {
-  var MAXIMUM_LOOKUPS = 10;
-  var code = []; // create a check for the maximum number of lookups to perform
-
-  for (var i = 1; i < MAXIMUM_LOOKUPS; i++) {
-    // string together a series of .parent checks
-    var refs = [];
-
-    for (var j = 0; j < i; j++) {
-      refs.push('parent');
-    }
-
-    var ref = refs.join('.'); // create the condition to check for a parent
-    // and check if it's a ResponsiveStage
-
-    code.push("\n\t\t\tif (!container.".concat(ref, ") return;\n\t\t\tif (container.").concat(ref, ".isResponsiveStage) return container.").concat(ref, "\n\t\t"));
-  }
-  /** pre-compiled parent lookup */
-
-
-  return new Function('container', code.join(';'));
-}();
-
-exports.findResponsiveStage = findResponsiveStage;
-},{}],"pixi/stage.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
-
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
-var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
-
-var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
-
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
-
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
-var PIXI = _interopRequireWildcard(require("pixi.js"));
-
-var _responsive = _interopRequireDefault(require("./responsive"));
-
-var _utils = require("./utils");
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-/** @typedef ResponsiveStageOptions
- * @property {number} [height] Uses the provided height as the default scaling value for the stage
- * @property {number} [width] Uses the provided width as the default scaling value for the stage
-*/
-
-/** creates a responsive stage for child elements to use */
-var ResponsiveStage = /*#__PURE__*/function (_PIXI$Container) {
-  (0, _inherits2.default)(ResponsiveStage, _PIXI$Container);
-
-  var _super = _createSuper(ResponsiveStage);
-
-  /** Creates a responsive stage that bases container sizes on a default size
-   * @param {ResponsiveStageOptions} options Options for creating a responsive stage
-   */
-  function ResponsiveStage(options) {
-    var _this;
-
-    (0, _classCallCheck2.default)(this, ResponsiveStage);
-
-    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      args[_key - 1] = arguments[_key];
-    }
-
-    _this = _super.call.apply(_super, [this].concat(args));
-    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "_definedWidth", 0);
-    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "_definedHeight", 0);
-    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "isResponsiveStage", true);
-    _this.options = options;
-    return _this;
-  }
-  /** the defined width for this stage */
-
-
-  (0, _createClass2.default)(ResponsiveStage, [{
-    key: "resize",
-
-    /** resizes the stage */
-    value: function resize(width, height) {
-      var options = this.options; // track when last updated
-
-      this.lastUpdate = +new Date(); // update scaling values
-
-      this._definedWidth = width;
-      this._definedHeight = height;
-      this.scaleX = width / options.width;
-      this.scaleY = height / options.height; // if either value wasn't provided, replace it
-      // with the other value or 1
-
-      if (!('height' in options)) this.scaleY = this.scaleX || 1;
-      if (!('width' in options)) this.scaleX = this.scaleY || 1;
-    }
-    /** finds a responsive stage for a responsive container
-     * @type {ResponsiveContainer}
-     * @returns {ResponsiveStage | null} The stage, if any
-     */
-
-  }, {
-    key: "width",
-    get: function get() {
-      return this._definedWidth;
-    }
-    /** the defined size for this stage */
-
-  }, {
-    key: "height",
-    get: function get() {
-      return this._definedHeight;
-    } // defined scaling of the container
-
-  }], [{
-    key: "findResponsiveStage",
-    value: function findResponsiveStage(container) {
-      return (0, _utils.findResponsiveStage)(container);
-    }
-  }]);
-  return ResponsiveStage;
-}(PIXI.Container);
-
-exports.default = ResponsiveStage;
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./responsive":"pixi/responsive.js","./utils":"pixi/utils/index.js"}],"animation/assign.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.assignIf = assignIf;
-exports.assignDisplayObjectProps = assignDisplayObjectProps;
-exports.applyExpressions = applyExpressions;
-exports.applyDynamicProperties = applyDynamicProperties;
-
-var _utils = require("../utils");
-
-var _expressions = require("./expressions");
-
-var _stage = _interopRequireDefault(require("../pixi/stage"));
-
-var _mappings = require("./mappings");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-var MISSING_STAGE = {
-  width: 0,
-  height: 0
-};
-var DYNAMIC_PROPERTY_DEFAULTS = {
-  x: 0,
-  y: 0,
-  z: 0,
-  rotation: 0,
-  skewX: 0,
-  skewY: 0,
-  pivotX: 0,
-  pivotY: 0,
-  scaleX: 1,
-  scaleY: 1,
-  anchorX: 0.5,
-  anchorY: 0.5
-};
-/** executes an assignment function only when the condtion passes */
-
-function assignIf(value, condition, target, action) {
-  for (var _len = arguments.length, args = new Array(_len > 4 ? _len - 4 : 0), _key = 4; _key < _len; _key++) {
-    args[_key - 4] = arguments[_key];
-  }
-
-  if (condition(value)) action.apply(void 0, [target, value].concat(args));
-}
-/** assigns common properties for a display object */
-
-
-function assignDisplayObjectProps(target, props) {
-  if (!props) return; // update each property
-
-  var _iterator = _createForOfIteratorHelper(_mappings.MAPPINGS),
-      _step;
-
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var mapping = _step.value;
-
-      if (props[mapping.prop] !== undefined) {
-        mapping.apply(target, props[mapping.prop]);
-      }
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-}
-/** evaluates simple expressions */
-
-
-function applyExpressions(obj) {
-  for (var prop in obj) {
-    obj[prop] = (0, _expressions.evaluateExpression)(obj[prop]);
-  }
-}
-/** handles adding dynamically rendered properties */
-
-
-function applyDynamicProperties(obj, props) {
-  if (!props) return;
-  var hasDynamicProperties = false;
-  var update = _utils.noop; // handling locked scaled?
-  // TODOL is this needed?
-
-  obj.startingScaleY = obj.height; // check and map all dynamic props
-
-  for (var id in props) {
-    if ((0, _expressions.isDynamic)(props[id])) {
-      var handler = (0, _expressions.createDynamicExpression)(id, props);
-      hasDynamicProperties = true; // append the update function
-
-      update = (0, _utils.appendFunc)(update, handler);
-      props[id] = DYNAMIC_PROPERTY_DEFAULTS[id];
-    }
-  } // check for special functions
-
-
-  if (props.lockWidth) {
-    hasDynamicProperties = true; // create the update function
-
-    update = (0, _utils.appendFunc)(update, function (obj, stage) {
-      obj.scale.x = Math.min(10, obj.width / obj.getBounds().width * (props.scaleX || 1)) * (stage.scaleX || 1);
-    });
-  } // check for special functions
-
-
-  if (props.lockHeight) {
-    hasDynamicProperties = true; // create the update function
-
-    update = (0, _utils.appendFunc)(update, function (obj, stage) {
-      obj.scale.y = Math.min(10, obj.height / obj.getBounds().height * (props.scaleY || 1)) * (stage.scaleY || 1);
-    });
-  } // if nothing was found, just skip
-
-
-  if (!hasDynamicProperties) {
-    return;
-  } // create the handler function
-
-
-  var updateProperties = function updateProperties() {
-    var stage = obj.__responsive_stage__ = obj.__responsive_stage__ || _stage.default.findResponsiveStage(obj) || MISSING_STAGE;
-    update(obj, stage);
-  }; // set the initial values
-
-
-  updateProperties(); // override the existing render function
-
-  var __render__ = obj.render;
-
-  obj.render = function () {
-    updateProperties(); // render normally
-
-    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      args[_key2] = arguments[_key2];
-    }
-
-    return __render__.apply(obj, args);
-  };
-}
-},{"../utils":"utils/index.js","./expressions":"animation/expressions.js","../pixi/stage":"pixi/stage.js","./mappings":"animation/mappings.js"}],"../node_modules/@babel/runtime/helpers/iterableToArray.js":[function(require,module,exports) {
-function _iterableToArray(iter) {
-  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
-}
-
-module.exports = _iterableToArray;
-},{}],"../node_modules/@babel/runtime/helpers/toArray.js":[function(require,module,exports) {
-var arrayWithHoles = require("./arrayWithHoles");
-
-var iterableToArray = require("./iterableToArray");
-
-var unsupportedIterableToArray = require("./unsupportedIterableToArray");
-
-var nonIterableRest = require("./nonIterableRest");
-
-function _toArray(arr) {
-  return arrayWithHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableRest();
-}
-
-module.exports = _toArray;
-},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArray":"../node_modules/@babel/runtime/helpers/iterableToArray.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"animate/index.js":[function(require,module,exports) {
+},{}],"animate/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -68206,11 +68175,7 @@ exports.default = createAnimation;
 
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-var _animeEs = _interopRequireDefault(require("animejs/lib/anime.es.js"));
-
-var _deepGetSet = _interopRequireDefault(require("deep-get-set"));
-
-var _cloneDeep = _interopRequireDefault(require("clone-deep"));
+var _fastCopy = _interopRequireDefault(require("fast-copy"));
 
 var _utils = require("../utils");
 
@@ -68252,7 +68217,7 @@ function createAnimation(animator, path, composition, layer, instance) {
   for (var i = 0; i < animations.length; i++) {
     try {
       // unpack any variables
-      var animation = (0, _cloneDeep.default)(animations[i]);
+      var animation = (0, _fastCopy.default)(animations[i]);
       (0, _utils.inheritFrom)(animator, composition, animation, 'base'); // REFACTOR: don't create object just for array prop - 
       // consider allowing the "prop" for unpack to be an array index
       // unpack expects it to be part of the layer object
@@ -68316,7 +68281,7 @@ function createAnimation(animator, path, composition, layer, instance) {
             // for example, an emitter can change "emit.x" to tween a sub property
             // however, rotation is simply "rotation" and not "props.rotation"
             var isSubProperty = !!~prop.indexOf('.');
-            starting[prop] = isSubProperty ? (0, _deepGetSet.default)(layer, prop) : layer.props[prop]; // without a value, there might be an error
+            starting[prop] = isSubProperty ? deep(layer, prop) : layer.props[prop]; // without a value, there might be an error
 
             if ((0, _utils2.isNil)(starting[prop])) {
               console.warn("Missing starting animation prop for ".concat(prop, ". This might mean you're animating a property that doesn't have a known starting value"));
@@ -68388,7 +68353,7 @@ function decToHex(dec) {
   var val = dec.toString(16);
   return ['#', "000000".substr(val.length), val].join('');
 }
-},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","animejs/lib/anime.es.js":"../node_modules/animejs/lib/anime.es.js","deep-get-set":"../node_modules/deep-get-set/index.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js","../converters":"animation/converters.js","../../animate":"animate/index.js"}],"utils/graphics.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js","../converters":"animation/converters.js","../../animate":"animate/index.js"}],"utils/graphics.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -68413,12 +68378,23 @@ function createContext() {
     canvas.height = height;
   }
 
+  ctx.drawTexture = drawPixiTexture;
   return {
     canvas: canvas,
     ctx: ctx,
     reset: reset,
     resize: resize
   };
+}
+/** draws a texture */
+
+
+function drawPixiTexture(texture, x, y, width, height) {
+  var orig = texture.orig,
+      baseTexture = texture.baseTexture;
+  var source = baseTexture.resource.source; // console.log(source);
+
+  this.drawImage(source, orig.x, orig.y, orig.width, orig.height, x, y, width, height);
 }
 /** generates a placeholder image */
 
@@ -68462,7 +68438,161 @@ function createPlaceholderImage(_ref) {
 
   return canvas;
 }
-},{"../animation/converters":"animation/converters.js"}],"animation/resources/loadImage.js":[function(require,module,exports) {
+},{"../animation/converters":"animation/converters.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.get = get;
+exports.set = set;
+exports.del = del;
+exports.clear = clear;
+exports.keys = keys;
+exports.Store = void 0;
+
+class Store {
+  constructor(dbName = 'keyval-store', storeName = 'keyval') {
+    this.storeName = storeName;
+    this._dbp = new Promise((resolve, reject) => {
+      const openreq = indexedDB.open(dbName, 1);
+
+      openreq.onerror = () => reject(openreq.error);
+
+      openreq.onsuccess = () => resolve(openreq.result); // First time setup: create an empty object store
+
+
+      openreq.onupgradeneeded = () => {
+        openreq.result.createObjectStore(storeName);
+      };
+    });
+  }
+
+  _withIDBStore(type, callback) {
+    return this._dbp.then(db => new Promise((resolve, reject) => {
+      const transaction = db.transaction(this.storeName, type);
+
+      transaction.oncomplete = () => resolve();
+
+      transaction.onabort = transaction.onerror = () => reject(transaction.error);
+
+      callback(transaction.objectStore(this.storeName));
+    }));
+  }
+
+}
+
+exports.Store = Store;
+let store;
+
+function getDefaultStore() {
+  if (!store) store = new Store();
+  return store;
+}
+
+function get(key, store = getDefaultStore()) {
+  let req;
+  return store._withIDBStore('readonly', store => {
+    req = store.get(key);
+  }).then(() => req.result);
+}
+
+function set(key, value, store = getDefaultStore()) {
+  return store._withIDBStore('readwrite', store => {
+    store.put(value, key);
+  });
+}
+
+function del(key, store = getDefaultStore()) {
+  return store._withIDBStore('readwrite', store => {
+    store.delete(key);
+  });
+}
+
+function clear(store = getDefaultStore()) {
+  return store._withIDBStore('readwrite', store => {
+    store.clear();
+  });
+}
+
+function keys(store = getDefaultStore()) {
+  const keys = [];
+  return store._withIDBStore('readonly', store => {
+    // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
+    // And openKeyCursor isn't supported by Safari.
+    (store.openKeyCursor || store.openCursor).call(store).onsuccess = function () {
+      if (!this.result) return;
+      keys.push(this.result.key);
+      this.result.continue();
+    };
+  }).then(() => keys);
+}
+},{}],"utils/assetCache.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.shared = exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _idbKeyval = require("idb-keyval");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/** creates an asset cache */
+var AssetCache =
+/** create a new cache */
+function AssetCache(db, table) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, AssetCache);
+  (0, _defineProperty2.default)(this, "getItem", function (key) {
+    var store = _this.store;
+    return new Promise(function (resolve) {
+      (0, _idbKeyval.get)(key, store).then(function () {
+        var record = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var now = +new Date();
+        var data = record.data,
+            expires = record.expires;
+        var success = !!data && !isNaN(expires) && expires > now;
+        resolve(success ? data : null);
+      }) // for errors, just resolve with
+      // no value
+      .catch(function () {
+        return resolve(null);
+      });
+    });
+  });
+  (0, _defineProperty2.default)(this, "setItem", function (key, data) {
+    var expires = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 24 * 60 * 60 * 1000;
+    var store = _this.store;
+    return new Promise(function (resolve) {
+      (0, _idbKeyval.set)(key, {
+        data: data,
+        expires: +new Date() + expires
+      }, store).then(function () {
+        return resolve(true);
+      }).catch(function () {
+        return resolve(false);
+      });
+    });
+  });
+  (0, _defineProperty2.default)(this, "purge", function () {// TODO
+  });
+  this.store = new _idbKeyval.Store(db, table);
+}
+/** saves an image resource */
+; // shared common cache
+
+
+exports.default = AssetCache;
+var shared = new AssetCache('nt:cached-assets', 'images');
+exports.shared = shared;
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","idb-keyval":"../node_modules/idb-keyval/dist/idb-keyval.mjs"}],"animation/resources/loadImage.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -68476,6 +68606,8 @@ var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/
 
 var _graphics = require("../../utils/graphics");
 
+var _assetCache = require("../../utils/assetCache");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
@@ -68486,9 +68618,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 // resources that are currently loading
 var pending = {};
-var images = {}; // expire a day later
-
-var EXPIRE_MS = 24 * 60 * 60 * 1000;
+var images = {};
 /** handles loading an external image url 
  * @param {string} url The url of the image to load
 */
@@ -68499,7 +68629,7 @@ function loadImage(_x) {
 
 function _loadImage() {
   _loadImage = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(url) {
-    var now, existing, img;
+    var now;
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -68527,28 +68657,6 @@ function _loadImage() {
             }));
 
           case 5:
-            _context.prev = 5;
-            existing = JSON.parse(localStorage.getItem(url));
-
-            if (!(existing && existing.expires > now)) {
-              _context.next = 12;
-              break;
-            }
-
-            img = document.createElement('img');
-            images[url] = img;
-            img.src = existing.src;
-            return _context.abrupt("return", img);
-
-          case 12:
-            _context.next = 16;
-            break;
-
-          case 14:
-            _context.prev = 14;
-            _context.t0 = _context["catch"](5);
-
-          case 16:
             return _context.abrupt("return", new Promise(function (resolve, reject) {
               var img = document.createElement('img'); // if no active queue is available, start it now
 
@@ -68560,23 +68668,22 @@ function _loadImage() {
               var handle = function handle(success) {
                 return function () {
                   // all finished, resolve the result
-                  images[url] = success ? img : null; // try and cache
-
-                  if (success) requestAnimationFrame(function () {
-                    try {
-                      var context = (0, _graphics.createContext)();
-                      context.resize(img.width, img.height); // create a data url for the image
-
-                      context.ctx.drawImage(img, 0, 0);
-                      var data = context.canvas.toDataURL();
-                      var cached = JSON.stringify({
-                        src: data,
-                        expires: now + EXPIRE_MS
-                      });
-                      localStorage.setItem(url, cached);
-                    } // do not fail for this
-                    catch (ex) {}
-                  }); // execute all waiting requests
+                  images[url] = success ? img : null; // // try and cache
+                  // if (success)
+                  // 	requestAnimationFrame(() => {
+                  // 		try {
+                  // 			// save to the cache
+                  // 			const context = createContext();
+                  // 			context.resize(img.width, img.height);
+                  // 			// create a data url for the image
+                  // 			context.ctx.drawImage(img, 0, 0);
+                  // 			const data = context.canvas.toDataURL();
+                  // 			cache.setItem(url, data);
+                  // 		}
+                  // 		// do not fail for this
+                  // 		catch(ex) { }
+                  // 	});
+                  // execute all waiting requests
 
                   try {
                     var _iterator = _createForOfIteratorHelper(pending[url]),
@@ -68607,16 +68714,16 @@ function _loadImage() {
               img.src = url;
             }));
 
-          case 17:
+          case 6:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[5, 14]]);
+    }, _callee);
   }));
   return _loadImage.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../utils/graphics":"utils/graphics.js"}],"animation/resources/loadSpritesheet.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../utils/graphics":"utils/graphics.js","../../utils/assetCache":"utils/assetCache.js"}],"animation/resources/loadSpritesheet.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -68633,6 +68740,8 @@ var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/
 var _loadImage = _interopRequireDefault(require("./loadImage"));
 
 var _graphics = require("../../utils/graphics");
+
+var _pixi = require("pixi.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -68690,10 +68799,12 @@ function _loadSpritesheet() {
 }
 
 function generateSprites(image, spritesheetId, spritesheet, ext) {
-  var _loop = function _loop(id) {
+  var base = PIXI.Texture.from(image); // create each sprite slice
+
+  for (var id in spritesheet) {
     var record = spritesheet[id]; // if this is not an array, skip it
 
-    if (!Array.isArray(record)) return "continue"; // make sure it's for the image type used
+    if (!Array.isArray(record)) continue; // make sure it's for the image type used
 
     var _record = (0, _slicedToArray2.default)(record, 5),
         x = _record[0],
@@ -68702,68 +68813,16 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
         height = _record[3],
         type = _record[4];
 
-    if (type !== ext) return "continue"; // create a generation function
+    if (type !== ext) continue; // save the texture
 
-    var generate = function generate() {
-      // match the canvas
-      var canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height; // // helper to display all textures and names
-      // if (displayAllTextures) {
-      // 	const label = document.createElement('h1');
-      // 	label.textContent = id;
-      // 	document.body.appendChild(label);
-      // 	document.body.appendChild(canvas);
-      // }
-      // extra data (debugging)
-
-      canvas.setAttribute('spritesheet', spritesheetId);
-      canvas.setAttribute('sprite', id); // draw the sprite
-
-      var ctx = canvas.getContext('2d'); // try and draw the required sprite
-
-      try {
-        // an image was found
-        if (!!image) {
-          ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
-        } // create a fake image
-        else {
-            (0, _graphics.createPlaceholderImage)({
-              width: width,
-              height: height,
-              canvas: canvas,
-              ctx: ctx
-            });
-          }
-      } // if this failed, just draw a placeholder
-      catch (ex) {
-        (0, _graphics.createPlaceholderImage)({
-          width: width,
-          height: height,
-          canvas: canvas,
-          ctx: ctx
-        });
-      } // replaces the value
-
-
-      canvas.isSprite = true;
-      spritesheet[id] = canvas;
-    }; // save the generator
-
-
-    spritesheet[id] = generate;
-  };
-
-  // create each sprite slice
-  for (var id in spritesheet) {
-    var _ret = _loop(id);
-
-    if (_ret === "continue") continue;
+    var rect = new _pixi.Rectangle(x, y, width, height);
+    var texture = new PIXI.Texture(base, rect);
+    spritesheet[id] = texture;
   }
 }
 
 function ImageRequestFailedException() {}
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","./loadImage":"animation/resources/loadImage.js","../../utils/graphics":"utils/graphics.js"}],"animation/resources/getSpritesheet.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","./loadImage":"animation/resources/loadImage.js","../../utils/graphics":"utils/graphics.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js"}],"animation/resources/getSpritesheet.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -68841,7 +68900,7 @@ function getSprite(_x, _x2, _x3) {
 
 function _getSprite() {
   _getSprite = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, spritesheetId, imageId) {
-    var spritesheet, sprite;
+    var spritesheet;
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -68851,13 +68910,9 @@ function _getSprite() {
 
           case 2:
             spritesheet = _context.sent;
-            sprite = spritesheet[imageId]; // check if this sprite has been generated
-
-            if (!sprite.isSprite) sprite(); // return the reference
-
             return _context.abrupt("return", spritesheet[imageId]);
 
-          case 6:
+          case 4:
           case "end":
             return _context.stop();
         }
@@ -69040,7 +69095,7 @@ var TEXTURES = {};
 
 function createTextureFromImage(img) {
   var spritesheet;
-  var sprite; // attempt to load the texture
+  var sprite;
 
   try {
     if (!img) {
@@ -69199,7 +69254,7 @@ function createSprite(_x, _x2, _x3, _x4, _x5) {
 
 function _createSprite() {
   _createSprite = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, composition, layer) {
-    var update, dispose, phase, type, isSprite, isMarker, sprite, _layer$props, images, textures, isAnimated, _layer$props2, _layer$props3;
+    var update, dispose, phase, type, isSprite, isMarker, sprite, _layer$props, textures, isAnimated, _layer$props2, _layer$props3;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -69216,7 +69271,7 @@ function _createSprite() {
             isMarker = !isSprite; // create the required sprite
 
             if (!isSprite) {
-              _context.next = 30;
+              _context.next = 21;
               break;
             }
 
@@ -69226,24 +69281,22 @@ function _createSprite() {
             return (0, _resolveImages.default)(animator, path, composition, layer);
 
           case 11:
-            images = _context.sent;
-            // create textures for each sprite
-            phase = 'generating textures';
-            _context.prev = 13;
-            textures = (0, _collection.map)(images, _createTextureFromImage.default);
-            _context.next = 21;
-            break;
-
-          case 17:
-            _context.prev = 17;
-            _context.t0 = _context["catch"](13);
-            console.error("Failed to create a texture for ".concat(path), composition);
-            throw _context.t0;
-
-          case 21:
+            textures = _context.sent;
+            // console.log('resolved', textures);
+            // // create textures for each sprite
+            // phase = 'generating textures';
+            // let textures;
+            // try {
+            // 	textures = map(images, createTextureFromImage);
+            // }
+            // // had a problem
+            // catch (ex) {
+            // 	console.error(`Failed to create a texture for ${path}`, composition);
+            // 	throw ex;
+            // }
             // create the instance of the sprite
             phase = 'creating sprite instance';
-            isAnimated = images.length > 1;
+            isAnimated = textures.length > 1;
             sprite = isAnimated ? new PIXI.AnimatedSprite(textures) : new PIXI.Sprite(textures[0]); // set other values
 
             sprite.loop = ((_layer$props = layer.props) === null || _layer$props === void 0 ? void 0 : _layer$props.loop) !== false;
@@ -69259,10 +69312,10 @@ function _createSprite() {
               };
             }
 
-            _context.next = 31;
+            _context.next = 22;
             break;
 
-          case 30:
+          case 21:
             // markers act like normal sprites and are used to define
             // bounds and positions without needing an actual sprite
             if (isMarker) {
@@ -69270,7 +69323,7 @@ function _createSprite() {
               sprite.visible = false;
             }
 
-          case 31:
+          case 22:
             // shared data
             sprite.role = (0, _utils2.toRole)(layer.role);
             sprite.path = path; // set some default values
@@ -69312,18 +69365,18 @@ function _createSprite() {
               dispose: dispose
             }]);
 
-          case 51:
-            _context.prev = 51;
-            _context.t1 = _context["catch"](3);
+          case 42:
+            _context.prev = 42;
+            _context.t0 = _context["catch"](3);
             console.error("Failed to create sprite ".concat(path, " while ").concat(phase));
-            throw _context.t1;
+            throw _context.t0;
 
-          case 55:
+          case 46:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[3, 51], [13, 17]]);
+    }, _callee, null, [[3, 42]]);
   }));
   return _createSprite.apply(this, arguments);
 }
@@ -71954,8 +72007,6 @@ var _animation = _interopRequireDefault(require("../animation"));
 
 var _resolveImages = _interopRequireDefault(require("../../resources/resolveImages"));
 
-var _createTextureFromImage = _interopRequireDefault(require("../../resources/createTextureFromImage"));
-
 var _normalize = require("../../normalize");
 
 var _converters = require("../../converters");
@@ -72023,7 +72074,7 @@ function createEmitter(_x, _x2, _x3, _x4, _x5) {
 
 function _createEmitter() {
   _createEmitter = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, composition, layer) {
-    var container, generator, update, dispose, phase, images, textures, _layer$emit, emit, auto, config, _loop, prop, _ret, emitter;
+    var container, generator, update, dispose, phase, textures, _layer$emit, emit, auto, config, _loop, prop, _ret, emitter;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -72057,21 +72108,18 @@ function _createEmitter() {
             return (0, _resolveImages.default)(animator, path, composition, layer);
 
           case 13:
-            images = _context.sent;
-            // create textures for each sprite
-            phase = 'generating textures';
-            _context.prev = 15;
-            textures = (0, _collection.map)(images, _createTextureFromImage.default);
-            _context.next = 23;
-            break;
-
-          case 19:
-            _context.prev = 19;
-            _context.t0 = _context["catch"](15);
-            console.error("Failed to create a texture for ".concat(path), composition);
-            throw _context.t0;
-
-          case 23:
+            textures = _context.sent;
+            // // create textures for each sprite
+            // phase = 'generating textures';
+            // let textures;
+            // try {
+            // 	textures = map(images, createTextureFromImage);
+            // }
+            // // had a problem
+            // catch (ex) {
+            // 	console.error(`Failed to create a texture for ${path}`, composition);
+            // 	throw ex;
+            // }
             // create the instance of the sprite
             phase = 'configuring emitter'; // generate a config -- pixi-particles uses a lot of
             // objects that are difficult to work with - nt-animator
@@ -72141,29 +72189,29 @@ function _createEmitter() {
               config[mapping.renameTo || prop] = assign;
             };
 
-            _context.t1 = _regenerator.default.keys(emit);
+            _context.t0 = _regenerator.default.keys(emit);
 
-          case 30:
-            if ((_context.t2 = _context.t1()).done) {
-              _context.next = 37;
+          case 21:
+            if ((_context.t1 = _context.t0()).done) {
+              _context.next = 28;
               break;
             }
 
-            prop = _context.t2.value;
+            prop = _context.t1.value;
             _ret = _loop(prop);
 
             if (!(_ret === "continue")) {
-              _context.next = 35;
+              _context.next = 26;
               break;
             }
 
-            return _context.abrupt("continue", 30);
+            return _context.abrupt("continue", 21);
 
-          case 35:
-            _context.next = 30;
+          case 26:
+            _context.next = 21;
             break;
 
-          case 37:
+          case 28:
             // assign a few more values
             (0, _assign2.assignIf)(emit.per, _utils.isNumber, config, function (t, v) {
               return t.particlesPerWave = v;
@@ -72273,22 +72321,22 @@ function _createEmitter() {
               dispose: dispose
             }]);
 
-          case 76:
-            _context.prev = 76;
-            _context.t3 = _context["catch"](7);
+          case 67:
+            _context.prev = 67;
+            _context.t2 = _context["catch"](7);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
-            throw _context.t3;
+            throw _context.t2;
 
-          case 80:
+          case 71:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[7, 76], [15, 19]]);
+    }, _callee, null, [[7, 67]]);
   }));
   return _createEmitter.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../../assign":"animation/assign.js","../../../utils":"utils/index.js","../../../utils/collection":"utils/collection.js","./bounds":"animation/generators/emitter/bounds.js","./overrides":"animation/generators/emitter/overrides.js","../animation":"animation/generators/animation.js","../../resources/resolveImages":"animation/resources/resolveImages.js","../../resources/createTextureFromImage":"animation/resources/createTextureFromImage.js","../../normalize":"animation/normalize.js","../../converters":"animation/converters.js","../../utils":"animation/utils.js"}],"animation/generators/group.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../../assign":"animation/assign.js","../../../utils":"utils/index.js","../../../utils/collection":"utils/collection.js","./bounds":"animation/generators/emitter/bounds.js","./overrides":"animation/generators/emitter/overrides.js","../animation":"animation/generators/animation.js","../../resources/resolveImages":"animation/resources/resolveImages.js","../../normalize":"animation/normalize.js","../../converters":"animation/converters.js","../../utils":"animation/utils.js"}],"animation/generators/group.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -72421,7 +72469,11 @@ function _createGroup() {
             group.pivot.x = 0;
             group.pivot.y = 0; // bakes a layer to a single object
 
-            if (layer.merge) group.cacheAsBitmap = true; // include this instance
+            if (layer.merge) {
+              group.cacheAsBitmap = true;
+              group.batch = 'merged';
+            } // include this instance
+
 
             controller.register(container); // attach the update function
 
@@ -72801,8 +72853,6 @@ var _normalize = require("../normalize");
 
 var _utils2 = require("../utils");
 
-var _cloneDeep = _interopRequireDefault(require("clone-deep"));
-
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -73079,7 +73129,7 @@ function findPivot(container) {
 
   return pivot;
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../../pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js",".":"animation/generators/index.js","../expressions":"animation/expressions.js","../normalize":"animation/normalize.js","../utils":"animation/utils.js","clone-deep":"../node_modules/clone-deep/index.js"}],"animation/generators/index.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../../pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js",".":"animation/generators/index.js","../expressions":"animation/expressions.js","../normalize":"animation/normalize.js","../utils":"animation/utils.js"}],"animation/generators/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -73095,7 +73145,7 @@ var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/
 
 var PIXI = _interopRequireWildcard(require("pixi.js"));
 
-var _cloneDeep = _interopRequireDefault(require("clone-deep"));
+var _fastCopy = _interopRequireDefault(require("fast-copy"));
 
 var _utils = require("../utils");
 
@@ -73139,7 +73189,7 @@ function _createInstance() {
             // format the path
             path = path.replace(/^\/*/, ''); // unpack all data
 
-            instance = (0, _cloneDeep.default)(data);
+            instance = (0, _fastCopy.default)(data);
             if (data && 'base' in data) (0, _utils.inheritFrom)(animator, data, instance, 'base'); // create the instance container
 
             container = new PIXI.Container();
@@ -73304,7 +73354,7 @@ function _createInstance() {
   }));
   return _createInstance.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","clone-deep":"../node_modules/clone-deep/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js"}],"animation/generators/controller.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js"}],"animation/generators/controller.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -73480,6 +73530,10 @@ var _controller = _interopRequireDefault(require("./generators/controller"));
 
 var _utils = require("./utils");
 
+var _assetCache = require("../utils/assetCache");
+
+var _loadImage = _interopRequireDefault(require("./resources/loadImage"));
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -73508,6 +73562,7 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
     // designs
 
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "plugins", {});
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "imageCache", _assetCache.shared);
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "getSpritesheet", /*#__PURE__*/function () {
       var _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(id) {
         return _regenerator.default.wrap(function _callee$(_context) {
@@ -73530,7 +73585,7 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
     }());
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "getSprite", /*#__PURE__*/function () {
       var _ref2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(spritesheetId, id) {
-        var canvas;
+        var texture;
         return _regenerator.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -73539,8 +73594,8 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
                 return (0, _getSprite.default)((0, _assertThisInitialized2.default)(_this), spritesheetId, id);
 
               case 2:
-                canvas = _context2.sent;
-                return _context2.abrupt("return", PIXI.Sprite.from(canvas));
+                texture = _context2.sent;
+                return _context2.abrupt("return", PIXI.Sprite.from(texture));
 
               case 4:
               case "end":
@@ -73560,13 +73615,30 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                _context3.next = 2;
+                if (!id) {
+                  _context3.next = 6;
+                  break;
+                }
+
+                _context3.next = 3;
                 return (0, _getSprite.default)((0, _assertThisInitialized2.default)(_this), spritesheetId, id);
 
-              case 2:
-                return _context3.abrupt("return", _context3.sent);
-
               case 3:
+                _context3.t0 = _context3.sent;
+                _context3.next = 9;
+                break;
+
+              case 6:
+                _context3.next = 8;
+                return (0, _loadImage.default)("".concat(_this.baseUrl, "/").concat(spritesheetId));
+
+              case 8:
+                _context3.t0 = _context3.sent;
+
+              case 9:
+                return _context3.abrupt("return", _context3.t0);
+
+              case 10:
               case "end":
                 return _context3.stop();
             }
@@ -73693,7 +73765,7 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
 }(_eventEmitter.EventEmitter);
 
 exports.Animator = Animator;
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","../common/event-emitter":"common/event-emitter.js","./path":"animation/path.js","./rng":"animation/rng.js","./generators":"animation/generators/index.js","./resources/getSprite":"animation/resources/getSprite.js","./resources/getSpritesheet":"animation/resources/getSpritesheet.js","./expressions":"animation/expressions.js","./generators/controller":"animation/generators/controller.js","./utils":"animation/utils.js"}],"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","../common/event-emitter":"common/event-emitter.js","./path":"animation/path.js","./rng":"animation/rng.js","./generators":"animation/generators/index.js","./resources/getSprite":"animation/resources/getSprite.js","./resources/getSpritesheet":"animation/resources/getSpritesheet.js","./expressions":"animation/expressions.js","./generators/controller":"animation/generators/controller.js","./utils":"animation/utils.js","../utils/assetCache":"utils/assetCache.js","./resources/loadImage":"animation/resources/loadImage.js"}],"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js":[function(require,module,exports) {
 var arrayLikeToArray = require("./arrayLikeToArray");
 
 function _arrayWithoutHoles(arr) {
@@ -73986,6 +74058,12 @@ var _graphics = require("./utils/graphics");
 
 var _remove = require("./pixi/utils/remove");
 
+var PPP = _interopRequireWildcard(require("pixi.js"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // skips hello messages for PIXI
@@ -73998,5 +74076,6 @@ var PIXI = {
 }; // helpful utils
 
 exports.PIXI = PIXI;
-},{"./pixi/utils/skip-hello":"pixi/utils/skip-hello.js","./animation":"animation/index.js","./animate":"animate/index.js","./pixi/responsive":"pixi/responsive.js","./pixi/stage":"pixi/stage.js","./pixi/detatched-container":"pixi/detatched-container.js","./animation/resources/loadImage":"animation/resources/loadImage.js","./common/event-emitter":"common/event-emitter.js","./pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js","./pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","./utils/graphics":"utils/graphics.js","./pixi/utils/remove":"pixi/utils/remove.js"}]},{},["index.js"], null)
+window.PIXI = PPP;
+},{"./pixi/utils/skip-hello":"pixi/utils/skip-hello.js","./animation":"animation/index.js","./animate":"animate/index.js","./pixi/responsive":"pixi/responsive.js","./pixi/stage":"pixi/stage.js","./pixi/detatched-container":"pixi/detatched-container.js","./animation/resources/loadImage":"animation/resources/loadImage.js","./common/event-emitter":"common/event-emitter.js","./pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js","./pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","./utils/graphics":"utils/graphics.js","./pixi/utils/remove":"pixi/utils/remove.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js"}]},{},["index.js"], null)
 //# sourceMappingURL=/index.js.map

@@ -1,5 +1,6 @@
 import loadImage from "./loadImage";
 import { createPlaceholderImage } from "../../utils/graphics";
+import { Rectangle } from "pixi.js";
 
 
 // handle loading an external spritesheet
@@ -31,6 +32,7 @@ export default async function loadSpritesheet(animator, spritesheetId, spriteshe
 // TODO: consider converting to async or JIT since it seems
 // to be a little slow on chromebooks
 function generateSprites(image, spritesheetId, spritesheet, ext) {
+	const base = PIXI.Texture.from(image);
 
 	// create each sprite slice
 	for (const id in spritesheet) {
@@ -43,53 +45,10 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
 		const [ x, y, width, height, type ] = record;
 		if (type !== ext) continue;
 
-		// create a generation function
-		const generate = () => {
-		
-			// match the canvas
-			const canvas = document.createElement('canvas');
-			canvas.width = width;
-			canvas.height = height;
-
-			// // helper to display all textures and names
-			// if (displayAllTextures) {
-			// 	const label = document.createElement('h1');
-			// 	label.textContent = id;
-			// 	document.body.appendChild(label);
-			// 	document.body.appendChild(canvas);
-			// }
-
-			// extra data (debugging)
-			canvas.setAttribute('spritesheet', spritesheetId);
-			canvas.setAttribute('sprite', id);
-
-			// draw the sprite
-			const ctx = canvas.getContext('2d');
-
-			// try and draw the required sprite
-			try {
-				// an image was found
-				if (!!image) {
-					ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
-				}
-				// create a fake image
-				else {
-					createPlaceholderImage({ width, height, canvas, ctx });
-				}
-			}
-			// if this failed, just draw a placeholder
-			catch (ex) {
-				createPlaceholderImage({ width, height, canvas, ctx });
-			}
-
-			
-			// replaces the value
-			canvas.isSprite = true;
-			spritesheet[id] = canvas;
-		};
-
-		// save the generator
-		spritesheet[id] = generate;
+		// save the texture
+		const rect = new Rectangle(x, y, width, height);
+		const texture = new PIXI.Texture(base, rect);
+		spritesheet[id] = texture;
 	}
 
 }

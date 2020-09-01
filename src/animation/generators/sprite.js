@@ -45,23 +45,24 @@ export default async function createSprite(animator, controller, path, compositi
 
 			// gather all required images
 			phase = 'resolving images';
-			const images = await resolveImages(animator, path, composition, layer);
+			const textures = await resolveImages(animator, path, composition, layer);
+			// console.log('resolved', textures);
 
-			// create textures for each sprite
-			phase = 'generating textures';
-			let textures;
-			try {
-				textures = map(images, createTextureFromImage);
-			}
-			// had a problem
-			catch (ex) {
-				console.error(`Failed to create a texture for ${path}`, composition);
-				throw ex;
-			}
+			// // create textures for each sprite
+			// phase = 'generating textures';
+			// let textures;
+			// try {
+			// 	textures = map(images, createTextureFromImage);
+			// }
+			// // had a problem
+			// catch (ex) {
+			// 	console.error(`Failed to create a texture for ${path}`, composition);
+			// 	throw ex;
+			// }
 			
 			// create the instance of the sprite
 			phase = 'creating sprite instance';
-			const isAnimated = images.length > 1;
+			const isAnimated = textures.length > 1;
 			sprite = isAnimated
 				? new PIXI.AnimatedSprite(textures)
 				: new PIXI.Sprite(textures[0]);

@@ -13,6 +13,8 @@ export function createContext() {
 		canvas.width = width;
 		canvas.height = height;
 	}
+
+	ctx.drawTexture = drawPixiTexture;
 	
 	return {
 		canvas,
@@ -20,6 +22,17 @@ export function createContext() {
 		reset,
 		resize
 	};
+}
+
+/** draws a texture */
+function drawPixiTexture(texture, x, y, width, height) {
+
+	const { orig, baseTexture } = texture;
+	const { source } = baseTexture.resource;
+
+	// console.log(source);
+	this.drawImage(source, orig.x, orig.y, orig.width, orig.height, x, y, width, height);
+
 }
 
 

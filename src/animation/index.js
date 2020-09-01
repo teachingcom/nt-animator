@@ -8,12 +8,15 @@ import getSpritesheet from "./resources/getSpritesheet";
 import { setRandomizer, evaluateExpression } from './expressions';
 import Controller from './generators/controller';
 import { inheritFrom } from './utils';
+import { shared as imageCache } from '../utils/assetCache';
+import loadImage from './resources/loadImage';
 
 /** handles creating PIXI animations using defined files */
 export class Animator extends EventEmitter {
 
 	// custom types for compositions
 	plugins = { }
+	imageCache = imageCache
 
 	/** creates a new instance */
 	constructor(manifest, options) {
@@ -48,13 +51,15 @@ export class Animator extends EventEmitter {
 
 	/** handles loading a single sprite */
 	getSprite = async (spritesheetId, id) => {
-		const canvas = await getSprite(this, spritesheetId, id);
-		return PIXI.Sprite.from(canvas);
+		const texture = await getSprite(this, spritesheetId, id);
+		return PIXI.Sprite.from(texture);
 	}
 
 	/** handles loading a sprite as a canvas */
 	getImage = async (spritesheetId, id) => {
-		return await getSprite(this, spritesheetId, id);
+		return !!id
+			? await getSprite(this, spritesheetId, id)
+			: await loadImage(`${this.baseUrl}/${spritesheetId}`);
 	}
 
 	/** handles a custom type */
