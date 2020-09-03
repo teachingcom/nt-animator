@@ -65137,7 +65137,41 @@ function unpack(animator, root, source, prop) {
       }
     }
 }
-},{"fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-defaults":"../node_modules/deep-defaults/lib/index.js","../utils":"utils/index.js","./path":"animation/path.js","./errors":"animation/errors.js"}],"utils/collection.js":[function(require,module,exports) {
+},{"fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-defaults":"../node_modules/deep-defaults/lib/index.js","../utils":"utils/index.js","./path":"animation/path.js","./errors":"animation/errors.js"}],"../node_modules/deep-get-set/index.js":[function(require,module,exports) {
+var hasOwnProp = Object.prototype.hasOwnProperty;
+
+module.exports = deep;
+
+function deep (obj, path, value) {
+  if (arguments.length === 3) return set.apply(null, arguments);
+  return get.apply(null, arguments);
+}
+
+function get (obj, path) {
+  var keys = Array.isArray(path) ? path : path.split('.');
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    if (!obj || !hasOwnProp.call(obj, key)) {
+      obj = undefined;
+      break;
+    }
+    obj = obj[key];
+  }
+  return obj;
+}
+
+function set (obj, path, value) {
+  var keys = Array.isArray(path) ? path : path.split('.');
+  for (var i = 0; i < keys.length - 1; i++) {
+    var key = keys[i];
+    if (deep.p && !hasOwnProp.call(obj, key)) obj[key] = {};
+    obj = obj[key];
+  }
+  obj[keys[i]] = value;
+  return value;
+}
+
+},{}],"utils/collection.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -68177,6 +68211,8 @@ var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/de
 
 var _fastCopy = _interopRequireDefault(require("fast-copy"));
 
+var _deepGetSet = _interopRequireDefault(require("deep-get-set"));
+
 var _utils = require("../utils");
 
 var _utils2 = require("../../utils");
@@ -68281,7 +68317,7 @@ function createAnimation(animator, path, composition, layer, instance) {
             // for example, an emitter can change "emit.x" to tween a sub property
             // however, rotation is simply "rotation" and not "props.rotation"
             var isSubProperty = !!~prop.indexOf('.');
-            starting[prop] = isSubProperty ? deep(layer, prop) : layer.props[prop]; // without a value, there might be an error
+            starting[prop] = isSubProperty ? (0, _deepGetSet.default)(layer, prop) : layer.props[prop]; // without a value, there might be an error
 
             if ((0, _utils2.isNil)(starting[prop])) {
               console.warn("Missing starting animation prop for ".concat(prop, ". This might mean you're animating a property that doesn't have a known starting value"));
@@ -68353,7 +68389,7 @@ function decToHex(dec) {
   var val = dec.toString(16);
   return ['#', "000000".substr(val.length), val].join('');
 }
-},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js","../converters":"animation/converters.js","../../animate":"animate/index.js"}],"utils/graphics.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-get-set":"../node_modules/deep-get-set/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js","../converters":"animation/converters.js","../../animate":"animate/index.js"}],"utils/graphics.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
