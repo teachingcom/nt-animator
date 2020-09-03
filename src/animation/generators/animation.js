@@ -1,5 +1,6 @@
 // import * as pop from 'popmotion';
 import fastCopy from 'fast-copy';
+import deep from 'deep-get-set';
 import { unpack, inheritFrom } from "../utils";
 import { isNumber, isArray, noop, isNil } from "../../utils";
 import { assignDisplayObjectProps } from '../assign';
