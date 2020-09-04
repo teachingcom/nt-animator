@@ -68228,7 +68228,8 @@ var _animate = _interopRequireDefault(require("../../animate"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // import * as pop from 'popmotion';
-// creates an animation
+console.log("preload", typeof _deepGetSet.default !== 'undefined' && _deepGetSet.default); // creates an animation
+
 function createAnimation(animator, path, composition, layer, instance) {
   // check for special debugging flags
   if (layer.animate === false) return; // find the source of animations

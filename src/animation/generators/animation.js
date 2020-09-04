@@ -8,6 +8,8 @@ import { evaluateExpression } from '../expressions';
 import { toEasing } from '../converters';
 import animate from '../../animate';
 
+console.log(`preload`, typeof deep !== 'undefined' && deep);
+
 // creates an animation
 export default function createAnimation(animator, path, composition, layer, instance) {
 
