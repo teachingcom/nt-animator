@@ -1,6 +1,6 @@
 import loadImage from "./loadImage";
 import { createPlaceholderImage } from "../../utils/graphics";
-import { Rectangle } from "pixi.js";
+import * as PIXI from "pixi.js";
 
 
 // handle loading an external spritesheet
@@ -46,7 +46,7 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
 		if (type !== ext) continue;
 
 		// save the texture
-		const rect = new Rectangle(x, y, width, height);
+		const rect = new PIXI.Rectangle(x, y, width, height);
 		const texture = new PIXI.Texture(base, rect);
 		spritesheet[id] = texture;
 	}

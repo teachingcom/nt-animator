@@ -574,8 +574,8 @@ var _objectAssign = _interopRequireDefault(require("object-assign"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /*!
- * @pixi/polyfill - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/polyfill - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/polyfill is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -856,8 +856,8 @@ var _ismobilejs = _interopRequireDefault(require("ismobilejs"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /*!
- * @pixi/settings - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/settings - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/settings is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -3658,8 +3658,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.WRAP_MODES = exports.TYPES = exports.TARGETS = exports.SCALE_MODES = exports.RENDERER_TYPE = exports.PRECISION = exports.MIPMAP_MODES = exports.MASK_TYPES = exports.GC_MODES = exports.FORMATS = exports.ENV = exports.DRAW_MODES = exports.BLEND_MODES = exports.ALPHA_MODES = void 0;
 
 /*!
- * @pixi/constants - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/constants - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/constants is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -4166,8 +4166,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /*!
- * @pixi/utils - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/utils - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/utils is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -4198,7 +4198,7 @@ _settings.settings.RETINA_PREFIX = /@([0-9\.]+)x/;
 
 _settings.settings.FAIL_IF_MAJOR_PERFORMANCE_CAVEAT = true;
 var saidHello = false;
-var VERSION = '5.2.4';
+var VERSION = '5.2.3';
 /**
  * Skips the hello message of renderers that are created after this is run.
  *
@@ -5177,8 +5177,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.groupD8 = exports.Transform = exports.SHAPES = exports.RoundedRectangle = exports.Rectangle = exports.RAD_TO_DEG = exports.Polygon = exports.Point = exports.PI_2 = exports.ObservablePoint = exports.Matrix = exports.Ellipse = exports.DEG_TO_RAD = exports.Circle = void 0;
 
 /*!
- * @pixi/math - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/math - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/math is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -7517,8 +7517,8 @@ var _math = require("@pixi/math");
 var _utils = require("@pixi/utils");
 
 /*!
- * @pixi/display - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/display - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/display is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -9315,8 +9315,8 @@ var _utils = require("@pixi/utils");
 var _display = require("@pixi/display");
 
 /*!
- * @pixi/accessibility - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/accessibility - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/accessibility is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -9977,8 +9977,8 @@ exports.UPDATE_PRIORITY = exports.TickerPlugin = exports.Ticker = void 0;
 var _settings = require("@pixi/settings");
 
 /*!
- * @pixi/ticker - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/ticker - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/ticker is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -10969,8 +10969,8 @@ var _display = require("@pixi/display");
 var _utils = require("@pixi/utils");
 
 /*!
- * @pixi/interaction - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/interaction - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/interaction is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -13473,8 +13473,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.Runner = void 0;
 
 /*!
- * @pixi/runner - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/runner - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/runner is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -13727,8 +13727,8 @@ var _math = require("@pixi/math");
 var _display = require("@pixi/display");
 
 /*!
- * @pixi/core - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/core - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/core is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -25663,8 +25663,8 @@ var _display = require("@pixi/display");
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/app - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/app - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/app is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -25887,8 +25887,8 @@ var _utils = require("@pixi/utils");
 var _math = require("@pixi/math");
 
 /*!
- * @pixi/extract - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/extract - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/extract is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -26120,7 +26120,8 @@ Extract.arrayPostDivide = function arrayPostDivide(pixels, out) {
 },{"@pixi/core":"../node_modules/@pixi/core/lib/core.es.js","@pixi/utils":"../node_modules/@pixi/utils/lib/utils.es.js","@pixi/math":"../node_modules/@pixi/math/lib/math.es.js"}],"../node_modules/parse-uri/index.js":[function(require,module,exports) {
 'use strict';
 
-module.exports = function parseURI(str, opts) {
+function parseURI(str, opts) {
+  if (!str) return undefined;
   opts = opts || {};
   var o = {
     key: ['source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host', 'port', 'relative', 'path', 'directory', 'file', 'query', 'anchor'],
@@ -26144,7 +26145,9 @@ module.exports = function parseURI(str, opts) {
     if ($1) uri[o.q.name][$1] = $2;
   });
   return uri;
-};
+}
+
+module.exports = parseURI;
 },{}],"../node_modules/mini-signals/lib/mini-signals.js":[function(require,module,exports) {
 'use strict';
 
@@ -28677,8 +28680,8 @@ var _utils = require("@pixi/utils");
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/loaders - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/loaders - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/loaders is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -29001,8 +29004,8 @@ var _core = require("@pixi/core");
 var _math = require("@pixi/math");
 
 /*!
- * @pixi/particles - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/particles - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/particles is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -29865,8 +29868,8 @@ var _constants = require("@pixi/constants");
 var _display = require("@pixi/display");
 
 /*!
- * @pixi/graphics - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/graphics - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/graphics is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -33260,8 +33263,8 @@ var _display = require("@pixi/display");
 var _settings = require("@pixi/settings");
 
 /*!
- * @pixi/sprite - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/sprite - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/sprite is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -33905,8 +33908,8 @@ var _math = require("@pixi/math");
 var _utils = require("@pixi/utils");
 
 /*!
- * @pixi/text - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/text - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/text is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -36146,8 +36149,8 @@ var _display = require("@pixi/display");
 var _text = require("@pixi/text");
 
 /*!
- * @pixi/prepare - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/prepare - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/prepare is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -36843,8 +36846,8 @@ var _utils = require("@pixi/utils");
 var _loaders = require("@pixi/loaders");
 
 /*!
- * @pixi/spritesheet - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/spritesheet - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/spritesheet is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -37219,8 +37222,8 @@ var _sprite = require("@pixi/sprite");
 var _constants = require("@pixi/constants");
 
 /*!
- * @pixi/sprite-tiling - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/sprite-tiling - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/sprite-tiling is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -37713,8 +37716,8 @@ var _utils = require("@pixi/utils");
 var _loaders = require("@pixi/loaders");
 
 /*!
- * @pixi/text-bitmap - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/text-bitmap - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/text-bitmap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -38497,8 +38500,8 @@ exports.AlphaFilter = void 0;
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/filter-alpha - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/filter-alpha - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/filter-alpha is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -38573,8 +38576,8 @@ var _core = require("@pixi/core");
 var _settings = require("@pixi/settings");
 
 /*!
- * @pixi/filter-blur - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/filter-blur - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/filter-blur is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -38959,8 +38962,8 @@ exports.ColorMatrixFilter = void 0;
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/filter-color-matrix - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/filter-color-matrix - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/filter-color-matrix is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -39459,8 +39462,8 @@ var _core = require("@pixi/core");
 var _math = require("@pixi/math");
 
 /*!
- * @pixi/filter-displacement - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/filter-displacement - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/filter-displacement is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -39583,8 +39586,8 @@ exports.FXAAFilter = void 0;
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/filter-fxaa - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/filter-fxaa - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/filter-fxaa is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -39627,8 +39630,8 @@ exports.NoiseFilter = void 0;
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/filter-noise - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/filter-noise - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/filter-noise is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -39722,8 +39725,8 @@ var _utils = require("@pixi/utils");
 var _settings = require("@pixi/settings");
 
 /*!
- * @pixi/mixin-cache-as-bitmap - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/mixin-cache-as-bitmap - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/mixin-cache-as-bitmap is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -40089,8 +40092,8 @@ _display.DisplayObject.prototype._cacheAsBitmapDestroy = function _cacheAsBitmap
 var _display = require("@pixi/display");
 
 /*!
- * @pixi/mixin-get-child-by-name - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/mixin-get-child-by-name - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/mixin-get-child-by-name is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -40129,8 +40132,8 @@ var _display = require("@pixi/display");
 var _math = require("@pixi/math");
 
 /*!
- * @pixi/mixin-get-global-position - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/mixin-get-global-position - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/mixin-get-global-position is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -40182,8 +40185,8 @@ var _settings = require("@pixi/settings");
 var _utils = require("@pixi/utils");
 
 /*!
- * @pixi/mesh - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/mesh - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/mesh is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -40954,8 +40957,8 @@ var _constants = require("@pixi/constants");
 var _core = require("@pixi/core");
 
 /*!
- * @pixi/mesh-extras - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/mesh-extras - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/mesh-extras is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -41730,8 +41733,8 @@ var _sprite = require("@pixi/sprite");
 var _ticker = require("@pixi/ticker");
 
 /*!
- * @pixi/sprite-animated - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * @pixi/sprite-animated - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * @pixi/sprite-animated is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -42545,8 +42548,8 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 /*!
- * pixi.js - v5.2.4
- * Compiled Sun, 03 May 2020 22:38:52 UTC
+ * pixi.js - v5.2.3
+ * Compiled Fri, 24 Apr 2020 00:55:22 UTC
  *
  * pixi.js is licensed under the MIT License.
  * http://www.opensource.org/licenses/mit-license
@@ -43798,7 +43801,7 @@ _app.Application.registerPlugin(_loaders.AppLoaderPlugin);
  */
 
 
-var VERSION = '5.2.4';
+var VERSION = '5.2.3';
 /**
  * @namespace PIXI
  */
@@ -68778,7 +68781,11 @@ var _loadImage = _interopRequireDefault(require("./loadImage"));
 
 var _graphics = require("../../utils/graphics");
 
-var _pixi = require("pixi.js");
+var PIXI = _interopRequireWildcard(require("pixi.js"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -68852,7 +68859,7 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
 
     if (type !== ext) continue; // save the texture
 
-    var rect = new _pixi.Rectangle(x, y, width, height);
+    var rect = new PIXI.Rectangle(x, y, width, height);
     var texture = new PIXI.Texture(base, rect);
     spritesheet[id] = texture;
   }
@@ -71925,6 +71932,8 @@ function defineRectangleBounds(config, rect) {
 
 var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 
+var PIXI = _interopRequireWildcard(require("pixi.js"));
+
 var Particles = _interopRequireWildcard(require("pixi-particles"));
 
 var _utils = require("../../../utils");
@@ -71935,6 +71944,42 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// PIXI.Transform.prototype.updateTransform = function(parentTransform) {
+// 	const lt = this.localTransform;
+// 	if (this._localID !== this._currentLocalID)
+// 	{
+// 			const scaleX = this.scale.x;
+// 			const scaleY = this.scale.y;
+// 			const pivotX = this.pivot.x;
+// 			const pivotY = this.pivot.y;
+// 			// get the matrix values of the displayobject based on its transform properties..
+// 			lt.a = this._cx * scaleX;
+// 			lt.b = this._sx * scaleX;
+// 			lt.c = this._cy * scaleY;
+// 			lt.d = this._sy * scaleY;
+// 			lt.tx = this.position.x - ((pivotX * lt.a) + (pivotY * lt.c));
+// 			lt.ty = this.position.y - ((pivotX * lt.b) + (pivotY * lt.d));
+// 			this._currentLocalID = this._localID;
+// 			// force an update..
+// 			this._parentID = -1;
+// 	}
+// 	if (this._parentID !== parentTransform._worldID)
+// 	{
+// 			// concat the parent matrix with the objects transform.
+// 			const pt = parentTransform.worldTransform;
+// 			const wt = this.worldTransform;
+// 			wt.a = (lt.a * pt.a) + (lt.b * pt.c);
+// 			wt.b = (lt.a * pt.b) + (lt.b * pt.d);
+// 			wt.c = (lt.c * pt.a) + (lt.d * pt.c);
+// 			wt.d = (lt.c * pt.b) + (lt.d * pt.d);
+// 			wt.tx = (lt.tx * pt.a) + (lt.ty * pt.c) + pt.tx;
+// 			wt.ty = (lt.tx * pt.b) + (lt.ty * pt.d) + pt.ty;
+// 			this._parentID = parentTransform._worldID;
+// 			// update the id of the transform..
+// 			this._worldID++;
+// 	}
+// 	this.firstPassIsDone = true;
+// };
 // NOTE: this overrides default PIXI behavior for particles
 // There are several properties about particles that cannot be
 // adjusted using the configuration. This overrides the update process
@@ -72012,7 +72057,7 @@ Particles.Particle.prototype.init = function () {
     this.rotationModifier = undefined;
   }
 };
-},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../../../utils":"utils/index.js"}],"animation/generators/emitter/index.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../../../utils":"utils/index.js"}],"animation/generators/emitter/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -74095,12 +74140,6 @@ var _graphics = require("./utils/graphics");
 
 var _remove = require("./pixi/utils/remove");
 
-var PPP = _interopRequireWildcard(require("pixi.js"));
-
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // skips hello messages for PIXI
@@ -74113,6 +74152,5 @@ var PIXI = {
 }; // helpful utils
 
 exports.PIXI = PIXI;
-window.PIXI = PPP;
-},{"./pixi/utils/skip-hello":"pixi/utils/skip-hello.js","./animation":"animation/index.js","./animate":"animate/index.js","./pixi/responsive":"pixi/responsive.js","./pixi/stage":"pixi/stage.js","./pixi/detatched-container":"pixi/detatched-container.js","./animation/resources/loadImage":"animation/resources/loadImage.js","./common/event-emitter":"common/event-emitter.js","./pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js","./pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","./utils/graphics":"utils/graphics.js","./pixi/utils/remove":"pixi/utils/remove.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js"}]},{},["index.js"], null)
+},{"./pixi/utils/skip-hello":"pixi/utils/skip-hello.js","./animation":"animation/index.js","./animate":"animate/index.js","./pixi/responsive":"pixi/responsive.js","./pixi/stage":"pixi/stage.js","./pixi/detatched-container":"pixi/detatched-container.js","./animation/resources/loadImage":"animation/resources/loadImage.js","./common/event-emitter":"common/event-emitter.js","./pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js","./pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","./utils/graphics":"utils/graphics.js","./pixi/utils/remove":"pixi/utils/remove.js"}]},{},["index.js"], null)
 //# sourceMappingURL=/index.js.map

@@ -18,6 +18,3 @@ export { getBoundsForRole } from './pixi/utils/get-bounds-of-role';
 export { findDisplayObjectsOfRole } from './pixi/utils/find-objects-of-role';
 export { createContext, createPlaceholderImage } from './utils/graphics';
 export { removeDisplayObject } from './pixi/utils/remove';
-
-import * as PPP from 'pixi.js';
-window.PIXI = PPP;

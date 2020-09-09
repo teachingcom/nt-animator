@@ -1,5 +1,51 @@
+import * as PIXI from 'pixi.js';
 import * as Particles from 'pixi-particles';
 import { RAD } from '../../../utils';
+
+// PIXI.Transform.prototype.updateTransform = function(parentTransform) {
+// 	const lt = this.localTransform;
+	
+// 	if (this._localID !== this._currentLocalID)
+// 	{
+// 			const scaleX = this.scale.x;
+// 			const scaleY = this.scale.y;
+// 			const pivotX = this.pivot.x;
+// 			const pivotY = this.pivot.y;
+			
+// 			// get the matrix values of the displayobject based on its transform properties..
+// 			lt.a = this._cx * scaleX;
+// 			lt.b = this._sx * scaleX;
+// 			lt.c = this._cy * scaleY;
+// 			lt.d = this._sy * scaleY;
+// 			lt.tx = this.position.x - ((pivotX * lt.a) + (pivotY * lt.c));
+// 			lt.ty = this.position.y - ((pivotX * lt.b) + (pivotY * lt.d));
+// 			this._currentLocalID = this._localID;
+
+// 			// force an update..
+// 			this._parentID = -1;
+// 	}
+
+// 	if (this._parentID !== parentTransform._worldID)
+// 	{
+// 			// concat the parent matrix with the objects transform.
+// 			const pt = parentTransform.worldTransform;
+// 			const wt = this.worldTransform;
+
+// 			wt.a = (lt.a * pt.a) + (lt.b * pt.c);
+// 			wt.b = (lt.a * pt.b) + (lt.b * pt.d);
+// 			wt.c = (lt.c * pt.a) + (lt.d * pt.c);
+// 			wt.d = (lt.c * pt.b) + (lt.d * pt.d);
+// 			wt.tx = (lt.tx * pt.a) + (lt.ty * pt.c) + pt.tx;
+// 			wt.ty = (lt.tx * pt.b) + (lt.ty * pt.d) + pt.ty;
+
+// 			this._parentID = parentTransform._worldID;
+
+// 			// update the id of the transform..
+// 			this._worldID++;
+// 	}
+
+// 	this.firstPassIsDone = true;
+// };
 
 // NOTE: this overrides default PIXI behavior for particles
 // There are several properties about particles that cannot be
