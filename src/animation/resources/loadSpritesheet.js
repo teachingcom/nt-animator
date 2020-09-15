@@ -1,6 +1,5 @@
+import { PIXI } from '../../pixi/lib';
 import loadImage from "./loadImage";
-import { createPlaceholderImage } from "../../utils/graphics";
-import * as PIXI from "pixi.js";
 
 
 // handle loading an external spritesheet

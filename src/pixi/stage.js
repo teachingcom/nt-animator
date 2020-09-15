@@ -1,5 +1,5 @@
 
-import * as PIXI from 'pixi.js';
+import { PIXI } from '../pixi/lib';
 
 import ResponsiveContainer from "./responsive";
 import { findResponsiveStage } from "./utils";

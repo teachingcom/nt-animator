@@ -1,4 +1,4 @@
-import * as libPIXI from 'pixi.js'
+import { PIXI as libPIXI } from '../../pixi/lib';
 
 // These do not work for some reason
 libPIXI.utils.skipHello();

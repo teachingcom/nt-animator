@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js';
+import { PIXI } from '../../../pixi/lib';
 import * as Particles from 'pixi-particles';
 import { assignIf, assignDisplayObjectProps, applyDynamicProperties, applyExpressions } from "../../assign";
 import { isNumber, noop, setDefaults, isString, isArray, RAD } from "../../../utils";

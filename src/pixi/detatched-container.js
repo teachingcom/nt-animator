@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js';
+import { PIXI } from '../pixi/lib';
 
 export default class DetatchedContainer extends PIXI.Container {
 

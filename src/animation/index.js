@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js';
+import { PIXI } from '../pixi/lib';
 import { EventEmitter } from "../common/event-emitter";
 import { parsePath, resolvePath } from "./path";
 import Random from './rng';

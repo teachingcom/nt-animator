@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js';
+import { PIXI } from '../pixi/lib';
 import ResponsiveStage from "./stage";
 
 /** Handles responsive scaling for a container relative to a stage */
@@ -41,7 +41,7 @@ export default class ResponsiveContainer extends PIXI.Container {
 	scaleY = 0;
 
 	/** match the scaling as required */
-	render(...args) {
+	updateTransform(...args) {
 
 		// check if the stage scale has changed
 		const stage = ResponsiveStage.findResponsiveStage(this);
@@ -63,7 +63,7 @@ export default class ResponsiveContainer extends PIXI.Container {
 		this.y = this._relativeY * stage._definedHeight;
 
 		// perform the render
-		super.render(...args);
+		super.updateTransform(...args);
 	}
 
 }

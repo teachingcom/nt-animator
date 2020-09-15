@@ -107,12 +107,18 @@ export function applyDynamicProperties(obj, props) {
 	updateProperties();
 
 	// override the existing render function
+	// depending on the object type, use the
+	// correct rendering function
 	const __render__ = obj.render;
 	obj.render = (...args) => {
 		updateProperties();
-
-		// render normally
 		return __render__.apply(obj, args);
+	};
+
+	const __renderCanvas__ = obj.renderCanvas;
+	obj.renderCanvas = (...args) => {
+		updateProperties();
+		return __renderCanvas__.apply(obj, args);
 	};
 
 }

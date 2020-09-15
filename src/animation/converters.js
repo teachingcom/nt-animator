@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js';
+import { PIXI } from '../pixi/lib';
 import { isString, isNumber, isArray, RAD } from '../utils';
 import { map } from '../utils/collection';
 
