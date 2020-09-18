@@ -71399,7 +71399,7 @@ function _loadSpritesheet() {
               break;
             }
 
-            if (!(!image && !animator.ignoreImageLoadErrors)) {
+            if (image) {
               _context.next = 7;
               break;
             }

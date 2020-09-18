@@ -17,7 +17,7 @@ export default async function loadSpritesheet(animator, spritesheetId, spriteshe
 
 		// if the image failed to load, and we're not using placeholder
 		// images, then crash here
-		if (!image && !animator.ignoreImageLoadErrors)
+		if (!image)
 			throw new ImageRequestFailedException();
 		
 		// create a spritesheet with the image. If the image is
