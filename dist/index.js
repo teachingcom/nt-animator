@@ -75119,12 +75119,11 @@ function _createGroup() {
 
             group.pivot.x = 0;
             group.pivot.y = 0; // bakes a layer to a single object
-
-            if (layer.merge) {
-              group.cacheAsBitmap = true;
-              group.batch = 'merged';
-            } // include this instance
-
+            // if (layer.merge) {
+            // 	group.cacheAsBitmap = true;
+            // 	group.batch = 'merged';
+            // }
+            // include this instance
 
             controller.register(container); // attach the update function
 
@@ -75135,18 +75134,18 @@ function _createGroup() {
               dispose: dispose
             }]);
 
-          case 38:
-            _context.prev = 38;
+          case 37:
+            _context.prev = 37;
             _context.t0 = _context["catch"](4);
             console.error("Failed to create group ".concat(path, " while ").concat(phase));
             throw _context.t0;
 
-          case 42:
+          case 41:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[4, 38]]);
+    }, _callee, null, [[4, 37]]);
   }));
   return _createGroup.apply(this, arguments);
 }
