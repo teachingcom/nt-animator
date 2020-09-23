@@ -84,6 +84,23 @@ class AnimationHandler {
 		this.animation = anime(config);
 	}
 
+	// local frame tracking
+	lastTick = +new Date;
+	currentFrame = 0
+
+	// tick forward
+	tick = () => {
+		
+		// move the animation forward
+		const now = +new Date;
+		const delta = now - this.lastTick;
+		this.currentFrame += delta;
+		this.lastTick = now;
+
+		// update the position
+		this.animation.tick(this.currentFrame);
+	}
+
 	seek = value => this.animation.seek(value)
 
 	stop = () => {

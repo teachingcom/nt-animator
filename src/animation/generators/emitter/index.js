@@ -1,9 +1,10 @@
 import { PIXI } from '../../../pixi/lib';
 import * as Particles from 'pixi-particles';
 import { assignIf, assignDisplayObjectProps, applyDynamicProperties, applyExpressions } from "../../assign";
-import { isNumber, noop, setDefaults, isString, isArray, RAD } from "../../../utils";
+import { isNumber, noop, setDefaults, isString, isArray, RAD, isBoolean } from "../../../utils";
 import { map } from "../../../utils/collection";
 import defineEmitterBounds from './bounds';
+import createThrottledUpdater from '../../../pixi/utils/throttled-updater';
 
 // apply PIXI rendering overrides
 import './overrides';
@@ -11,7 +12,7 @@ import './overrides';
 import createAnimation from '../animation';
 import resolveImages from "../../resources/resolveImages";
 import { normalizeProps, normalizeEmit } from '../../normalize';
-import { toColor, toBlendMode } from '../../converters';
+import { toColor } from '../../converters';
 import { toRole } from '../../utils';
 
 // emitter property mappings
@@ -173,6 +174,7 @@ export default async function createEmitter(animator, controller, path, composit
 		assignIf(emit.blend, isString, config, (t, v) => t.blendMode = v);
 
 		// boolean props
+		const autoplay = emit.auto === false || emit.autoplay === false || emit.autoPlay === false;
 		config.noRotation = !!emit.noRotation;
 		config.atBack = !!emit.atBack;
 		config.orderedArt = !!emit.orderedArt;
@@ -230,16 +232,33 @@ export default async function createEmitter(animator, controller, path, composit
 		normalizeProps(layer.props);
 		normalizeEmit(layer.emit);
 
-		// check for a delay
-		if (emit.delay > 0) {
-			emitter.emit = false;
-			setTimeout(() => emitter.emit = true, emit.delay);
+		// create the emitter
+		const create = () => {
+			
+			// if there's a throttle
+			const { emitterUpdateFrequency } = animator.options;
+			if (isNumber(emitterUpdateFrequency)) {
+				emitter.autoUpdate = false;
+				emitter.emit = true;
+				createThrottledUpdater(emitterUpdateFrequency, 0.001, delta => emitter.update(delta * emitterUpdateFrequency));
+			}
+			// start normally
+			else emitter.emit = true;
 		}
 
-		// don't play right away
-		if (emit.autoplay === false) {
+		// manual start
+		if (autoplay) {
+			emitter.autoUpdate = false;
+			emitter.activate = create;
 			emitter.emit = false;
 		}
+		
+		// delayed start
+		else if ((config.delay || 0) > 0)
+			setTimeout(create, config.delay);
+
+		// auto start
+		else create();
 
 		// create dynamically rendered properties
 		phase = 'creating dynamic properties';

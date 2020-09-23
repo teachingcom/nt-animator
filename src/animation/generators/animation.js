@@ -7,6 +7,8 @@ import { assignDisplayObjectProps } from '../assign';
 import { evaluateExpression } from '../expressions';
 import { toEasing } from '../converters';
 import animate from '../../animate';
+import throttledUpdater from '../../pixi/utils/throttled-updater';
+import createThrottledUpdater from '../../pixi/utils/throttled-updater';
 
 // creates an animation
 export default function createAnimation(animator, path, composition, layer, instance) {
@@ -167,11 +169,26 @@ export default function createAnimation(animator, path, composition, layer, inst
 
 			// set the config values
 			config.update = props => assignDisplayObjectProps(instance, props);
-			config.delay = delay;
-			
+			const { animationUpdateFrequency } = animator.options;
+			const isThrottled = isNumber(animationUpdateFrequency);
+			config.autoplay = !isThrottled;
+
+			// animation creation process
+			const create = () => {
+				instance.animation = animate(config);
+				
+				// if this is throttled
+				if (isThrottled)
+					createThrottledUpdater(animationUpdateFrequency, instance.animation.tick);
+			}
+
+			// create the animation
+			if (isNumber(delay) && delay > 0)
+				setTimeout(create, delay);
+			else create();
+
 			// create the animation
 			instance.hasAnimation = true;
-			instance.animation = animate(config);
 
 		}
 		// make it clear which animation failed

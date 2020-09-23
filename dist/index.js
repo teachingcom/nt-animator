@@ -70778,6 +70778,17 @@ var AnimationHandler = function AnimationHandler(config, props) {
   var _this = this;
 
   (0, _classCallCheck2.default)(this, AnimationHandler);
+  (0, _defineProperty2.default)(this, "lastTick", +new Date());
+  (0, _defineProperty2.default)(this, "currentFrame", 0);
+  (0, _defineProperty2.default)(this, "tick", function () {
+    // move the animation forward
+    var now = +new Date();
+    var delta = now - _this.lastTick;
+    _this.currentFrame += delta;
+    _this.lastTick = now; // update the position
+
+    _this.animation.tick(_this.currentFrame);
+  });
   (0, _defineProperty2.default)(this, "seek", function (value) {
     return _this.animation.seek(value);
   });
@@ -70787,8 +70798,62 @@ var AnimationHandler = function AnimationHandler(config, props) {
   this.config = config;
   this.props = props;
   this.animation = (0, _animeEs.default)(config);
-};
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/toArray":"../node_modules/@babel/runtime/helpers/toArray.js","animejs/lib/anime.es.js":"../node_modules/animejs/lib/anime.es.js","../utils":"utils/index.js"}],"animation/generators/animation.js":[function(require,module,exports) {
+} // local frame tracking
+;
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/toArray":"../node_modules/@babel/runtime/helpers/toArray.js","animejs/lib/anime.es.js":"../node_modules/animejs/lib/anime.es.js","../utils":"utils/index.js"}],"pixi/utils/throttled-updater.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createThrottledUpdater;
+// shared animation loop
+var throttled = {
+  frame: 0,
+  elapsed: +new Date(),
+  updates: []
+}; // update all throttled animations
+
+function updateAll() {
+  requestAnimationFrame(updateAll);
+  throttled.frame++; // update the timing
+
+  var now = +new Date();
+  var delta = now - throttled.elapsed;
+  throttled.elapsed = now; // update each
+
+  for (var i = throttled.updates.length; i-- > 0;) {
+    try {
+      throttled.updates[i](throttled.frame, delta);
+    } catch (ex) {}
+  }
+} // kick off update loop
+
+
+updateAll(); // begin the updated
+
+function createThrottledUpdater(frequency, scale, action) {
+  // optional scaling parameter
+  if (isNaN(scale)) {
+    action = scale;
+    scale = 1;
+  } // update on the appropriate frames
+
+
+  var update = function update(frame, delta) {
+    if (frame % frequency !== 0) return;
+    action(delta * scale);
+  }; // add to the update queue
+
+
+  throttled.updates.push(update); // return a stopper
+
+  return function () {
+    var index = throttled.updates.indexOf(update);
+    throttled.updates.splice(index, 1);
+  };
+}
+},{}],"animation/generators/animation.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -70813,6 +70878,8 @@ var _expressions = require("../expressions");
 var _converters = require("../converters");
 
 var _animate = _interopRequireDefault(require("../../animate"));
+
+var _throttledUpdater = _interopRequireDefault(require("../../pixi/utils/throttled-updater"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -70841,123 +70908,135 @@ function createAnimation(animator, path, composition, layer, instance) {
 
   for (var i = 0; i < animations.length; i++) {
     try {
-      // unpack any variables
-      var animation = (0, _fastCopy.default)(animations[i]);
-      (0, _utils.inheritFrom)(animator, composition, animation, 'base'); // REFACTOR: don't create object just for array prop - 
-      // consider allowing the "prop" for unpack to be an array index
-      // unpack expects it to be part of the layer object
+      (function () {
+        // unpack any variables
+        var animation = (0, _fastCopy.default)(animations[i]);
+        (0, _utils.inheritFrom)(animator, composition, animation, 'base'); // REFACTOR: don't create object just for array prop - 
+        // consider allowing the "prop" for unpack to be an array index
+        // unpack expects it to be part of the layer object
 
-      (0, _utils.unpack)(animator, composition, {
-        animation: animation
-      }, 'animation'); // start creating the popmotion animation
+        (0, _utils.unpack)(animator, composition, {
+          animation: animation
+        }, 'animation'); // start creating the popmotion animation
 
-      var keyframes = animation.keyframes,
-          sequence = animation.sequence,
-          _animation$loop = animation.loop,
-          loop = _animation$loop === void 0 ? Infinity : _animation$loop,
-          _animation$flip = animation.flip,
-          flip = _animation$flip === void 0 ? 0 : _animation$flip,
-          _animation$elapsed = animation.elapsed,
-          elapsed = _animation$elapsed === void 0 ? 0 : _animation$elapsed,
-          _animation$yoyo = animation.yoyo,
-          yoyo = _animation$yoyo === void 0 ? 0 : _animation$yoyo,
-          _animation$duration = animation.duration,
-          duration = _animation$duration === void 0 ? 1000 : _animation$duration,
-          _animation$delay = animation.delay,
-          delay = _animation$delay === void 0 ? 0 : _animation$delay,
-          ease = animation.ease;
-      var easings = (0, _converters.toEasing)(ease); // check for how to repeat the animation - if it's a flip then
-      // we're just going to use the flip value
+        var keyframes = animation.keyframes,
+            sequence = animation.sequence,
+            _animation$loop = animation.loop,
+            loop = _animation$loop === void 0 ? Infinity : _animation$loop,
+            _animation$flip = animation.flip,
+            flip = _animation$flip === void 0 ? 0 : _animation$flip,
+            _animation$elapsed = animation.elapsed,
+            elapsed = _animation$elapsed === void 0 ? 0 : _animation$elapsed,
+            _animation$yoyo = animation.yoyo,
+            yoyo = _animation$yoyo === void 0 ? 0 : _animation$yoyo,
+            _animation$duration = animation.duration,
+            duration = _animation$duration === void 0 ? 1000 : _animation$duration,
+            _animation$delay = animation.delay,
+            delay = _animation$delay === void 0 ? 0 : _animation$delay,
+            ease = animation.ease;
+        var easings = (0, _converters.toEasing)(ease); // check for how to repeat the animation - if it's a flip then
+        // we're just going to use the flip value
 
-      var repeating = !!flip ? flip : loop;
-      var repeatType = flip === true
-      /* intentional */
-      ? 'flip' : 'loop';
-      var config = (0, _defineProperty2.default)({
-        times: [],
-        values: keyframes || sequence || [],
-        elapsed: (0, _expressions.evaluateExpression)(elapsed, duration) || 0,
-        easings: easings,
-        duration: duration
-      }, repeatType, (0, _utils2.isNumber)(repeating) ? repeating : Infinity); // check for a few special flags
+        var repeating = !!flip ? flip : loop;
+        var repeatType = flip === true
+        /* intentional */
+        ? 'flip' : 'loop';
+        var config = (0, _defineProperty2.default)({
+          times: [],
+          values: keyframes || sequence || [],
+          elapsed: (0, _expressions.evaluateExpression)(elapsed, duration) || 0,
+          easings: easings,
+          duration: duration
+        }, repeatType, (0, _utils2.isNumber)(repeating) ? repeating : Infinity); // check for a few special flags
 
-      if (loop === false) config.loop = false;
-      if (flip === false) config.flip = false;
-      if (yoyo === false) config.yoyo = false; // copy all default values for the starting frame
+        if (loop === false) config.loop = false;
+        if (flip === false) config.flip = false;
+        if (yoyo === false) config.yoyo = false; // copy all default values for the starting frame
 
-      var starting = {}; //TODO: create an update mapper to improve performance
-      // create a timings parameter
+        var starting = {}; //TODO: create an update mapper to improve performance
+        // create a timings parameter
 
-      for (var _i = 0; _i < config.values.length; _i++) {
-        var keyframe = config.values[_i]; // get the timing value, if any
+        for (var _i = 0; _i < config.values.length; _i++) {
+          var keyframe = config.values[_i]; // get the timing value, if any
 
-        var timing = (0, _utils2.isNumber)(keyframe.at) ? keyframe.at : _i / config.values.length;
-        config.times.push(timing); // remove any timing helpers, if any
+          var timing = (0, _utils2.isNumber)(keyframe.at) ? keyframe.at : _i / config.values.length;
+          config.times.push(timing); // remove any timing helpers, if any
 
-        delete keyframe.at; // copy all default values
+          delete keyframe.at; // copy all default values
 
-        for (var prop in keyframe) {
-          if (!(prop in starting)) {
-            // TODO: Colors have special rules
-            // using tint/hue shift/and Popmotion color tween rules
-            // TODO: this part is confusing -- special layer configurations
-            // can create animations using their prop name and sub property, but
-            // by default animations can simply use a property by their name
-            // for example, an emitter can change "emit.x" to tween a sub property
-            // however, rotation is simply "rotation" and not "props.rotation"
-            var isSubProperty = !!~prop.indexOf('.');
-            starting[prop] = isSubProperty ? (0, _deepGetSet.default)(layer, prop) : layer.props[prop]; // without a value, there might be an error
+          for (var prop in keyframe) {
+            if (!(prop in starting)) {
+              // TODO: Colors have special rules
+              // using tint/hue shift/and Popmotion color tween rules
+              // TODO: this part is confusing -- special layer configurations
+              // can create animations using their prop name and sub property, but
+              // by default animations can simply use a property by their name
+              // for example, an emitter can change "emit.x" to tween a sub property
+              // however, rotation is simply "rotation" and not "props.rotation"
+              var isSubProperty = !!~prop.indexOf('.');
+              starting[prop] = isSubProperty ? (0, _deepGetSet.default)(layer, prop) : layer.props[prop]; // without a value, there might be an error
 
-            if ((0, _utils2.isNil)(starting[prop])) {
-              console.warn("Missing starting animation prop for ".concat(prop, ". This might mean you're animating a property that doesn't have a known starting value"));
+              if ((0, _utils2.isNil)(starting[prop])) {
+                console.warn("Missing starting animation prop for ".concat(prop, ". This might mean you're animating a property that doesn't have a known starting value"));
+              }
+            } // evaluate any expressions
+
+
+            keyframe[prop] = (0, _expressions.evaluateExpression)(keyframe[prop], starting[prop]); // for tint, create new properties for the 
+            // transition and remove the keyframe prop. This
+            // will allow the animation keyframe update to 
+            // property animate the color change
+
+            if (prop === 'tint') {
+              keyframe.__animated_tint__ = decToHex(keyframe[prop]);
+              if (starting[prop]) starting.__animated_tint__ = decToHex(starting[prop]);
+              delete keyframe.tint;
+              delete starting.tint;
             }
-          } // evaluate any expressions
-
-
-          keyframe[prop] = (0, _expressions.evaluateExpression)(keyframe[prop], starting[prop]); // for tint, create new properties for the 
-          // transition and remove the keyframe prop. This
-          // will allow the animation keyframe update to 
-          // property animate the color change
-
-          if (prop === 'tint') {
-            keyframe.__animated_tint__ = decToHex(keyframe[prop]);
-            if (starting[prop]) starting.__animated_tint__ = decToHex(starting[prop]);
-            delete keyframe.tint;
-            delete starting.tint;
           }
-        }
-      } // include the starting frame of animation
-      // and also shift timings to account for
-      // the extra frame of animation
+        } // include the starting frame of animation
+        // and also shift timings to account for
+        // the extra frame of animation
 
 
-      config.values.unshift(starting); // this section is used to correct animation
-      // timing errors - this could grow unweildy so 
-      // consider throwing errors for future animation
-      // errors as opposed to fixing in code
+        config.values.unshift(starting); // this section is used to correct animation
+        // timing errors - this could grow unweildy so 
+        // consider throwing errors for future animation
+        // errors as opposed to fixing in code
 
-      if (config.times.length < config.values.length) {
-        var first = config.times[0]; // if the first value is not a zero, then we'll
-        // assume the animation is missing it's start time
+        if (config.times.length < config.values.length) {
+          var first = config.times[0]; // if the first value is not a zero, then we'll
+          // assume the animation is missing it's start time
 
-        if (first !== 0) {
-          config.times.unshift(0);
-        } // if it's already set to zero, but there
-        // doesn't appear to be an ending time
-        else if (first === 0) {
-            config.times.push(1);
-          }
-      } // set the config values
+          if (first !== 0) {
+            config.times.unshift(0);
+          } // if it's already set to zero, but there
+          // doesn't appear to be an ending time
+          else if (first === 0) {
+              config.times.push(1);
+            }
+        } // set the config values
 
 
-      config.update = function (props) {
-        return (0, _assign.assignDisplayObjectProps)(instance, props);
-      };
+        config.update = function (props) {
+          return (0, _assign.assignDisplayObjectProps)(instance, props);
+        };
 
-      config.delay = delay; // create the animation
+        var animationUpdateFrequency = animator.options.animationUpdateFrequency;
+        var isThrottled = (0, _utils2.isNumber)(animationUpdateFrequency);
+        config.autoplay = !isThrottled; // animation creation process
 
-      instance.hasAnimation = true;
-      instance.animation = (0, _animate.default)(config);
+        var create = function create() {
+          instance.animation = (0, _animate.default)(config); // if this is throttled
+
+          if (isThrottled) (0, _throttledUpdater.default)(animationUpdateFrequency, instance.animation.tick);
+        }; // create the animation
+
+
+        if ((0, _utils2.isNumber)(delay) && delay > 0) setTimeout(create, delay);else create(); // create the animation
+
+        instance.hasAnimation = true;
+      })();
     } // make it clear which animation failed
     catch (ex) {
       console.error("Failed to create animation ".concat(i));
@@ -70978,7 +71057,7 @@ function decToHex(dec) {
   var val = dec.toString(16);
   return ['#', "000000".substr(val.length), val].join('');
 }
-},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-get-set":"../node_modules/deep-get-set/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js","../converters":"animation/converters.js","../../animate":"animate/index.js"}],"utils/graphics.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-get-set":"../node_modules/deep-get-set/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js","../converters":"animation/converters.js","../../animate":"animate/index.js","../../pixi/utils/throttled-updater":"pixi/utils/throttled-updater.js"}],"utils/graphics.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -74656,6 +74735,8 @@ var _collection = require("../../../utils/collection");
 
 var _bounds = _interopRequireDefault(require("./bounds"));
 
+var _throttledUpdater = _interopRequireDefault(require("../../../pixi/utils/throttled-updater"));
+
 require("./overrides");
 
 var _animation = _interopRequireDefault(require("../animation"));
@@ -74729,7 +74810,7 @@ function createEmitter(_x, _x2, _x3, _x4, _x5) {
 
 function _createEmitter() {
   _createEmitter = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, composition, layer) {
-    var container, generator, update, dispose, phase, textures, _layer$emit, emit, auto, config, _loop, prop, _ret, emitter;
+    var container, generator, update, dispose, phase, textures, _layer$emit, emit, auto, config, _loop, prop, _ret, autoplay, emitter, create;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -74893,6 +74974,7 @@ function _createEmitter() {
               return t.blendMode = v;
             }); // boolean props
 
+            autoplay = emit.auto === false || emit.autoplay === false || emit.autoPlay === false;
             config.noRotation = !!emit.noRotation;
             config.atBack = !!emit.atBack;
             config.orderedArt = !!emit.orderedArt;
@@ -74941,19 +75023,30 @@ function _createEmitter() {
             generator.isEmitter = true; // fix property names to account for aliases
 
             (0, _normalize.normalizeProps)(layer.props);
-            (0, _normalize.normalizeEmit)(layer.emit); // check for a delay
+            (0, _normalize.normalizeEmit)(layer.emit); // create the emitter
 
-            if (emit.delay > 0) {
+            create = function create() {
+              // if there's a throttle
+              var emitterUpdateFrequency = animator.options.emitterUpdateFrequency;
+
+              if ((0, _utils.isNumber)(emitterUpdateFrequency)) {
+                emitter.autoUpdate = false;
+                emitter.emit = true;
+                (0, _throttledUpdater.default)(emitterUpdateFrequency, 0.001, function (delta) {
+                  return emitter.update(delta * emitterUpdateFrequency);
+                });
+              } // start normally
+              else emitter.emit = true;
+            }; // manual start
+
+
+            if (autoplay) {
+              emitter.autoUpdate = false;
+              emitter.activate = create;
               emitter.emit = false;
-              setTimeout(function () {
-                return emitter.emit = true;
-              }, emit.delay);
-            } // don't play right away
-
-
-            if (emit.autoplay === false) {
-              emitter.emit = false;
-            } // create dynamically rendered properties
+            } // delayed start
+            else if ((config.delay || 0) > 0) setTimeout(create, config.delay); // auto start
+              else create(); // create dynamically rendered properties
 
 
             phase = 'creating dynamic properties';
@@ -74976,22 +75069,22 @@ function _createEmitter() {
               dispose: dispose
             }]);
 
-          case 67:
-            _context.prev = 67;
+          case 68:
+            _context.prev = 68;
             _context.t2 = _context["catch"](7);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
             throw _context.t2;
 
-          case 71:
+          case 72:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[7, 67]]);
+    }, _callee, null, [[7, 68]]);
   }));
   return _createEmitter.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../../pixi/lib":"pixi/lib.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../../assign":"animation/assign.js","../../../utils":"utils/index.js","../../../utils/collection":"utils/collection.js","./bounds":"animation/generators/emitter/bounds.js","./overrides":"animation/generators/emitter/overrides.js","../animation":"animation/generators/animation.js","../../resources/resolveImages":"animation/resources/resolveImages.js","../../normalize":"animation/normalize.js","../../converters":"animation/converters.js","../../utils":"animation/utils.js"}],"animation/generators/group.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../../pixi/lib":"pixi/lib.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../../assign":"animation/assign.js","../../../utils":"utils/index.js","../../../utils/collection":"utils/collection.js","./bounds":"animation/generators/emitter/bounds.js","../../../pixi/utils/throttled-updater":"pixi/utils/throttled-updater.js","./overrides":"animation/generators/emitter/overrides.js","../animation":"animation/generators/animation.js","../../resources/resolveImages":"animation/resources/resolveImages.js","../../normalize":"animation/normalize.js","../../converters":"animation/converters.js","../../utils":"animation/utils.js"}],"animation/generators/group.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
