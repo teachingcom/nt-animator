@@ -71305,15 +71305,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = loadImage;
 
-var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
-
-var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
-
 var _graphics = require("../../utils/graphics");
 
 var _assetCache = require("../../utils/assetCache");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
@@ -71328,107 +71322,85 @@ var images = {};
  * @param {string} url The url of the image to load
 */
 
-function loadImage(_x) {
-  return _loadImage.apply(this, arguments);
-}
+function loadImage(url) {
+  return new Promise(function (resolve, reject) {
+    // prevent accidental double slashes
+    var parts = url.split('://');
+    var last = parts.length - 1;
+    parts[last] = parts[last].replace(/\/+/g, '/');
+    url = parts.join('://'); // check if already existing
 
-function _loadImage() {
-  _loadImage = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(url) {
-    var now;
-    return _regenerator.default.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            now = +new Date(); // check if already existing
+    if (url in images) return resolve(images[url]); // if already waiting for a resource
 
-            if (!(url in images)) {
-              _context.next = 3;
-              break;
+    if (pending[url]) {
+      pending[url].push({
+        resolve: resolve,
+        reject: reject
+      });
+      return;
+    } // load the image
+
+
+    var img = document.createElement('img'); // if no active queue is available, start it now
+
+    pending[url] = [{
+      resolve: resolve,
+      reject: reject
+    }]; // create resolution actions
+
+    var handle = function handle(success) {
+      return function () {
+        // all finished, resolve the result
+        images[url] = success ? img : null; // // try and cache
+        // if (success)
+        // 	requestAnimationFrame(() => {
+        // 		try {
+        // 			// save to the cache
+        // 			const context = createContext();
+        // 			context.resize(img.width, img.height);
+        // 			// create a data url for the image
+        // 			context.ctx.drawImage(img, 0, 0);
+        // 			const data = context.canvas.toDataURL();
+        // 			cache.setItem(url, data);
+        // 		}
+        // 		// do not fail for this
+        // 		catch(ex) { }
+        // 	});
+        // execute all waiting requests
+
+        try {
+          var _iterator = _createForOfIteratorHelper(pending[url]),
+              _step;
+
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done;) {
+              var handler = _step.value;
+              var _resolve = handler.resolve;
+
+              _resolve(success ? img : null);
             }
-
-            return _context.abrupt("return", images[url]);
-
-          case 3:
-            if (!pending[url]) {
-              _context.next = 5;
-              break;
-            }
-
-            return _context.abrupt("return", new Promise(function (resolve, reject) {
-              pending[url].push({
-                resolve: resolve,
-                reject: reject
-              });
-            }));
-
-          case 5:
-            return _context.abrupt("return", new Promise(function (resolve, reject) {
-              var img = document.createElement('img'); // if no active queue is available, start it now
-
-              pending[url] = [{
-                resolve: resolve,
-                reject: reject
-              }]; // create resolution actions
-
-              var handle = function handle(success) {
-                return function () {
-                  // all finished, resolve the result
-                  images[url] = success ? img : null; // // try and cache
-                  // if (success)
-                  // 	requestAnimationFrame(() => {
-                  // 		try {
-                  // 			// save to the cache
-                  // 			const context = createContext();
-                  // 			context.resize(img.width, img.height);
-                  // 			// create a data url for the image
-                  // 			context.ctx.drawImage(img, 0, 0);
-                  // 			const data = context.canvas.toDataURL();
-                  // 			cache.setItem(url, data);
-                  // 		}
-                  // 		// do not fail for this
-                  // 		catch(ex) { }
-                  // 	});
-                  // execute all waiting requests
-
-                  try {
-                    var _iterator = _createForOfIteratorHelper(pending[url]),
-                        _step;
-
-                    try {
-                      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-                        var handler = _step.value;
-                        var _resolve = handler.resolve;
-
-                        _resolve(success ? img : null);
-                      }
-                    } catch (err) {
-                      _iterator.e(err);
-                    } finally {
-                      _iterator.f();
-                    }
-                  } // cleanup
-                  finally {
-                    delete pending[url];
-                  }
-                };
-              }; // make the exernal image request
-
-
-              img.onload = handle(true);
-              img.onerror = handle(false);
-              img.src = url;
-            }));
-
-          case 6:
-          case "end":
-            return _context.stop();
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+        } // cleanup
+        finally {
+          delete pending[url];
         }
-      }
-    }, _callee);
-  }));
-  return _loadImage.apply(this, arguments);
+      };
+    }; // handle results
+
+
+    img.onload = handle(true);
+    img.onerror = handle(false); // wait a moment before loading
+
+    setTimeout(function () {
+      return img.src = url;
+    });
+  });
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../utils/graphics":"utils/graphics.js","../../utils/assetCache":"utils/assetCache.js"}],"animation/resources/loadSpritesheet.js":[function(require,module,exports) {
+},{"../../utils/graphics":"utils/graphics.js","../../utils/assetCache":"utils/assetCache.js"}],"animation/resources/loadSpritesheet.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
