@@ -71950,18 +71950,6 @@ function _createSprite() {
 
           case 11:
             textures = _context.sent;
-            // console.log('resolved', textures);
-            // // create textures for each sprite
-            // phase = 'generating textures';
-            // let textures;
-            // try {
-            // 	textures = map(images, createTextureFromImage);
-            // }
-            // // had a problem
-            // catch (ex) {
-            // 	console.error(`Failed to create a texture for ${path}`, composition);
-            // 	throw ex;
-            // }
             // create the instance of the sprite
             phase = 'creating sprite instance';
             isAnimated = textures.length > 1;
@@ -72024,7 +72012,8 @@ function _createSprite() {
             } // add to the controller
 
 
-            controller.register(sprite); // attach the update function
+            controller.register(sprite);
+            sprite.config = layer; // attach the update function
 
             return _context.abrupt("return", [{
               displayObject: sprite,
@@ -72033,18 +72022,18 @@ function _createSprite() {
               dispose: dispose
             }]);
 
-          case 42:
-            _context.prev = 42;
+          case 43:
+            _context.prev = 43;
             _context.t0 = _context["catch"](3);
             console.error("Failed to create sprite ".concat(path, " while ").concat(phase));
             throw _context.t0;
 
-          case 46:
+          case 47:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[3, 42]]);
+    }, _callee, null, [[3, 43]]);
   }));
   return _createSprite.apply(this, arguments);
 }

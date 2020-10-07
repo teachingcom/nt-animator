@@ -46,19 +46,6 @@ export default async function createSprite(animator, controller, path, compositi
 			// gather all required images
 			phase = 'resolving images';
 			const textures = await resolveImages(animator, path, composition, layer);
-			// console.log('resolved', textures);
-
-			// // create textures for each sprite
-			// phase = 'generating textures';
-			// let textures;
-			// try {
-			// 	textures = map(images, createTextureFromImage);
-			// }
-			// // had a problem
-			// catch (ex) {
-			// 	console.error(`Failed to create a texture for ${path}`, composition);
-			// 	throw ex;
-			// }
 			
 			// create the instance of the sprite
 			phase = 'creating sprite instance';
@@ -129,6 +116,7 @@ export default async function createSprite(animator, controller, path, compositi
 
 		// add to the controller
 		controller.register(sprite);
+		sprite.config = layer;
 
 		// attach the update function
 		return [{ displayObject: sprite, data: layer, update, dispose }];
