@@ -71057,257 +71057,13 @@ function decToHex(dec) {
   var val = dec.toString(16);
   return ['#', "000000".substr(val.length), val].join('');
 }
-},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-get-set":"../node_modules/deep-get-set/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js","../converters":"animation/converters.js","../../animate":"animate/index.js","../../pixi/utils/throttled-updater":"pixi/utils/throttled-updater.js"}],"utils/graphics.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createContext = createContext;
-exports.drawPixiTexture = drawPixiTexture;
-exports.createPlaceholderImage = createPlaceholderImage;
-
-var _converters = require("../animation/converters");
-
-/** creates a rendering surface */
-function createContext() {
-  var canvas = document.createElement('canvas');
-  var ctx = canvas.getContext('2d');
-
-  function reset() {
-    canvas.width = canvas.width;
-  }
-
-  function resize(width, height) {
-    canvas.width = width;
-    canvas.height = height;
-  }
-
-  ctx.drawTexture = drawPixiTexture;
-  return {
-    canvas: canvas,
-    ctx: ctx,
-    reset: reset,
-    resize: resize
-  };
-}
-/** draws a texture */
-
-
-function drawPixiTexture(texture, x, y, width, height) {
-  var orig = texture.orig,
-      baseTexture = texture.baseTexture;
-  var source = baseTexture.resource.source; // console.log(source);
-
-  this.drawImage(source, orig.x, orig.y, orig.width, orig.height, x, y, width, height);
-}
-/** generates a placeholder image */
-
-
-function createPlaceholderImage(_ref) {
-  var _ref$width = _ref.width,
-      width = _ref$width === void 0 ? 100 : _ref$width,
-      _ref$height = _ref.height,
-      height = _ref$height === void 0 ? 100 : _ref$height,
-      _ref$canvas = _ref.canvas,
-      canvas = _ref$canvas === void 0 ? document.createElement('canvas') : _ref$canvas,
-      _ref$ctx = _ref.ctx,
-      ctx = _ref$ctx === void 0 ? canvas.getContext('2d') : _ref$ctx,
-      _ref$background = _ref.background,
-      background = _ref$background === void 0 ? 0x000000 : _ref$background,
-      _ref$color = _ref.color,
-      color = _ref$color === void 0 ? 0xffffff : _ref$color;
-  // match size
-  canvas.width = width;
-  canvas.height = height;
-  /** generates a placeholder image */
-
-  ctx.lineWidth = 4;
-  ctx.strokeStyle = "#".concat((0, _converters.toColor)(color));
-  ctx.fillStyle = "#".concat((0, _converters.toColor)(background)); // background
-
-  ctx.globalAlpha = 0.5;
-  ctx.fillRect(0, 0, width, height); // paint a temp sprite
-
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(width, 0);
-  ctx.lineTo(width, height);
-  ctx.lineTo(0, height);
-  ctx.lineTo(0, 0);
-  ctx.lineTo(width, height);
-  ctx.moveTo(width, 0);
-  ctx.lineTo(0, height);
-  ctx.globalAlpha = 1;
-  ctx.stroke(); // give back the generated image
-
-  return canvas;
-}
-},{"../animation/converters":"animation/converters.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.get = get;
-exports.set = set;
-exports.del = del;
-exports.clear = clear;
-exports.keys = keys;
-exports.Store = void 0;
-
-class Store {
-  constructor(dbName = 'keyval-store', storeName = 'keyval') {
-    this.storeName = storeName;
-    this._dbp = new Promise((resolve, reject) => {
-      const openreq = indexedDB.open(dbName, 1);
-
-      openreq.onerror = () => reject(openreq.error);
-
-      openreq.onsuccess = () => resolve(openreq.result); // First time setup: create an empty object store
-
-
-      openreq.onupgradeneeded = () => {
-        openreq.result.createObjectStore(storeName);
-      };
-    });
-  }
-
-  _withIDBStore(type, callback) {
-    return this._dbp.then(db => new Promise((resolve, reject) => {
-      const transaction = db.transaction(this.storeName, type);
-
-      transaction.oncomplete = () => resolve();
-
-      transaction.onabort = transaction.onerror = () => reject(transaction.error);
-
-      callback(transaction.objectStore(this.storeName));
-    }));
-  }
-
-}
-
-exports.Store = Store;
-let store;
-
-function getDefaultStore() {
-  if (!store) store = new Store();
-  return store;
-}
-
-function get(key, store = getDefaultStore()) {
-  let req;
-  return store._withIDBStore('readonly', store => {
-    req = store.get(key);
-  }).then(() => req.result);
-}
-
-function set(key, value, store = getDefaultStore()) {
-  return store._withIDBStore('readwrite', store => {
-    store.put(value, key);
-  });
-}
-
-function del(key, store = getDefaultStore()) {
-  return store._withIDBStore('readwrite', store => {
-    store.delete(key);
-  });
-}
-
-function clear(store = getDefaultStore()) {
-  return store._withIDBStore('readwrite', store => {
-    store.clear();
-  });
-}
-
-function keys(store = getDefaultStore()) {
-  const keys = [];
-  return store._withIDBStore('readonly', store => {
-    // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
-    // And openKeyCursor isn't supported by Safari.
-    (store.openKeyCursor || store.openCursor).call(store).onsuccess = function () {
-      if (!this.result) return;
-      keys.push(this.result.key);
-      this.result.continue();
-    };
-  }).then(() => keys);
-}
-},{}],"utils/assetCache.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.shared = exports.default = void 0;
-
-var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
-
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
-var _idbKeyval = require("idb-keyval");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/** creates an asset cache */
-var AssetCache =
-/** create a new cache */
-function AssetCache(db, table) {
-  var _this = this;
-
-  (0, _classCallCheck2.default)(this, AssetCache);
-  (0, _defineProperty2.default)(this, "getItem", function (key) {
-    var store = _this.store;
-    return new Promise(function (resolve) {
-      (0, _idbKeyval.get)(key, store).then(function () {
-        var record = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        var now = +new Date();
-        var data = record.data,
-            expires = record.expires;
-        var success = !!data && !isNaN(expires) && expires > now;
-        resolve(success ? data : null);
-      }) // for errors, just resolve with
-      // no value
-      .catch(function () {
-        return resolve(null);
-      });
-    });
-  });
-  (0, _defineProperty2.default)(this, "setItem", function (key, data) {
-    var expires = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 24 * 60 * 60 * 1000;
-    var store = _this.store;
-    return new Promise(function (resolve) {
-      (0, _idbKeyval.set)(key, {
-        data: data,
-        expires: +new Date() + expires
-      }, store).then(function () {
-        return resolve(true);
-      }).catch(function () {
-        return resolve(false);
-      });
-    });
-  });
-  (0, _defineProperty2.default)(this, "purge", function () {// TODO
-  });
-  this.store = new _idbKeyval.Store(db, table);
-}
-/** saves an image resource */
-; // shared common cache
-
-
-exports.default = AssetCache;
-var shared = new AssetCache('nt:cached-assets', 'images');
-exports.shared = shared;
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","idb-keyval":"../node_modules/idb-keyval/dist/idb-keyval.mjs"}],"animation/resources/loadImage.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-get-set":"../node_modules/deep-get-set/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js","../converters":"animation/converters.js","../../animate":"animate/index.js","../../pixi/utils/throttled-updater":"pixi/utils/throttled-updater.js"}],"animation/resources/loadImage.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = loadImage;
-
-var _graphics = require("../../utils/graphics");
-
-var _assetCache = require("../../utils/assetCache");
 
 function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
@@ -71318,7 +71074,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // resources that are currently loading
 var pending = {};
 var images = {};
-/** handles loading an external image url 
+/** handles loading an external image url
  * @param {string} url The url of the image to load
 */
 
@@ -71330,7 +71086,10 @@ function loadImage(url) {
     parts[last] = parts[last].replace(/\/+/g, '/');
     url = parts.join('://'); // check if already existing
 
-    if (url in images) return resolve(images[url]); // if already waiting for a resource
+    if (url in images) {
+      return resolve(images[url]);
+    } // if already waiting for a resource
+
 
     if (pending[url]) {
       pending[url].push({
@@ -71338,35 +71097,38 @@ function loadImage(url) {
         reject: reject
       });
       return;
-    } // load the image
+    } // reserve the image
 
 
-    var img = document.createElement('img'); // if no active queue is available, start it now
+    var img; // limit attempts to reload
+
+    var attempts = 3; // if no active queue is available, start it now
 
     pending[url] = [{
       resolve: resolve,
       reject: reject
-    }]; // create resolution actions
+    }]; // attempts to load an image
+
+    var request = function request() {
+      img = document.createElement('img');
+      img.onload = handle(true);
+      img.onerror = handle(false); // replace the image url
+
+      setTimeout(function () {
+        img.src = url;
+      });
+    }; // create resolution actions
+
 
     var handle = function handle(success) {
       return function () {
-        // all finished, resolve the result
-        images[url] = success ? img : null; // // try and cache
-        // if (success)
-        // 	requestAnimationFrame(() => {
-        // 		try {
-        // 			// save to the cache
-        // 			const context = createContext();
-        // 			context.resize(img.width, img.height);
-        // 			// create a data url for the image
-        // 			context.ctx.drawImage(img, 0, 0);
-        // 			const data = context.canvas.toDataURL();
-        // 			cache.setItem(url, data);
-        // 		}
-        // 		// do not fail for this
-        // 		catch(ex) { }
-        // 	});
-        // execute all waiting requests
+        // if wasn't successful, but is allowed to try again
+        if (!success && --attempts > 0) {
+          return request();
+        } // all finished, resolve the result
+
+
+        images[url] = success ? img : null; // execute all waiting requests
 
         try {
           var _iterator = _createForOfIteratorHelper(pending[url]),
@@ -71384,23 +71146,17 @@ function loadImage(url) {
           } finally {
             _iterator.f();
           }
-        } // cleanup
-        finally {
+        } finally {
           delete pending[url];
         }
       };
-    }; // handle results
+    }; // kick off the first attempt
 
 
-    img.onload = handle(true);
-    img.onerror = handle(false); // wait a moment before loading
-
-    setTimeout(function () {
-      return img.src = url;
-    });
+    request();
   });
 }
-},{"../../utils/graphics":"utils/graphics.js","../../utils/assetCache":"utils/assetCache.js"}],"animation/resources/loadSpritesheet.js":[function(require,module,exports) {
+},{}],"animation/resources/loadSpritesheet.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -75203,7 +74959,93 @@ function _createGroup() {
   }));
   return _createGroup.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../utils":"animation/utils.js",".":"animation/generators/index.js","../normalize":"animation/normalize.js"}],"animation/generators/mask.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../utils":"animation/utils.js",".":"animation/generators/index.js","../normalize":"animation/normalize.js"}],"utils/graphics.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createContext = createContext;
+exports.drawPixiTexture = drawPixiTexture;
+exports.createPlaceholderImage = createPlaceholderImage;
+
+var _converters = require("../animation/converters");
+
+/** creates a rendering surface */
+function createContext() {
+  var canvas = document.createElement('canvas');
+  var ctx = canvas.getContext('2d');
+
+  function reset() {
+    canvas.width = canvas.width;
+  }
+
+  function resize(width, height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  ctx.drawTexture = drawPixiTexture;
+  return {
+    canvas: canvas,
+    ctx: ctx,
+    reset: reset,
+    resize: resize
+  };
+}
+/** draws a texture */
+
+
+function drawPixiTexture(texture, x, y, width, height) {
+  var orig = texture.orig,
+      baseTexture = texture.baseTexture;
+  var source = baseTexture.resource.source; // console.log(source);
+
+  this.drawImage(source, orig.x, orig.y, orig.width, orig.height, x, y, width, height);
+}
+/** generates a placeholder image */
+
+
+function createPlaceholderImage(_ref) {
+  var _ref$width = _ref.width,
+      width = _ref$width === void 0 ? 100 : _ref$width,
+      _ref$height = _ref.height,
+      height = _ref$height === void 0 ? 100 : _ref$height,
+      _ref$canvas = _ref.canvas,
+      canvas = _ref$canvas === void 0 ? document.createElement('canvas') : _ref$canvas,
+      _ref$ctx = _ref.ctx,
+      ctx = _ref$ctx === void 0 ? canvas.getContext('2d') : _ref$ctx,
+      _ref$background = _ref.background,
+      background = _ref$background === void 0 ? 0x000000 : _ref$background,
+      _ref$color = _ref.color,
+      color = _ref$color === void 0 ? 0xffffff : _ref$color;
+  // match size
+  canvas.width = width;
+  canvas.height = height;
+  /** generates a placeholder image */
+
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "#".concat((0, _converters.toColor)(color));
+  ctx.fillStyle = "#".concat((0, _converters.toColor)(background)); // background
+
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(0, 0, width, height); // paint a temp sprite
+
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(width, 0);
+  ctx.lineTo(width, height);
+  ctx.lineTo(0, height);
+  ctx.lineTo(0, 0);
+  ctx.lineTo(width, height);
+  ctx.moveTo(width, 0);
+  ctx.lineTo(0, height);
+  ctx.globalAlpha = 1;
+  ctx.stroke(); // give back the generated image
+
+  return canvas;
+}
+},{"../animation/converters":"animation/converters.js"}],"animation/generators/mask.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -76176,7 +76018,161 @@ var Controller = /*#__PURE__*/function () {
 }();
 
 exports.default = Controller;
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js"}],"animation/index.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.get = get;
+exports.set = set;
+exports.del = del;
+exports.clear = clear;
+exports.keys = keys;
+exports.Store = void 0;
+
+class Store {
+  constructor(dbName = 'keyval-store', storeName = 'keyval') {
+    this.storeName = storeName;
+    this._dbp = new Promise((resolve, reject) => {
+      const openreq = indexedDB.open(dbName, 1);
+
+      openreq.onerror = () => reject(openreq.error);
+
+      openreq.onsuccess = () => resolve(openreq.result); // First time setup: create an empty object store
+
+
+      openreq.onupgradeneeded = () => {
+        openreq.result.createObjectStore(storeName);
+      };
+    });
+  }
+
+  _withIDBStore(type, callback) {
+    return this._dbp.then(db => new Promise((resolve, reject) => {
+      const transaction = db.transaction(this.storeName, type);
+
+      transaction.oncomplete = () => resolve();
+
+      transaction.onabort = transaction.onerror = () => reject(transaction.error);
+
+      callback(transaction.objectStore(this.storeName));
+    }));
+  }
+
+}
+
+exports.Store = Store;
+let store;
+
+function getDefaultStore() {
+  if (!store) store = new Store();
+  return store;
+}
+
+function get(key, store = getDefaultStore()) {
+  let req;
+  return store._withIDBStore('readonly', store => {
+    req = store.get(key);
+  }).then(() => req.result);
+}
+
+function set(key, value, store = getDefaultStore()) {
+  return store._withIDBStore('readwrite', store => {
+    store.put(value, key);
+  });
+}
+
+function del(key, store = getDefaultStore()) {
+  return store._withIDBStore('readwrite', store => {
+    store.delete(key);
+  });
+}
+
+function clear(store = getDefaultStore()) {
+  return store._withIDBStore('readwrite', store => {
+    store.clear();
+  });
+}
+
+function keys(store = getDefaultStore()) {
+  const keys = [];
+  return store._withIDBStore('readonly', store => {
+    // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
+    // And openKeyCursor isn't supported by Safari.
+    (store.openKeyCursor || store.openCursor).call(store).onsuccess = function () {
+      if (!this.result) return;
+      keys.push(this.result.key);
+      this.result.continue();
+    };
+  }).then(() => keys);
+}
+},{}],"utils/assetCache.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.shared = exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _idbKeyval = require("idb-keyval");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/** creates an asset cache */
+var AssetCache =
+/** create a new cache */
+function AssetCache(db, table) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, AssetCache);
+  (0, _defineProperty2.default)(this, "getItem", function (key) {
+    var store = _this.store;
+    return new Promise(function (resolve) {
+      (0, _idbKeyval.get)(key, store).then(function () {
+        var record = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var now = +new Date();
+        var data = record.data,
+            expires = record.expires;
+        var success = !!data && !isNaN(expires) && expires > now;
+        resolve(success ? data : null);
+      }) // for errors, just resolve with
+      // no value
+      .catch(function () {
+        return resolve(null);
+      });
+    });
+  });
+  (0, _defineProperty2.default)(this, "setItem", function (key, data) {
+    var expires = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 24 * 60 * 60 * 1000;
+    var store = _this.store;
+    return new Promise(function (resolve) {
+      (0, _idbKeyval.set)(key, {
+        data: data,
+        expires: +new Date() + expires
+      }, store).then(function () {
+        return resolve(true);
+      }).catch(function () {
+        return resolve(false);
+      });
+    });
+  });
+  (0, _defineProperty2.default)(this, "purge", function () {// TODO
+  });
+  this.store = new _idbKeyval.Store(db, table);
+}
+/** saves an image resource */
+; // shared common cache
+
+
+exports.default = AssetCache;
+var shared = new AssetCache('nt:cached-assets', 'images');
+exports.shared = shared;
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","idb-keyval":"../node_modules/idb-keyval/dist/idb-keyval.mjs"}],"animation/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

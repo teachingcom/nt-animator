@@ -1,82 +1,72 @@
-import { createContext } from "../../utils/graphics";
-import { shared as cache } from '../../utils/assetCache';
 
 // resources that are currently loading
-const pending = { };
-const images = { };
+const pending = { }
+const images = { }
 
-/** handles loading an external image url 
+/** handles loading an external image url
  * @param {string} url The url of the image to load
 */
-export default function loadImage(url) {
+export default function loadImage (url) {
   return new Promise((resolve, reject) => {
-
     // prevent accidental double slashes
-    const parts = url.split('://');
-    const last = parts.length - 1;
-    parts[last] = parts[last].replace(/\/+/g, '/');
-    url = parts.join('://');
+    const parts = url.split('://')
+    const last = parts.length - 1
+    parts[last] = parts[last].replace(/\/+/g, '/')
+    url = parts.join('://')
 
     // check if already existing
-    if (url in images)
-      return resolve(images[url]);
+    if (url in images) {
+      return resolve(images[url])
+    }
 
     // if already waiting for a resource
     if (pending[url]) {
-      pending[url].push({ resolve, reject });
-      return;
+      pending[url].push({ resolve, reject })
+      return
     }
-      
-    // load the image
-    const img = document.createElement('img');
+
+    // reserve the image
+    let img
+
+    // limit attempts to reload
+    let attempts = 3
 
     // if no active queue is available, start it now
-    pending[url] = [{resolve, reject}];
+    pending[url] = [{ resolve, reject }]
+
+    // attempts to load an image
+    const request = () => {
+      img = document.createElement('img')
+      img.onload = handle(true)
+      img.onerror = handle(false)
+
+      // replace the image url
+      setTimeout(() => { img.src = url })
+    }
 
     // create resolution actions
     const handle = success =>
       () => {
-        
+        // if wasn't successful, but is allowed to try again
+        if (!success && --attempts > 0) {
+          return request()
+        }
+
         // all finished, resolve the result
-        images[url] = success ? img : null;
-
-        // // try and cache
-        // if (success)
-        // 	requestAnimationFrame(() => {
-        // 		try {
-
-        // 			// save to the cache
-        // 			const context = createContext();
-        // 			context.resize(img.width, img.height);
-
-        // 			// create a data url for the image
-        // 			context.ctx.drawImage(img, 0, 0);
-        // 			const data = context.canvas.toDataURL();
-        // 			cache.setItem(url, data);
-        // 		}
-        // 		// do not fail for this
-        // 		catch(ex) { }
-        // 	});
+        images[url] = success ? img : null
 
         // execute all waiting requests
         try {
           for (const handler of pending[url]) {
-            const { resolve } = handler;
-            resolve(success ? img : null);
+            const { resolve } = handler
+            resolve(success ? img : null)
           }
+        } finally {
+          delete pending[url]
         }
-        // cleanup
-        finally {
-          delete pending[url];
-        }
-      };
+      }
 
-    // handle results
-    img.onload = handle(true);
-    img.onerror = handle(false);
-
-    // wait a moment before loading
-    setTimeout(() => img.src = url);
-    
-  });
+    // kick off the first attempt
+    request()
+  })
 }
