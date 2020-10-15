@@ -277,6 +277,7 @@ export default async function createEmitter(animator, controller, path, composit
 
 		// include this instance
 		controller.register(generator);
+		container.config = layer;
 
 		// attach the update function
 		return [{ displayObject: container, data: layer, update, dispose }];
