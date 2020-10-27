@@ -70806,11 +70806,16 @@ var AnimationHandler = function AnimationHandler(config, props) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = createThrottledUpdater;
+exports.createThrottledUpdater = createThrottledUpdater;
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 // shared animation loop
 var throttled = {
   frame: 0,
-  elapsed: +new Date(),
+  elapsed: Date.now(),
   updates: []
 }; // update all throttled animations
 
@@ -70818,7 +70823,7 @@ function updateAll() {
   requestAnimationFrame(updateAll);
   throttled.frame++; // update the timing
 
-  var now = +new Date();
+  var now = Date.now();
   var delta = now - throttled.elapsed;
   throttled.elapsed = now; // update each
 
@@ -70830,18 +70835,31 @@ function updateAll() {
 } // kick off update loop
 
 
-updateAll(); // begin the updated
+updateAll(); // // handles creating an throttled updater for animations
+// export function createThrottledAnimationUpdater (...args) {
+//   return createThrottledUpdater('animationUpdateFrequency', args)
+// }
+// // handles creating a throttled updater for emitters
+// export function createThrottledEmitterUpdater (...args) {
+//   return createThrottledUpdater('emitterUpdateFrequency', args)
+// }
+// handles creating a throttled updater for emitters
 
-function createThrottledUpdater(frequency, scale, action) {
-  // optional scaling parameter
-  if (isNaN(scale)) {
-    action = scale;
-    scale = 1;
-  } // update on the appropriate frames
+function createThrottledUpdater(key, animator) {
+  for (var _len = arguments.length, args = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+    args[_key - 2] = arguments[_key];
+  }
+
+  var _resolveArgs = resolveArgs(args),
+      action = _resolveArgs.action,
+      scale = _resolveArgs.scale; // update on the appropriate frames
 
 
   var update = function update(frame, delta) {
-    if (frame % frequency !== 0) return;
+    if (frame % animator.options[key] !== 0) {
+      return;
+    }
+
     action(delta * scale);
   }; // add to the update queue
 
@@ -70852,8 +70870,26 @@ function createThrottledUpdater(frequency, scale, action) {
     var index = throttled.updates.indexOf(update);
     throttled.updates.splice(index, 1);
   };
+} // resolve optional args
+
+
+function resolveArgs(args) {
+  var _args = (0, _slicedToArray2.default)(args, 2),
+      scale = _args[0],
+      action = _args[1]; // no scaling was provided
+
+
+  if (isNaN(scale)) {
+    action = scale;
+    scale = 1;
+  }
+
+  return {
+    scale: scale,
+    action: action
+  };
 }
-},{}],"animation/generators/animation.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js"}],"animation/generators/animation.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -70879,7 +70915,7 @@ var _converters = require("../converters");
 
 var _animate = _interopRequireDefault(require("../../animate"));
 
-var _throttledUpdater = _interopRequireDefault(require("../../pixi/utils/throttled-updater"));
+var _throttledUpdater = require("../../pixi/utils/throttled-updater");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -71022,14 +71058,12 @@ function createAnimation(animator, path, composition, layer, instance) {
           return (0, _assign.assignDisplayObjectProps)(instance, props);
         };
 
-        var animationUpdateFrequency = animator.options.animationUpdateFrequency;
-        var isThrottled = (0, _utils2.isNumber)(animationUpdateFrequency);
-        config.autoplay = !isThrottled; // animation creation process
+        config.autoplay = false; // animation creation process
 
         var create = function create() {
           instance.animation = (0, _animate.default)(config); // if this is throttled
 
-          if (isThrottled) (0, _throttledUpdater.default)(animationUpdateFrequency, instance.animation.tick);
+          (0, _throttledUpdater.createThrottledUpdater)('animationUpdateFrequency', animator, instance.animation.tick);
         }; // create the animation
 
 
@@ -74452,7 +74486,7 @@ var _collection = require("../../../utils/collection");
 
 var _bounds = _interopRequireDefault(require("./bounds"));
 
-var _throttledUpdater = _interopRequireDefault(require("../../../pixi/utils/throttled-updater"));
+var _throttledUpdater = require("../../../pixi/utils/throttled-updater");
 
 require("./overrides");
 
@@ -74743,17 +74777,11 @@ function _createEmitter() {
             (0, _normalize.normalizeEmit)(layer.emit); // create the emitter
 
             create = function create() {
-              // if there's a throttle
-              var emitterUpdateFrequency = animator.options.emitterUpdateFrequency;
-
-              if ((0, _utils.isNumber)(emitterUpdateFrequency)) {
-                emitter.autoUpdate = false;
-                emitter.emit = true;
-                (0, _throttledUpdater.default)(emitterUpdateFrequency, 0.001, function (delta) {
-                  return emitter.update(delta * emitterUpdateFrequency);
-                });
-              } // start normally
-              else emitter.emit = true;
+              emitter.autoUpdate = false;
+              emitter.emit = true;
+              (0, _throttledUpdater.createThrottledUpdater)('emitterUpdateFrequency', animator, 0.001, function (delta) {
+                emitter.update(delta * animator.options.emitterUpdateFrequency);
+              });
             }; // manual start
 
 

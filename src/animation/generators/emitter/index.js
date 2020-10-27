@@ -4,7 +4,7 @@ import { assignIf, assignDisplayObjectProps, applyDynamicProperties, applyExpres
 import { isNumber, noop, setDefaults, isString, isArray, RAD, isBoolean } from "../../../utils";
 import { map } from "../../../utils/collection";
 import defineEmitterBounds from './bounds';
-import createThrottledUpdater from '../../../pixi/utils/throttled-updater';
+import { createThrottledUpdater } from '../../../pixi/utils/throttled-updater';
 
 // apply PIXI rendering overrides
 import './overrides';
@@ -234,16 +234,13 @@ export default async function createEmitter(animator, controller, path, composit
 
 		// create the emitter
 		const create = () => {
-			
-			// if there's a throttle
-			const { emitterUpdateFrequency } = animator.options;
-			if (isNumber(emitterUpdateFrequency)) {
-				emitter.autoUpdate = false;
-				emitter.emit = true;
-				createThrottledUpdater(emitterUpdateFrequency, 0.001, delta => emitter.update(delta * emitterUpdateFrequency));
-			}
-			// start normally
-			else emitter.emit = true;
+
+			emitter.autoUpdate = false;
+			emitter.emit = true;
+
+			createThrottledUpdater('emitterUpdateFrequency', animator, 0.001, delta => {
+				emitter.update(delta * animator.options.emitterUpdateFrequency);
+			});
 		}
 
 		// manual start
