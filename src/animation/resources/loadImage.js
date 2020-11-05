@@ -39,6 +39,7 @@ export default function loadImage (url) {
       img = document.createElement('img')
       img.onload = handle(true)
       img.onerror = handle(false)
+      img.crossOrigin = 'anonymous'
 
       // replace the image url
       setTimeout(() => { img.src = url })

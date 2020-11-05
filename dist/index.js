@@ -71146,7 +71146,8 @@ function loadImage(url) {
     var request = function request() {
       img = document.createElement('img');
       img.onload = handle(true);
-      img.onerror = handle(false); // replace the image url
+      img.onerror = handle(false);
+      img.crossOrigin = 'anonymous'; // replace the image url
 
       setTimeout(function () {
         img.src = url;
