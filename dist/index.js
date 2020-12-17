@@ -68025,6 +68025,12 @@ var MAPPINGS = [// transforms
   apply: function apply(t, v) {
     return t.pivot.y = detectPivot(t, v, t.height);
   }
+}, {
+  prop: 'pivot',
+  apply: function apply(t, v) {
+    t.pivot.x = detectPivot(t, v, t.width);
+    t.pivot.y = detectPivot(t, v, t.height);
+  }
 }, // layer scaling
 {
   prop: 'scaleX',
@@ -68035,6 +68041,11 @@ var MAPPINGS = [// transforms
   prop: 'scaleY',
   apply: function apply(t, v) {
     return t.scale.y = v;
+  }
+}, {
+  prop: 'scale',
+  apply: function apply(t, v) {
+    return t.scale.y = t.scale.x = v;
   }
 }, // layer scaling
 {
@@ -70717,6 +70728,7 @@ function animate(params) {
     targets: props,
     easing: params.ease || params.easing || params.easings || 'linear',
     duration: params.duration,
+    direction: params.direction,
     delay: params.delay || 0,
     autoplay: params.auto !== false && params.autoplay !== false,
     loop: params.loop !== false
@@ -71659,7 +71671,37 @@ function normalizeTo(props) {
     props[preferredName] = value;
   }
 }
-},{"../utils":"utils/index.js"}],"animation/generators/sprite.js":[function(require,module,exports) {
+},{"../utils":"utils/index.js"}],"pixi/utils/animated-sprite.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createAnimatedSpriteHelper;
+
+var _lib = require("../lib");
+
+// for some reason, PIXI can cause animations animated sprites from playing
+// this is a temporary solution that ensures animations play
+function createAnimatedSpriteHelper(sprite, props) {
+  // determine how often to update the keyframes
+  var frequency = 1000 / ((props === null || props === void 0 ? void 0 : props.fps) || 60); // keeping track of the next time to cycle
+
+  var nextFrame = Date.now() + frequency; // do this when the frame is updated
+
+  sprite.updateTransform = function () {
+    var now = Date.now(); // move to the next frame, if needed
+
+    if (now > nextFrame) {
+      nextFrame = now + frequency;
+      sprite.gotoAndStop(sprite.currentFrame + 1);
+    } // use the normal update
+
+
+    _lib.PIXI.AnimatedSprite.prototype.updateTransform.apply(sprite, arguments);
+  };
+}
+},{"../lib":"pixi/lib.js"}],"animation/generators/sprite.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -71688,6 +71730,8 @@ var _collection = require("../../utils/collection");
 var _normalize = require("../normalize");
 
 var _utils2 = require("../utils");
+
+var _animatedSprite = _interopRequireDefault(require("../../pixi/utils/animated-sprite"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -71730,7 +71774,7 @@ function _createSprite() {
             isMarker = !isSprite; // create the required sprite
 
             if (!isSprite) {
-              _context.next = 21;
+              _context.next = 22;
               break;
             }
 
@@ -71747,22 +71791,20 @@ function _createSprite() {
             sprite = isAnimated ? new _lib.PIXI.AnimatedSprite(textures) : new _lib.PIXI.Sprite(textures[0]); // set other values
 
             sprite.loop = ((_layer$props = layer.props) === null || _layer$props === void 0 ? void 0 : _layer$props.loop) !== false;
-            sprite.isSprite = true; // if animated, start playback
-
-            sprite.isAnimatedSprite = isAnimated;
+            sprite.isSprite = true;
+            sprite.autoPlay = false;
+            sprite.isAnimatedSprite = isAnimated; // do not use built in animation engine
+            // has strange behaviors when multiple
+            // instances are active
 
             if (isAnimated && layer.autoplay !== false) {
-              sprite.play(); // disposal
-
-              dispose = function dispose() {
-                return sprite.stop();
-              };
+              (0, _animatedSprite.default)(sprite, layer.props);
             }
 
-            _context.next = 22;
+            _context.next = 23;
             break;
 
-          case 21:
+          case 22:
             // markers act like normal sprites and are used to define
             // bounds and positions without needing an actual sprite
             if (isMarker) {
@@ -71770,7 +71812,7 @@ function _createSprite() {
               sprite.visible = false;
             }
 
-          case 22:
+          case 23:
             // shared data
             sprite.role = (0, _utils2.toRole)(layer.role);
             sprite.path = path; // set some default values
@@ -71813,22 +71855,22 @@ function _createSprite() {
               dispose: dispose
             }]);
 
-          case 43:
-            _context.prev = 43;
+          case 44:
+            _context.prev = 44;
             _context.t0 = _context["catch"](3);
             console.error("Failed to create sprite ".concat(path, " while ").concat(phase));
             throw _context.t0;
 
-          case 47:
+          case 48:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[3, 43]]);
+    }, _callee, null, [[3, 44]]);
   }));
   return _createSprite.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./animation":"animation/generators/animation.js","../resources/resolveImages":"animation/resources/resolveImages.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../resources/createTextureFromImage":"animation/resources/createTextureFromImage.js","../../utils/collection":"utils/collection.js","../normalize":"animation/normalize.js","../utils":"animation/utils.js"}],"../node_modules/pixi-particles/lib/pixi-particles.es.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./animation":"animation/generators/animation.js","../resources/resolveImages":"animation/resources/resolveImages.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../resources/createTextureFromImage":"animation/resources/createTextureFromImage.js","../../utils/collection":"utils/collection.js","../normalize":"animation/normalize.js","../utils":"animation/utils.js","../../pixi/utils/animated-sprite":"pixi/utils/animated-sprite.js"}],"../node_modules/pixi-particles/lib/pixi-particles.es.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -76724,6 +76766,12 @@ Object.defineProperty(exports, "findDisplayObjectsOfRole", {
     return _findObjectsOfRole.findDisplayObjectsOfRole;
   }
 });
+Object.defineProperty(exports, "createAnimatedSpriteHelper", {
+  enumerable: true,
+  get: function () {
+    return _animatedSprite.createAnimatedSpriteHelper;
+  }
+});
 Object.defineProperty(exports, "createContext", {
   enumerable: true,
   get: function () {
@@ -76774,6 +76822,8 @@ var _getBoundsOfRole = require("./pixi/utils/get-bounds-of-role");
 
 var _findObjectsOfRole = require("./pixi/utils/find-objects-of-role");
 
+var _animatedSprite = require("./pixi/utils/animated-sprite");
+
 var _graphics = require("./utils/graphics");
 
 var _remove = require("./pixi/utils/remove");
@@ -76793,5 +76843,5 @@ var PIXI = _objectSpread(_objectSpread({}, _lib.PIXI), {}, {
 
 
 exports.PIXI = PIXI;
-},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","./pixi/lib":"pixi/lib.js","./pixi/utils/skip-hello":"pixi/utils/skip-hello.js","./animation":"animation/index.js","./animate":"animate/index.js","./pixi/responsive":"pixi/responsive.js","./pixi/stage":"pixi/stage.js","./pixi/detatched-container":"pixi/detatched-container.js","./animation/resources/loadImage":"animation/resources/loadImage.js","./common/event-emitter":"common/event-emitter.js","./pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js","./pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","./utils/graphics":"utils/graphics.js","./pixi/utils/remove":"pixi/utils/remove.js"}]},{},["index.js"], null)
+},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","./pixi/lib":"pixi/lib.js","./pixi/utils/skip-hello":"pixi/utils/skip-hello.js","./animation":"animation/index.js","./animate":"animate/index.js","./pixi/responsive":"pixi/responsive.js","./pixi/stage":"pixi/stage.js","./pixi/detatched-container":"pixi/detatched-container.js","./animation/resources/loadImage":"animation/resources/loadImage.js","./common/event-emitter":"common/event-emitter.js","./pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js","./pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","./pixi/utils/animated-sprite":"pixi/utils/animated-sprite.js","./utils/graphics":"utils/graphics.js","./pixi/utils/remove":"pixi/utils/remove.js"}]},{},["index.js"], null)
 //# sourceMappingURL=/index.js.map

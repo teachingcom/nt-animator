@@ -10,6 +10,7 @@ export default function animate(params) {
 		targets: props,
 		easing: params.ease || params.easing || params.easings || 'linear',
 		duration: params.duration,
+		direction: params.direction,
 		delay: params.delay || 0,
 		autoplay: params.auto !== false && params.autoplay !== false,
 		loop: params.loop !== false

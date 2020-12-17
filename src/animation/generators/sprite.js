@@ -9,6 +9,8 @@ import createTextureFromImage from '../resources/createTextureFromImage';
 import { map } from '../../utils/collection';
 import { normalizeProps } from '../normalize';
 import { toRole } from '../utils';
+import createAnimatedSpriteHelper from '../../pixi/utils/animated-sprite';
+
 
 // default parameters to create a sprite
 const SPRITE_DEFAULTS = {
@@ -57,14 +59,14 @@ export default async function createSprite(animator, controller, path, compositi
 			// set other values
 			sprite.loop = layer.props?.loop !== false;
 			sprite.isSprite = true;
-			
-			// if animated, start playback
+			sprite.autoPlay = false;
 			sprite.isAnimatedSprite = isAnimated;
+
+			// do not use built in animation engine
+			// has strange behaviors when multiple
+			// instances are active
 			if (isAnimated && layer.autoplay !== false) {
-				sprite.play();
-				
-				// disposal
-				dispose = () => sprite.stop();
+				createAnimatedSpriteHelper(sprite, layer.props);
 			}
 		}
 		// markers act like normal sprites and are used to define
@@ -127,3 +129,4 @@ export default async function createSprite(animator, controller, path, compositi
 	}
 
 }
+

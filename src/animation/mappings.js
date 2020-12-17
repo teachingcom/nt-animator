@@ -46,10 +46,15 @@ export const MAPPINGS = [
 	// layer pivoting
 	{ prop: 'pivotX', apply: (t, v) => t.pivot.x = detectPivot(t, v, t.width) },
 	{ prop: 'pivotY', apply: (t, v) => t.pivot.y = detectPivot(t, v, t.height) },
+	{ prop: 'pivot', apply: (t, v) => {
+		t.pivot.x = detectPivot(t, v, t.width); 
+		t.pivot.y = detectPivot(t, v, t.height); 
+	}},
 
 	// layer scaling
 	{ prop: 'scaleX', apply: (t, v) => t.scale.x = v },
 	{ prop: 'scaleY', apply: (t, v) => t.scale.y = v },
+	{ prop: 'scale', apply: (t, v) => t.scale.y = t.scale.x = v },
 
 	// layer scaling
 	{ prop: 'skewX', apply: (t, v) => t.skew.x = v },
