@@ -71161,7 +71161,6 @@ function loadImage(url, version) {
       img.onerror = handle(false);
       img.crossOrigin = 'anonymous'; // replace the image url
 
-      console.log('will load', "".concat(url).concat(version ? "?".concat(version) : ''));
       setTimeout(function () {
         return img.src = "".concat(url).concat(version ? "?".concat(version) : '');
       });

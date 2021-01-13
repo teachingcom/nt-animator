@@ -42,7 +42,6 @@ export default function loadImage (url, version) {
       img.crossOrigin = 'anonymous'
 
       // replace the image url
-      console.log('will load', `${url}${version ? `?${version}` : ''}`)
       setTimeout(() => (img.src = `${url}${version ? `?${version}` : ''}`))
     }
 
