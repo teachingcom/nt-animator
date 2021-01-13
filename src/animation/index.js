@@ -44,22 +44,30 @@ export class Animator extends EventEmitter {
 		return this.options.baseUrl || '/';
 	}
 
+	// alias for get spritesheet, just to make it clearer
+	// what it's used for elsewhere
+	preloadSpritesheet = spritesheetId => this.getSpritesheet(spritesheetId)
+
 	/** handles loading a single sprite */
-	getSpritesheet = async id => {
-		return getSpritesheet(this, id);
-	}
+	getSpritesheet = async id => getSpritesheet(this, id)
 
 	/** handles loading a single sprite */
 	getSprite = async (spritesheetId, id) => {
-		const texture = await getSprite(this, spritesheetId, id);
+		const spritesheet = await this.getSpritesheet(spritesheetId)
+		const texture = await getSprite(this, spritesheetId, id, spritesheet.version);
 		return PIXI.Sprite.from(texture);
 	}
-
+	
 	/** handles loading a sprite as a canvas */
 	getImage = async (spritesheetId, id) => {
-		return !!id
-			? await getSprite(this, spritesheetId, id)
-			: await loadImage(`${this.baseUrl}/${spritesheetId}`);
+		if (id) {
+			const spritesheet = await this.getSpritesheet(spritesheetId)
+			return await getSprite(this, spritesheetId, id, spritesheet.version)
+		}
+		// loading a non-spritesheet
+		else {
+			return await loadImage(`${this.baseUrl}/${spritesheetId}`);
+		}
 	}
 
 	/** handles a custom type */

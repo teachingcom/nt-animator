@@ -71124,7 +71124,7 @@ var images = {};
  * @param {string} url The url of the image to load
 */
 
-function loadImage(url) {
+function loadImage(url, version) {
   return new Promise(function (resolve, reject) {
     // prevent accidental double slashes
     var parts = url.split('://');
@@ -71161,8 +71161,9 @@ function loadImage(url) {
       img.onerror = handle(false);
       img.crossOrigin = 'anonymous'; // replace the image url
 
+      console.log('will load', "".concat(url).concat(version ? "?".concat(version) : ''));
       setTimeout(function () {
-        img.src = url;
+        return img.src = "".concat(url).concat(version ? "?".concat(version) : '');
       });
     }; // create resolution actions
 
@@ -71243,7 +71244,7 @@ function _loadSpritesheet() {
             url = "".concat(animator.baseUrl).concat(spritesheetId, ".").concat(ext); // attempt to load the image
 
             _context.next = 3;
-            return (0, _loadImage.default)(url);
+            return (0, _loadImage.default)(url, spritesheet.version);
 
           case 3:
             image = _context.sent;
@@ -71283,7 +71284,10 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
   for (var id in spritesheet) {
     var record = spritesheet[id]; // if this is not an array, skip it
 
-    if (!Array.isArray(record)) continue; // make sure it's for the image type used
+    if (!Array.isArray(record)) {
+      continue;
+    } // make sure it's for the image type used
+
 
     var _record = (0, _slicedToArray2.default)(record, 5),
         x = _record[0],
@@ -71292,7 +71296,10 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
         height = _record[3],
         type = _record[4];
 
-    if (type !== ext) continue; // save the texture
+    if (type !== ext) {
+      continue;
+    } // save the texture
+
 
     var rect = new _lib.PIXI.Rectangle(x, y, width, height);
     var texture = new _lib.PIXI.Texture(base, rect);
@@ -76319,6 +76326,9 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
 
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "plugins", {});
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "imageCache", _assetCache.shared);
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "preloadSpritesheet", function (spritesheetId) {
+      return _this.getSpritesheet(spritesheetId);
+    });
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "getSpritesheet", /*#__PURE__*/function () {
       var _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(id) {
         return _regenerator.default.wrap(function _callee$(_context) {
@@ -76341,19 +76351,24 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
     }());
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "getSprite", /*#__PURE__*/function () {
       var _ref2 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(spritesheetId, id) {
-        var texture;
+        var spritesheet, texture;
         return _regenerator.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 _context2.next = 2;
-                return (0, _getSprite.default)((0, _assertThisInitialized2.default)(_this), spritesheetId, id);
+                return _this.getSpritesheet(spritesheetId);
 
               case 2:
+                spritesheet = _context2.sent;
+                _context2.next = 5;
+                return (0, _getSprite.default)((0, _assertThisInitialized2.default)(_this), spritesheetId, id, spritesheet.version);
+
+              case 5:
                 texture = _context2.sent;
                 return _context2.abrupt("return", _lib.PIXI.Sprite.from(texture));
 
-              case 4:
+              case 7:
               case "end":
                 return _context2.stop();
             }
@@ -76367,34 +76382,35 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
     }());
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "getImage", /*#__PURE__*/function () {
       var _ref3 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(spritesheetId, id) {
+        var spritesheet;
         return _regenerator.default.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
                 if (!id) {
-                  _context3.next = 6;
+                  _context3.next = 9;
                   break;
                 }
 
                 _context3.next = 3;
-                return (0, _getSprite.default)((0, _assertThisInitialized2.default)(_this), spritesheetId, id);
+                return _this.getSpritesheet(spritesheetId);
 
               case 3:
-                _context3.t0 = _context3.sent;
-                _context3.next = 9;
-                break;
+                spritesheet = _context3.sent;
+                _context3.next = 6;
+                return (0, _getSprite.default)((0, _assertThisInitialized2.default)(_this), spritesheetId, id, spritesheet.version);
 
               case 6:
-                _context3.next = 8;
-                return (0, _loadImage.default)("".concat(_this.baseUrl, "/").concat(spritesheetId));
-
-              case 8:
-                _context3.t0 = _context3.sent;
+                return _context3.abrupt("return", _context3.sent);
 
               case 9:
-                return _context3.abrupt("return", _context3.t0);
+                _context3.next = 11;
+                return (0, _loadImage.default)("".concat(_this.baseUrl, "/").concat(spritesheetId));
 
-              case 10:
+              case 11:
+                return _context3.abrupt("return", _context3.sent);
+
+              case 12:
               case "end":
                 return _context3.stop();
             }
@@ -76513,8 +76529,8 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
     key: "baseUrl",
     get: function get() {
       return this.options.baseUrl || '/';
-    }
-    /** handles loading a single sprite */
+    } // alias for get spritesheet, just to make it clearer
+    // what it's used for elsewhere
 
   }]);
   return Animator;

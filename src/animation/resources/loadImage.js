@@ -6,7 +6,7 @@ const images = { }
 /** handles loading an external image url
  * @param {string} url The url of the image to load
 */
-export default function loadImage (url) {
+export default function loadImage (url, version) {
   return new Promise((resolve, reject) => {
     // prevent accidental double slashes
     const parts = url.split('://')
@@ -42,7 +42,8 @@ export default function loadImage (url) {
       img.crossOrigin = 'anonymous'
 
       // replace the image url
-      setTimeout(() => { img.src = url })
+      console.log('will load', `${url}${version ? `?${version}` : ''}`)
+      setTimeout(() => (img.src = `${url}${version ? `?${version}` : ''}`))
     }
 
     // create resolution actions

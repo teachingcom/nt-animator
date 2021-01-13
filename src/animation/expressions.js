@@ -167,6 +167,7 @@ function calculateRelative(obj, prop, args, at, relativeTo) {
 export function getRandom(obj, stage, prop, ...params) {
 	const mapping = mappings.lookup(prop);
 	
+	
 	// check for a cached value
 	const cacheKey = `___cache_${prop}___`;
 	const cached = obj[cacheKey];
