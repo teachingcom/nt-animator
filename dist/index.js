@@ -76784,7 +76784,7 @@ Object.defineProperty(exports, "findDisplayObjectsOfRole", {
 Object.defineProperty(exports, "createAnimatedSpriteHelper", {
   enumerable: true,
   get: function () {
-    return _animatedSprite.createAnimatedSpriteHelper;
+    return _animatedSprite.default;
   }
 });
 Object.defineProperty(exports, "createContext", {
@@ -76837,7 +76837,7 @@ var _getBoundsOfRole = require("./pixi/utils/get-bounds-of-role");
 
 var _findObjectsOfRole = require("./pixi/utils/find-objects-of-role");
 
-var _animatedSprite = require("./pixi/utils/animated-sprite");
+var _animatedSprite = _interopRequireDefault(require("./pixi/utils/animated-sprite"));
 
 var _graphics = require("./utils/graphics");
 
