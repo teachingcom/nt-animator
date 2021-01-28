@@ -36,7 +36,7 @@ export default function loadImage (url, version) {
 
     // attempts to load an image
     const request = () => {
-      img = document.createElement('img')
+      img = new Image()
       img.onload = handle(true)
       img.onerror = handle(false)
       img.crossOrigin = 'anonymous'

@@ -47813,639 +47813,7 @@ var global = arguments[3];
 })));
 
 
-},{}],"utils/index.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.isNil = isNil;
-exports.isSet = isSet;
-exports.isArray = isArray;
-exports.isObject = isObject;
-exports.isIterable = isIterable;
-exports.isString = isString;
-exports.isNumber = isNumber;
-exports.isBoolean = isBoolean;
-exports.setDefaults = setDefaults;
-exports.appendFunc = appendFunc;
-exports.noop = exports.RAD = exports.TAU = void 0;
-
-var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
-
-var _fastCopy = _interopRequireDefault(require("fast-copy"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// helper math values
-var TAU = Math.PI * 2;
-exports.TAU = TAU;
-var RAD = Math.PI / 180;
-/** checks if an object is non-null and not undefined */
-
-exports.RAD = RAD;
-
-function isNil(obj) {
-  return obj === null || obj === undefined;
-}
-/** checks if an object has a value */
-
-
-function isSet(obj) {
-  return !isNil(obj);
-}
-/** checks if an object is an array */
-
-
-function isArray(obj) {
-  return Array.isArray(obj);
-}
-/** checks if an object is just an object */
-
-
-function isObject(obj) {
-  return (0, _typeof2.default)(obj) === 'object';
-}
-/** checks if an object can be iterated over */
-
-
-function isIterable(obj) {
-  return isObject(obj) || isArray(obj);
-}
-/** checks if n object is a string */
-
-
-function isString(obj) {
-  return typeof obj === 'string' || obj instanceof String;
-}
-/** checks if an object is a number */
-
-
-function isNumber(obj) {
-  return typeof obj === 'number' || obj instanceof Number;
-}
-/** checks if an object is a boolean value */
-
-
-function isBoolean(obj) {
-  return obj === true || obj === false;
-}
-/** non-action function */
-
-
-var noop = function noop() {};
-/** assigns default values to another object
- * NOTE: this is a shallow copy
- */
-
-
-exports.noop = noop;
-
-function setDefaults(target, prop, defaults) {
-  var assignTo = target[prop]; // nothing has been assigned
-
-  if (!assignTo) {
-    target[prop] = (0, _fastCopy.default)(defaults);
-    return;
-  } // set each missing value
-
-
-  for (var id in defaults) {
-    if (assignTo[id] === undefined) assignTo[id] = defaults[id];
-  }
-}
-/** Merges two functions into sequential calls */
-
-
-function appendFunc(baseFunction, includedFunction) {
-  return includedFunction ? function () {
-    baseFunction.apply(void 0, arguments);
-    includedFunction.apply(void 0, arguments);
-  } : baseFunction;
-}
-},{"@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js"}],"animation/path.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createUrlFromRef = createUrlFromRef;
-exports.parsePath = parsePath;
-exports.resolvePath = resolvePath;
-
-var _utils = require("../utils");
-
-/** creates a url from a reference */
-function createUrlFromRef(ref) {
-  // nothing fancy, just remove the prefix
-  return ref.path.substr(2);
-}
-/** parses a animation file path
- * TODO: cache path parsing?
-*/
-
-
-function parsePath(path) {
-  // identify the type
-  var isUrl = path.substr(0, 2) === ':/';
-  var isAbsolute = !isUrl && path.substr(0, 2) === '//';
-  var isRelative = !isAbsolute && path.substr(0, 1) === '/';
-  var isLocal = !(isAbsolute || isUrl || isRelative); // trim off the prefix
-
-  var index = isUrl ? 2 : isAbsolute ? 2 : isRelative ? 1 : 0; // create each part of the resource path
-
-  var parts = path.substr(index).split(/\/+/g);
-  return {
-    path: path,
-    parts: parts,
-    isAbsolute: isAbsolute,
-    isRelative: isRelative,
-    isLocal: isLocal,
-    isUrl: isUrl
-  };
-}
-/** resolves an animation path to a data element
- * TODO: cache path resolve?
- */
-
-
-function resolvePath(data, parts) {
-  if ((0, _utils.isString)(parts)) {
-    parts = parsePath(parts);
-  }
-
-  var block = data;
-
-  for (var i = 0; i < parts.length; i++) {
-    block = block && block[parts[i]];
-  }
-
-  return block;
-}
-},{"../utils":"utils/index.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
-
-module.exports = _arrayWithHoles;
-},{}],"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js":[function(require,module,exports) {
-function _iterableToArrayLimit(arr, i) {
-  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
-  var _arr = [];
-  var _n = true;
-  var _d = false;
-  var _e = undefined;
-
-  try {
-    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-      _arr.push(_s.value);
-
-      if (i && _arr.length === i) break;
-    }
-  } catch (err) {
-    _d = true;
-    _e = err;
-  } finally {
-    try {
-      if (!_n && _i["return"] != null) _i["return"]();
-    } finally {
-      if (_d) throw _e;
-    }
-  }
-
-  return _arr;
-}
-
-module.exports = _iterableToArrayLimit;
-},{}],"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":[function(require,module,exports) {
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) {
-    arr2[i] = arr[i];
-  }
-
-  return arr2;
-}
-
-module.exports = _arrayLikeToArray;
-},{}],"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js":[function(require,module,exports) {
-var arrayLikeToArray = require("./arrayLikeToArray");
-
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return arrayLikeToArray(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(o);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
-}
-
-module.exports = _unsupportedIterableToArray;
-},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/nonIterableRest.js":[function(require,module,exports) {
-function _nonIterableRest() {
-  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}
-
-module.exports = _nonIterableRest;
-},{}],"../node_modules/@babel/runtime/helpers/slicedToArray.js":[function(require,module,exports) {
-var arrayWithHoles = require("./arrayWithHoles");
-
-var iterableToArrayLimit = require("./iterableToArrayLimit");
-
-var unsupportedIterableToArray = require("./unsupportedIterableToArray");
-
-var nonIterableRest = require("./nonIterableRest");
-
-function _slicedToArray(arr, i) {
-  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
-}
-
-module.exports = _slicedToArray;
-},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArrayLimit":"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"../node_modules/json-stringify-safe/stringify.js":[function(require,module,exports) {
-exports = module.exports = stringify
-exports.getSerialize = serializer
-
-function stringify(obj, replacer, spaces, cycleReplacer) {
-  return JSON.stringify(obj, serializer(replacer, cycleReplacer), spaces)
-}
-
-function serializer(replacer, cycleReplacer) {
-  var stack = [], keys = []
-
-  if (cycleReplacer == null) cycleReplacer = function(key, value) {
-    if (stack[0] === value) return "[Circular ~]"
-    return "[Circular ~." + keys.slice(0, stack.indexOf(value)).join(".") + "]"
-  }
-
-  return function(key, value) {
-    if (stack.length > 0) {
-      var thisPos = stack.indexOf(this)
-      ~thisPos ? stack.splice(thisPos + 1) : stack.push(this)
-      ~thisPos ? keys.splice(thisPos, Infinity, key) : keys.push(key)
-      if (~stack.indexOf(value)) value = cycleReplacer.call(this, key, value)
-    }
-    else stack.push(value)
-
-    return replacer == null ? value : replacer.call(this, key, value)
-  }
-}
-
-},{}],"../node_modules/random-seed/index.js":[function(require,module,exports) {
-/*
- * random-seed
- * https://github.com/skratchdot/random-seed
- *
- * This code was originally written by Steve Gibson and can be found here:
- *
- * https://www.grc.com/otg/uheprng.htm
- *
- * It was slightly modified for use in node, to pass jshint, and a few additional
- * helper functions were added.
- *
- * Copyright (c) 2013 skratchdot
- * Dual Licensed under the MIT license and the original GRC copyright/license
- * included below.
- */
-
-/*	============================================================================
-									Gibson Research Corporation
-				UHEPRNG - Ultra High Entropy Pseudo-Random Number Generator
-	============================================================================
-	LICENSE AND COPYRIGHT:  THIS CODE IS HEREBY RELEASED INTO THE PUBLIC DOMAIN
-	Gibson Research Corporation releases and disclaims ALL RIGHTS AND TITLE IN
-	THIS CODE OR ANY DERIVATIVES. Anyone may be freely use it for any purpose.
-	============================================================================
-	This is GRC's cryptographically strong PRNG (pseudo-random number generator)
-	for JavaScript. It is driven by 1536 bits of entropy, stored in an array of
-	48, 32-bit JavaScript variables.  Since many applications of this generator,
-	including ours with the "Off The Grid" Latin Square generator, may require
-	the deteriministic re-generation of a sequence of PRNs, this PRNG's initial
-	entropic state can be read and written as a static whole, and incrementally
-	evolved by pouring new source entropy into the generator's internal state.
-	----------------------------------------------------------------------------
-	ENDLESS THANKS are due Johannes Baagoe for his careful development of highly
-	robust JavaScript implementations of JS PRNGs.  This work was based upon his
-	JavaScript "Alea" PRNG which is based upon the extremely robust Multiply-
-	With-Carry (MWC) PRNG invented by George Marsaglia. MWC Algorithm References:
-	http://www.GRC.com/otg/Marsaglia_PRNGs.pdf
-	http://www.GRC.com/otg/Marsaglia_MWC_Generators.pdf
-	----------------------------------------------------------------------------
-	The quality of this algorithm's pseudo-random numbers have been verified by
-	multiple independent researchers. It handily passes the fermilab.ch tests as
-	well as the "diehard" and "dieharder" test suites.  For individuals wishing
-	to further verify the quality of this algorithm's pseudo-random numbers, a
-	256-megabyte file of this algorithm's output may be downloaded from GRC.com,
-	and a Microsoft Windows scripting host (WSH) version of this algorithm may be
-	downloaded and run from the Windows command prompt to generate unique files
-	of any size:
-	The Fermilab "ENT" tests: http://fourmilab.ch/random/
-	The 256-megabyte sample PRN file at GRC: https://www.GRC.com/otg/uheprng.bin
-	The Windows scripting host version: https://www.GRC.com/otg/wsh-uheprng.js
-	----------------------------------------------------------------------------
-	Qualifying MWC multipliers are: 187884, 686118, 898134, 1104375, 1250205,
-	1460910 and 1768863. (We use the largest one that's < 2^21)
-	============================================================================ */
-'use strict';
-
-var stringify = require('json-stringify-safe');
-/*	============================================================================
-This is based upon Johannes Baagoe's carefully designed and efficient hash
-function for use with JavaScript.  It has a proven "avalanche" effect such
-that every bit of the input affects every bit of the output 50% of the time,
-which is good.	See: http://baagoe.com/en/RandomMusings/hash/avalanche.xhtml
-============================================================================
-*/
-
-
-var Mash = function () {
-  var n = 0xefc8249d;
-
-  var mash = function (data) {
-    if (data) {
-      data = data.toString();
-
-      for (var i = 0; i < data.length; i++) {
-        n += data.charCodeAt(i);
-        var h = 0.02519603282416938 * n;
-        n = h >>> 0;
-        h -= n;
-        h *= n;
-        n = h >>> 0;
-        h -= n;
-        n += h * 0x100000000; // 2^32
-      }
-
-      return (n >>> 0) * 2.3283064365386963e-10; // 2^-32
-    } else {
-      n = 0xefc8249d;
-    }
-  };
-
-  return mash;
-};
-
-var uheprng = function (seed) {
-  return function () {
-    var o = 48; // set the 'order' number of ENTROPY-holding 32-bit values
-
-    var c = 1; // init the 'carry' used by the multiply-with-carry (MWC) algorithm
-
-    var p = o; // init the 'phase' (max-1) of the intermediate variable pointer
-
-    var s = new Array(o); // declare our intermediate variables array
-
-    var i; // general purpose local
-
-    var j; // general purpose local
-
-    var k = 0; // general purpose local
-    // when our "uheprng" is initially invoked our PRNG state is initialized from the
-    // browser's own local PRNG. This is okay since although its generator might not
-    // be wonderful, it's useful for establishing large startup entropy for our usage.
-
-    var mash = new Mash(); // get a pointer to our high-performance "Mash" hash
-    // fill the array with initial mash hash values
-
-    for (i = 0; i < o; i++) {
-      s[i] = mash(Math.random());
-    } // this PRIVATE (internal access only) function is the heart of the multiply-with-carry
-    // (MWC) PRNG algorithm. When called it returns a pseudo-random number in the form of a
-    // 32-bit JavaScript fraction (0.0 to <1.0) it is a PRIVATE function used by the default
-    // [0-1] return function, and by the random 'string(n)' function which returns 'n'
-    // characters from 33 to 126.
-
-
-    var rawprng = function () {
-      if (++p >= o) {
-        p = 0;
-      }
-
-      var t = 1768863 * s[p] + c * 2.3283064365386963e-10; // 2^-32
-
-      return s[p] = t - (c = t | 0);
-    }; // this EXPORTED function is the default function returned by this library.
-    // The values returned are integers in the range from 0 to range-1. We first
-    // obtain two 32-bit fractions (from rawprng) to synthesize a single high
-    // resolution 53-bit prng (0 to <1), then we multiply this by the caller's
-    // "range" param and take the "floor" to return a equally probable integer.
-
-
-    var random = function (range) {
-      return Math.floor(range * (rawprng() + (rawprng() * 0x200000 | 0) * 1.1102230246251565e-16)); // 2^-53
-    }; // this EXPORTED function 'string(n)' returns a pseudo-random string of
-    // 'n' printable characters ranging from chr(33) to chr(126) inclusive.
-
-
-    random.string = function (count) {
-      var i;
-      var s = '';
-
-      for (i = 0; i < count; i++) {
-        s += String.fromCharCode(33 + random(94));
-      }
-
-      return s;
-    }; // this PRIVATE "hash" function is used to evolve the generator's internal
-    // entropy state. It is also called by the EXPORTED addEntropy() function
-    // which is used to pour entropy into the PRNG.
-
-
-    var hash = function () {
-      var args = Array.prototype.slice.call(arguments);
-
-      for (i = 0; i < args.length; i++) {
-        for (j = 0; j < o; j++) {
-          s[j] -= mash(args[i]);
-
-          if (s[j] < 0) {
-            s[j] += 1;
-          }
-        }
-      }
-    }; // this EXPORTED "clean string" function removes leading and trailing spaces and non-printing
-    // control characters, including any embedded carriage-return (CR) and line-feed (LF) characters,
-    // from any string it is handed. this is also used by the 'hashstring' function (below) to help
-    // users always obtain the same EFFECTIVE uheprng seeding key.
-
-
-    random.cleanString = function (inStr) {
-      inStr = inStr.replace(/(^\s*)|(\s*$)/gi, ''); // remove any/all leading spaces
-
-      inStr = inStr.replace(/[\x00-\x1F]/gi, ''); // remove any/all control characters
-
-      inStr = inStr.replace(/\n /, '\n'); // remove any/all trailing spaces
-
-      return inStr; // return the cleaned up result
-    }; // this EXPORTED "hash string" function hashes the provided character string after first removing
-    // any leading or trailing spaces and ignoring any embedded carriage returns (CR) or Line Feeds (LF)
-
-
-    random.hashString = function (inStr) {
-      inStr = random.cleanString(inStr);
-      mash(inStr); // use the string to evolve the 'mash' state
-
-      for (i = 0; i < inStr.length; i++) {
-        // scan through the characters in our string
-        k = inStr.charCodeAt(i); // get the character code at the location
-
-        for (j = 0; j < o; j++) {
-          //	"mash" it into the UHEPRNG state
-          s[j] -= mash(k);
-
-          if (s[j] < 0) {
-            s[j] += 1;
-          }
-        }
-      }
-    }; // this EXPORTED function allows you to seed the random generator.
-
-
-    random.seed = function (seed) {
-      if (typeof seed === 'undefined' || seed === null) {
-        seed = Math.random();
-      }
-
-      if (typeof seed !== 'string') {
-        seed = stringify(seed, function (key, value) {
-          if (typeof value === 'function') {
-            return value.toString();
-          }
-
-          return value;
-        });
-      }
-
-      random.initState();
-      random.hashString(seed);
-    }; // this handy exported function is used to add entropy to our uheprng at any time
-
-
-    random.addEntropy = function ()
-    /* accept zero or more arguments */
-    {
-      var args = [];
-
-      for (i = 0; i < arguments.length; i++) {
-        args.push(arguments[i]);
-      }
-
-      hash(k++ + new Date().getTime() + args.join('') + Math.random());
-    }; // if we want to provide a deterministic startup context for our PRNG,
-    // but without directly setting the internal state variables, this allows
-    // us to initialize the mash hash and PRNG's internal state before providing
-    // some hashing input
-
-
-    random.initState = function () {
-      mash(); // pass a null arg to force mash hash to init
-
-      for (i = 0; i < o; i++) {
-        s[i] = mash(' '); // fill the array with initial mash hash values
-      }
-
-      c = 1; // init our multiply-with-carry carry
-
-      p = o; // init our phase
-    }; // we use this (optional) exported function to signal the JavaScript interpreter
-    // that we're finished using the "Mash" hash function so that it can free up the
-    // local "instance variables" is will have been maintaining.  It's not strictly
-    // necessary, of course, but it's good JavaScript citizenship.
-
-
-    random.done = function () {
-      mash = null;
-    }; // if we called "uheprng" with a seed value, then execute random.seed() before returning
-
-
-    if (typeof seed !== 'undefined') {
-      random.seed(seed);
-    } // Returns a random integer between 0 (inclusive) and range (exclusive)
-
-
-    random.range = function (range) {
-      return random(range);
-    }; // Returns a random float between 0 (inclusive) and 1 (exclusive)
-
-
-    random.random = function () {
-      return random(Number.MAX_VALUE - 1) / Number.MAX_VALUE;
-    }; // Returns a random float between min (inclusive) and max (exclusive)
-
-
-    random.floatBetween = function (min, max) {
-      return random.random() * (max - min) + min;
-    }; // Returns a random integer between min (inclusive) and max (inclusive)
-
-
-    random.intBetween = function (min, max) {
-      return Math.floor(random.random() * (max - min + 1)) + min;
-    }; // when our main outer "uheprng" function is called, after setting up our
-    // initial variables and entropic state, we return an "instance pointer"
-    // to the internal anonymous function which can then be used to access
-    // the uheprng's various exported functions.  As with the ".done" function
-    // above, we should set the returned value to 'null' once we're finished
-    // using any of these functions.
-
-
-    return random;
-  }();
-}; // Modification for use in node:
-
-
-uheprng.create = function (seed) {
-  return new uheprng(seed);
-};
-
-module.exports = uheprng;
-},{"json-stringify-safe":"../node_modules/json-stringify-safe/stringify.js"}],"animation/rng.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
-
-var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
-
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
-var _randomSeed = _interopRequireDefault(require("random-seed"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Random = function Random(_seed) {
-  var _this = this;
-
-  (0, _classCallCheck2.default)(this, Random);
-  (0, _defineProperty2.default)(this, "activate", function (seed) {
-    _this.seed = seed;
-    _this.rng = _randomSeed.default.create(seed);
-  });
-  (0, _defineProperty2.default)(this, "random", function () {
-    return _this.rng.random();
-  });
-  (0, _defineProperty2.default)(this, "int", function () {
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    var _ref = args.length === 1 ? [0, args[1]] : args,
-        _ref2 = (0, _slicedToArray2.default)(_ref, 2),
-        min = _ref2[0],
-        max = _ref2[1];
-
-    return _this.rng.intBetween(min, max);
-  });
-  this.activate(_seed);
-}
-/** sets the random seed to use */
-;
-
-exports.default = Random;
-},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","random-seed":"../node_modules/random-seed/index.js"}],"../node_modules/base64-js/index.js":[function(require,module,exports) {
+},{}],"../node_modules/base64-js/index.js":[function(require,module,exports) {
 'use strict'
 
 exports.byteLength = byteLength
@@ -67628,7 +66996,176 @@ function _deepDefaults(dest, src) {
 }
 
 exports = module.exports = _deepDefaults;
-},{"lodash":"../node_modules/lodash/lodash.js"}],"animation/errors.js":[function(require,module,exports) {
+},{"lodash":"../node_modules/lodash/lodash.js"}],"utils/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.isNil = isNil;
+exports.isSet = isSet;
+exports.isArray = isArray;
+exports.isObject = isObject;
+exports.isIterable = isIterable;
+exports.isString = isString;
+exports.isNumber = isNumber;
+exports.isBoolean = isBoolean;
+exports.setDefaults = setDefaults;
+exports.appendFunc = appendFunc;
+exports.noop = exports.RAD = exports.TAU = void 0;
+
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+
+var _fastCopy = _interopRequireDefault(require("fast-copy"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// helper math values
+var TAU = Math.PI * 2;
+exports.TAU = TAU;
+var RAD = Math.PI / 180;
+/** checks if an object is non-null and not undefined */
+
+exports.RAD = RAD;
+
+function isNil(obj) {
+  return obj === null || obj === undefined;
+}
+/** checks if an object has a value */
+
+
+function isSet(obj) {
+  return !isNil(obj);
+}
+/** checks if an object is an array */
+
+
+function isArray(obj) {
+  return Array.isArray(obj);
+}
+/** checks if an object is just an object */
+
+
+function isObject(obj) {
+  return (0, _typeof2.default)(obj) === 'object';
+}
+/** checks if an object can be iterated over */
+
+
+function isIterable(obj) {
+  return isObject(obj) || isArray(obj);
+}
+/** checks if n object is a string */
+
+
+function isString(obj) {
+  return typeof obj === 'string' || obj instanceof String;
+}
+/** checks if an object is a number */
+
+
+function isNumber(obj) {
+  return typeof obj === 'number' || obj instanceof Number;
+}
+/** checks if an object is a boolean value */
+
+
+function isBoolean(obj) {
+  return obj === true || obj === false;
+}
+/** non-action function */
+
+
+var noop = function noop() {};
+/** assigns default values to another object
+ * NOTE: this is a shallow copy
+ */
+
+
+exports.noop = noop;
+
+function setDefaults(target, prop, defaults) {
+  var assignTo = target[prop]; // nothing has been assigned
+
+  if (!assignTo) {
+    target[prop] = (0, _fastCopy.default)(defaults);
+    return;
+  } // set each missing value
+
+
+  for (var id in defaults) {
+    if (assignTo[id] === undefined) assignTo[id] = defaults[id];
+  }
+}
+/** Merges two functions into sequential calls */
+
+
+function appendFunc(baseFunction, includedFunction) {
+  return includedFunction ? function () {
+    baseFunction.apply(void 0, arguments);
+    includedFunction.apply(void 0, arguments);
+  } : baseFunction;
+}
+},{"@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js"}],"animation/path.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.createUrlFromRef = createUrlFromRef;
+exports.parsePath = parsePath;
+exports.resolvePath = resolvePath;
+
+var _utils = require("../utils");
+
+/** creates a url from a reference */
+function createUrlFromRef(ref) {
+  // nothing fancy, just remove the prefix
+  return ref.path.substr(2);
+}
+/** parses a animation file path
+ * TODO: cache path parsing?
+*/
+
+
+function parsePath(path) {
+  // identify the type
+  var isUrl = path.substr(0, 2) === ':/';
+  var isAbsolute = !isUrl && path.substr(0, 2) === '//';
+  var isRelative = !isAbsolute && path.substr(0, 1) === '/';
+  var isLocal = !(isAbsolute || isUrl || isRelative); // trim off the prefix
+
+  var index = isUrl ? 2 : isAbsolute ? 2 : isRelative ? 1 : 0; // create each part of the resource path
+
+  var parts = path.substr(index).split(/\/+/g);
+  return {
+    path: path,
+    parts: parts,
+    isAbsolute: isAbsolute,
+    isRelative: isRelative,
+    isLocal: isLocal,
+    isUrl: isUrl
+  };
+}
+/** resolves an animation path to a data element
+ * TODO: cache path resolve?
+ */
+
+
+function resolvePath(data, parts) {
+  if ((0, _utils.isString)(parts)) {
+    parts = parsePath(parts);
+  }
+
+  var block = data;
+
+  for (var i = 0; i < parts.length; i++) {
+    block = block && block[parts[i]];
+  }
+
+  return block;
+}
+},{"../utils":"utils/index.js"}],"animation/errors.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -67724,41 +67261,87 @@ function unpack(animator, root, source, prop) {
       }
     }
 }
-},{"fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-defaults":"../node_modules/deep-defaults/lib/index.js","../utils":"utils/index.js","./path":"animation/path.js","./errors":"animation/errors.js"}],"../node_modules/deep-get-set/index.js":[function(require,module,exports) {
-var hasOwnProp = Object.prototype.hasOwnProperty;
-
-module.exports = deep;
-
-function deep (obj, path, value) {
-  if (arguments.length === 3) return set.apply(null, arguments);
-  return get.apply(null, arguments);
+},{"fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-defaults":"../node_modules/deep-defaults/lib/index.js","../utils":"utils/index.js","./path":"animation/path.js","./errors":"animation/errors.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
 }
 
-function get (obj, path) {
-  var keys = Array.isArray(path) ? path : path.split('.');
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-    if (!obj || !hasOwnProp.call(obj, key)) {
-      obj = undefined;
-      break;
+module.exports = _arrayWithHoles;
+},{}],"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js":[function(require,module,exports) {
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
     }
-    obj = obj[key];
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
   }
-  return obj;
+
+  return _arr;
 }
 
-function set (obj, path, value) {
-  var keys = Array.isArray(path) ? path : path.split('.');
-  for (var i = 0; i < keys.length - 1; i++) {
-    var key = keys[i];
-    if (deep.p && !hasOwnProp.call(obj, key)) obj[key] = {};
-    obj = obj[key];
+module.exports = _iterableToArrayLimit;
+},{}],"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":[function(require,module,exports) {
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
   }
-  obj[keys[i]] = value;
-  return value;
+
+  return arr2;
 }
 
-},{}],"utils/collection.js":[function(require,module,exports) {
+module.exports = _arrayLikeToArray;
+},{}],"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js":[function(require,module,exports) {
+var arrayLikeToArray = require("./arrayLikeToArray");
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+
+module.exports = _unsupportedIterableToArray;
+},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/nonIterableRest.js":[function(require,module,exports) {
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableRest;
+},{}],"../node_modules/@babel/runtime/helpers/slicedToArray.js":[function(require,module,exports) {
+var arrayWithHoles = require("./arrayWithHoles");
+
+var iterableToArrayLimit = require("./iterableToArrayLimit");
+
+var unsupportedIterableToArray = require("./unsupportedIterableToArray");
+
+var nonIterableRest = require("./nonIterableRest");
+
+function _slicedToArray(arr, i) {
+  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
+}
+
+module.exports = _slicedToArray;
+},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArrayLimit":"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"utils/collection.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -68452,7 +68035,708 @@ function shuffle(items) {
 
   items.push.apply(items, shuffled);
 }
-},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js","./mappings":"animation/mappings.js"}],"../node_modules/@babel/runtime/helpers/superPropBase.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js","./mappings":"animation/mappings.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.get = get;
+exports.set = set;
+exports.del = del;
+exports.clear = clear;
+exports.keys = keys;
+exports.Store = void 0;
+
+class Store {
+  constructor(dbName = 'keyval-store', storeName = 'keyval') {
+    this.storeName = storeName;
+    this._dbp = new Promise((resolve, reject) => {
+      const openreq = indexedDB.open(dbName, 1);
+
+      openreq.onerror = () => reject(openreq.error);
+
+      openreq.onsuccess = () => resolve(openreq.result); // First time setup: create an empty object store
+
+
+      openreq.onupgradeneeded = () => {
+        openreq.result.createObjectStore(storeName);
+      };
+    });
+  }
+
+  _withIDBStore(type, callback) {
+    return this._dbp.then(db => new Promise((resolve, reject) => {
+      const transaction = db.transaction(this.storeName, type);
+
+      transaction.oncomplete = () => resolve();
+
+      transaction.onabort = transaction.onerror = () => reject(transaction.error);
+
+      callback(transaction.objectStore(this.storeName));
+    }));
+  }
+
+}
+
+exports.Store = Store;
+let store;
+
+function getDefaultStore() {
+  if (!store) store = new Store();
+  return store;
+}
+
+function get(key, store = getDefaultStore()) {
+  let req;
+  return store._withIDBStore('readonly', store => {
+    req = store.get(key);
+  }).then(() => req.result);
+}
+
+function set(key, value, store = getDefaultStore()) {
+  return store._withIDBStore('readwrite', store => {
+    store.put(value, key);
+  });
+}
+
+function del(key, store = getDefaultStore()) {
+  return store._withIDBStore('readwrite', store => {
+    store.delete(key);
+  });
+}
+
+function clear(store = getDefaultStore()) {
+  return store._withIDBStore('readwrite', store => {
+    store.clear();
+  });
+}
+
+function keys(store = getDefaultStore()) {
+  const keys = [];
+  return store._withIDBStore('readonly', store => {
+    // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
+    // And openKeyCursor isn't supported by Safari.
+    (store.openKeyCursor || store.openCursor).call(store).onsuccess = function () {
+      if (!this.result) return;
+      keys.push(this.result.key);
+      this.result.continue();
+    };
+  }).then(() => keys);
+}
+},{}],"utils/assetCache.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.shared = exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _idbKeyval = require("idb-keyval");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/** creates an asset cache */
+var AssetCache =
+/** create a new cache */
+function AssetCache(db, table) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, AssetCache);
+  (0, _defineProperty2.default)(this, "getItem", function (key) {
+    var store = _this.store;
+    return new Promise(function (resolve) {
+      (0, _idbKeyval.get)(key, store).then(function () {
+        var record = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var now = +new Date();
+        var data = record.data,
+            expires = record.expires;
+        var success = !!data && !isNaN(expires) && expires > now;
+        resolve(success ? data : null);
+      }) // for errors, just resolve with
+      // no value
+      .catch(function () {
+        return resolve(null);
+      });
+    });
+  });
+  (0, _defineProperty2.default)(this, "setItem", function (key, data) {
+    var expires = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 24 * 60 * 60 * 1000;
+    var store = _this.store;
+    return new Promise(function (resolve) {
+      (0, _idbKeyval.set)(key, {
+        data: data,
+        expires: +new Date() + expires
+      }, store).then(function () {
+        return resolve(true);
+      }).catch(function () {
+        return resolve(false);
+      });
+    });
+  });
+  (0, _defineProperty2.default)(this, "purge", function () {// TODO
+  });
+  this.store = new _idbKeyval.Store(db, table);
+}
+/** saves an image resource */
+; // shared common cache
+
+
+exports.default = AssetCache;
+var shared = new AssetCache('nt:cached-assets', 'images');
+exports.shared = shared;
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","idb-keyval":"../node_modules/idb-keyval/dist/idb-keyval.mjs"}],"../node_modules/json-stringify-safe/stringify.js":[function(require,module,exports) {
+exports = module.exports = stringify
+exports.getSerialize = serializer
+
+function stringify(obj, replacer, spaces, cycleReplacer) {
+  return JSON.stringify(obj, serializer(replacer, cycleReplacer), spaces)
+}
+
+function serializer(replacer, cycleReplacer) {
+  var stack = [], keys = []
+
+  if (cycleReplacer == null) cycleReplacer = function(key, value) {
+    if (stack[0] === value) return "[Circular ~]"
+    return "[Circular ~." + keys.slice(0, stack.indexOf(value)).join(".") + "]"
+  }
+
+  return function(key, value) {
+    if (stack.length > 0) {
+      var thisPos = stack.indexOf(this)
+      ~thisPos ? stack.splice(thisPos + 1) : stack.push(this)
+      ~thisPos ? keys.splice(thisPos, Infinity, key) : keys.push(key)
+      if (~stack.indexOf(value)) value = cycleReplacer.call(this, key, value)
+    }
+    else stack.push(value)
+
+    return replacer == null ? value : replacer.call(this, key, value)
+  }
+}
+
+},{}],"../node_modules/random-seed/index.js":[function(require,module,exports) {
+/*
+ * random-seed
+ * https://github.com/skratchdot/random-seed
+ *
+ * This code was originally written by Steve Gibson and can be found here:
+ *
+ * https://www.grc.com/otg/uheprng.htm
+ *
+ * It was slightly modified for use in node, to pass jshint, and a few additional
+ * helper functions were added.
+ *
+ * Copyright (c) 2013 skratchdot
+ * Dual Licensed under the MIT license and the original GRC copyright/license
+ * included below.
+ */
+
+/*	============================================================================
+									Gibson Research Corporation
+				UHEPRNG - Ultra High Entropy Pseudo-Random Number Generator
+	============================================================================
+	LICENSE AND COPYRIGHT:  THIS CODE IS HEREBY RELEASED INTO THE PUBLIC DOMAIN
+	Gibson Research Corporation releases and disclaims ALL RIGHTS AND TITLE IN
+	THIS CODE OR ANY DERIVATIVES. Anyone may be freely use it for any purpose.
+	============================================================================
+	This is GRC's cryptographically strong PRNG (pseudo-random number generator)
+	for JavaScript. It is driven by 1536 bits of entropy, stored in an array of
+	48, 32-bit JavaScript variables.  Since many applications of this generator,
+	including ours with the "Off The Grid" Latin Square generator, may require
+	the deteriministic re-generation of a sequence of PRNs, this PRNG's initial
+	entropic state can be read and written as a static whole, and incrementally
+	evolved by pouring new source entropy into the generator's internal state.
+	----------------------------------------------------------------------------
+	ENDLESS THANKS are due Johannes Baagoe for his careful development of highly
+	robust JavaScript implementations of JS PRNGs.  This work was based upon his
+	JavaScript "Alea" PRNG which is based upon the extremely robust Multiply-
+	With-Carry (MWC) PRNG invented by George Marsaglia. MWC Algorithm References:
+	http://www.GRC.com/otg/Marsaglia_PRNGs.pdf
+	http://www.GRC.com/otg/Marsaglia_MWC_Generators.pdf
+	----------------------------------------------------------------------------
+	The quality of this algorithm's pseudo-random numbers have been verified by
+	multiple independent researchers. It handily passes the fermilab.ch tests as
+	well as the "diehard" and "dieharder" test suites.  For individuals wishing
+	to further verify the quality of this algorithm's pseudo-random numbers, a
+	256-megabyte file of this algorithm's output may be downloaded from GRC.com,
+	and a Microsoft Windows scripting host (WSH) version of this algorithm may be
+	downloaded and run from the Windows command prompt to generate unique files
+	of any size:
+	The Fermilab "ENT" tests: http://fourmilab.ch/random/
+	The 256-megabyte sample PRN file at GRC: https://www.GRC.com/otg/uheprng.bin
+	The Windows scripting host version: https://www.GRC.com/otg/wsh-uheprng.js
+	----------------------------------------------------------------------------
+	Qualifying MWC multipliers are: 187884, 686118, 898134, 1104375, 1250205,
+	1460910 and 1768863. (We use the largest one that's < 2^21)
+	============================================================================ */
+'use strict';
+
+var stringify = require('json-stringify-safe');
+/*	============================================================================
+This is based upon Johannes Baagoe's carefully designed and efficient hash
+function for use with JavaScript.  It has a proven "avalanche" effect such
+that every bit of the input affects every bit of the output 50% of the time,
+which is good.	See: http://baagoe.com/en/RandomMusings/hash/avalanche.xhtml
+============================================================================
+*/
+
+
+var Mash = function () {
+  var n = 0xefc8249d;
+
+  var mash = function (data) {
+    if (data) {
+      data = data.toString();
+
+      for (var i = 0; i < data.length; i++) {
+        n += data.charCodeAt(i);
+        var h = 0.02519603282416938 * n;
+        n = h >>> 0;
+        h -= n;
+        h *= n;
+        n = h >>> 0;
+        h -= n;
+        n += h * 0x100000000; // 2^32
+      }
+
+      return (n >>> 0) * 2.3283064365386963e-10; // 2^-32
+    } else {
+      n = 0xefc8249d;
+    }
+  };
+
+  return mash;
+};
+
+var uheprng = function (seed) {
+  return function () {
+    var o = 48; // set the 'order' number of ENTROPY-holding 32-bit values
+
+    var c = 1; // init the 'carry' used by the multiply-with-carry (MWC) algorithm
+
+    var p = o; // init the 'phase' (max-1) of the intermediate variable pointer
+
+    var s = new Array(o); // declare our intermediate variables array
+
+    var i; // general purpose local
+
+    var j; // general purpose local
+
+    var k = 0; // general purpose local
+    // when our "uheprng" is initially invoked our PRNG state is initialized from the
+    // browser's own local PRNG. This is okay since although its generator might not
+    // be wonderful, it's useful for establishing large startup entropy for our usage.
+
+    var mash = new Mash(); // get a pointer to our high-performance "Mash" hash
+    // fill the array with initial mash hash values
+
+    for (i = 0; i < o; i++) {
+      s[i] = mash(Math.random());
+    } // this PRIVATE (internal access only) function is the heart of the multiply-with-carry
+    // (MWC) PRNG algorithm. When called it returns a pseudo-random number in the form of a
+    // 32-bit JavaScript fraction (0.0 to <1.0) it is a PRIVATE function used by the default
+    // [0-1] return function, and by the random 'string(n)' function which returns 'n'
+    // characters from 33 to 126.
+
+
+    var rawprng = function () {
+      if (++p >= o) {
+        p = 0;
+      }
+
+      var t = 1768863 * s[p] + c * 2.3283064365386963e-10; // 2^-32
+
+      return s[p] = t - (c = t | 0);
+    }; // this EXPORTED function is the default function returned by this library.
+    // The values returned are integers in the range from 0 to range-1. We first
+    // obtain two 32-bit fractions (from rawprng) to synthesize a single high
+    // resolution 53-bit prng (0 to <1), then we multiply this by the caller's
+    // "range" param and take the "floor" to return a equally probable integer.
+
+
+    var random = function (range) {
+      return Math.floor(range * (rawprng() + (rawprng() * 0x200000 | 0) * 1.1102230246251565e-16)); // 2^-53
+    }; // this EXPORTED function 'string(n)' returns a pseudo-random string of
+    // 'n' printable characters ranging from chr(33) to chr(126) inclusive.
+
+
+    random.string = function (count) {
+      var i;
+      var s = '';
+
+      for (i = 0; i < count; i++) {
+        s += String.fromCharCode(33 + random(94));
+      }
+
+      return s;
+    }; // this PRIVATE "hash" function is used to evolve the generator's internal
+    // entropy state. It is also called by the EXPORTED addEntropy() function
+    // which is used to pour entropy into the PRNG.
+
+
+    var hash = function () {
+      var args = Array.prototype.slice.call(arguments);
+
+      for (i = 0; i < args.length; i++) {
+        for (j = 0; j < o; j++) {
+          s[j] -= mash(args[i]);
+
+          if (s[j] < 0) {
+            s[j] += 1;
+          }
+        }
+      }
+    }; // this EXPORTED "clean string" function removes leading and trailing spaces and non-printing
+    // control characters, including any embedded carriage-return (CR) and line-feed (LF) characters,
+    // from any string it is handed. this is also used by the 'hashstring' function (below) to help
+    // users always obtain the same EFFECTIVE uheprng seeding key.
+
+
+    random.cleanString = function (inStr) {
+      inStr = inStr.replace(/(^\s*)|(\s*$)/gi, ''); // remove any/all leading spaces
+
+      inStr = inStr.replace(/[\x00-\x1F]/gi, ''); // remove any/all control characters
+
+      inStr = inStr.replace(/\n /, '\n'); // remove any/all trailing spaces
+
+      return inStr; // return the cleaned up result
+    }; // this EXPORTED "hash string" function hashes the provided character string after first removing
+    // any leading or trailing spaces and ignoring any embedded carriage returns (CR) or Line Feeds (LF)
+
+
+    random.hashString = function (inStr) {
+      inStr = random.cleanString(inStr);
+      mash(inStr); // use the string to evolve the 'mash' state
+
+      for (i = 0; i < inStr.length; i++) {
+        // scan through the characters in our string
+        k = inStr.charCodeAt(i); // get the character code at the location
+
+        for (j = 0; j < o; j++) {
+          //	"mash" it into the UHEPRNG state
+          s[j] -= mash(k);
+
+          if (s[j] < 0) {
+            s[j] += 1;
+          }
+        }
+      }
+    }; // this EXPORTED function allows you to seed the random generator.
+
+
+    random.seed = function (seed) {
+      if (typeof seed === 'undefined' || seed === null) {
+        seed = Math.random();
+      }
+
+      if (typeof seed !== 'string') {
+        seed = stringify(seed, function (key, value) {
+          if (typeof value === 'function') {
+            return value.toString();
+          }
+
+          return value;
+        });
+      }
+
+      random.initState();
+      random.hashString(seed);
+    }; // this handy exported function is used to add entropy to our uheprng at any time
+
+
+    random.addEntropy = function ()
+    /* accept zero or more arguments */
+    {
+      var args = [];
+
+      for (i = 0; i < arguments.length; i++) {
+        args.push(arguments[i]);
+      }
+
+      hash(k++ + new Date().getTime() + args.join('') + Math.random());
+    }; // if we want to provide a deterministic startup context for our PRNG,
+    // but without directly setting the internal state variables, this allows
+    // us to initialize the mash hash and PRNG's internal state before providing
+    // some hashing input
+
+
+    random.initState = function () {
+      mash(); // pass a null arg to force mash hash to init
+
+      for (i = 0; i < o; i++) {
+        s[i] = mash(' '); // fill the array with initial mash hash values
+      }
+
+      c = 1; // init our multiply-with-carry carry
+
+      p = o; // init our phase
+    }; // we use this (optional) exported function to signal the JavaScript interpreter
+    // that we're finished using the "Mash" hash function so that it can free up the
+    // local "instance variables" is will have been maintaining.  It's not strictly
+    // necessary, of course, but it's good JavaScript citizenship.
+
+
+    random.done = function () {
+      mash = null;
+    }; // if we called "uheprng" with a seed value, then execute random.seed() before returning
+
+
+    if (typeof seed !== 'undefined') {
+      random.seed(seed);
+    } // Returns a random integer between 0 (inclusive) and range (exclusive)
+
+
+    random.range = function (range) {
+      return random(range);
+    }; // Returns a random float between 0 (inclusive) and 1 (exclusive)
+
+
+    random.random = function () {
+      return random(Number.MAX_VALUE - 1) / Number.MAX_VALUE;
+    }; // Returns a random float between min (inclusive) and max (exclusive)
+
+
+    random.floatBetween = function (min, max) {
+      return random.random() * (max - min) + min;
+    }; // Returns a random integer between min (inclusive) and max (inclusive)
+
+
+    random.intBetween = function (min, max) {
+      return Math.floor(random.random() * (max - min + 1)) + min;
+    }; // when our main outer "uheprng" function is called, after setting up our
+    // initial variables and entropic state, we return an "instance pointer"
+    // to the internal anonymous function which can then be used to access
+    // the uheprng's various exported functions.  As with the ".done" function
+    // above, we should set the returned value to 'null' once we're finished
+    // using any of these functions.
+
+
+    return random;
+  }();
+}; // Modification for use in node:
+
+
+uheprng.create = function (seed) {
+  return new uheprng(seed);
+};
+
+module.exports = uheprng;
+},{"json-stringify-safe":"../node_modules/json-stringify-safe/stringify.js"}],"animation/rng.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _randomSeed = _interopRequireDefault(require("random-seed"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Random = function Random(_seed) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, Random);
+  (0, _defineProperty2.default)(this, "activate", function (seed) {
+    _this.seed = seed;
+    _this.rng = _randomSeed.default.create(seed);
+  });
+  (0, _defineProperty2.default)(this, "random", function () {
+    return _this.rng.random();
+  });
+  (0, _defineProperty2.default)(this, "int", function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    var _ref = args.length === 1 ? [0, args[1]] : args,
+        _ref2 = (0, _slicedToArray2.default)(_ref, 2),
+        min = _ref2[0],
+        max = _ref2[1];
+
+    return _this.rng.intBetween(min, max);
+  });
+  this.activate(_seed);
+}
+/** sets the random seed to use */
+;
+
+exports.default = Random;
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","random-seed":"../node_modules/random-seed/index.js"}],"animation/generators/controller.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _utils = require("../../utils");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var Controller = /*#__PURE__*/function () {
+  function Controller() {
+    var _this = this;
+
+    (0, _classCallCheck2.default)(this, Controller);
+    (0, _defineProperty2.default)(this, "stopAnimations", function () {
+      var animations = _this.animations;
+
+      var _iterator = _createForOfIteratorHelper(animations),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var animation = _step.value;
+          animation.stop();
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+    });
+    (0, _defineProperty2.default)(this, "stopEmitters", function () {
+      var emitters = _this.emitters;
+
+      var _iterator2 = _createForOfIteratorHelper(emitters),
+          _step2;
+
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var instance = _step2.value;
+          var emitter = instance.emitter;
+          emitter.emit = false;
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+    });
+    (0, _defineProperty2.default)(this, "activateEmitters", function () {
+      var emitters = _this.emitters;
+
+      var _iterator3 = _createForOfIteratorHelper(emitters),
+          _step3;
+
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var instance = _step3.value;
+          var emitter = instance.emitter;
+          var config = emitter.config;
+          emitter.autoUpdate = true;
+          emitter.lifetime = (0, _utils.isNumber)(config.duration) ? config.duration / 1000 : undefined;
+          emitter.emit = true;
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+    });
+    (0, _defineProperty2.default)(this, "dispose", function () {
+      var objects = _this.objects;
+
+      _this.stopAnimations();
+
+      _this.stopEmitters();
+
+      var _iterator4 = _createForOfIteratorHelper(objects),
+          _step4;
+
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+          var obj = _step4.value;
+          if (obj.dispose) obj.dispose();
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
+    });
+    (0, _defineProperty2.default)(this, "emitters", []);
+    (0, _defineProperty2.default)(this, "animations", []);
+    (0, _defineProperty2.default)(this, "sprites", []);
+    (0, _defineProperty2.default)(this, "masks", []);
+    (0, _defineProperty2.default)(this, "groups", []);
+    (0, _defineProperty2.default)(this, "repeaters", []);
+    (0, _defineProperty2.default)(this, "objects", []);
+  }
+
+  (0, _createClass2.default)(Controller, [{
+    key: "register",
+
+    /** registers a layer for the controller */
+    value: function register(obj) {
+      // determine types
+      if (obj.isEmitter) this.emitters.push(obj);else if (obj.isSprite) this.sprites.push(obj);else if (obj.isMask) this.masks.push(obj);else if (obj.isGroup) this.groups.push(obj);else if (obj.isRepeater) this.repeaters.push(obj); // track animations
+
+      if (obj.hasAnimation) this.animations.push(obj.animation);
+    }
+  }]);
+  return Controller;
+}();
+
+exports.default = Controller;
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js"}],"../node_modules/deep-get-set/index.js":[function(require,module,exports) {
+var hasOwnProp = Object.prototype.hasOwnProperty;
+
+module.exports = deep;
+
+function deep (obj, path, value) {
+  if (arguments.length === 3) return set.apply(null, arguments);
+  return get.apply(null, arguments);
+}
+
+function get (obj, path) {
+  var keys = Array.isArray(path) ? path : path.split('.');
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    if (!obj || !hasOwnProp.call(obj, key)) {
+      obj = undefined;
+      break;
+    }
+    obj = obj[key];
+  }
+  return obj;
+}
+
+function set (obj, path, value) {
+  var keys = Array.isArray(path) ? path : path.split('.');
+  for (var i = 0; i < keys.length - 1; i++) {
+    var key = keys[i];
+    if (deep.p && !hasOwnProp.call(obj, key)) obj[key] = {};
+    obj = obj[key];
+  }
+  obj[keys[i]] = value;
+  return value;
+}
+
+},{}],"../node_modules/@babel/runtime/helpers/superPropBase.js":[function(require,module,exports) {
 var getPrototypeOf = require("./getPrototypeOf");
 
 function _superPropBase(object, property) {
@@ -71156,7 +71440,7 @@ function loadImage(url, version) {
     }]; // attempts to load an image
 
     var request = function request() {
-      img = document.createElement('img');
+      img = new Image();
       img.onload = handle(true);
       img.onerror = handle(false);
       img.crossOrigin = 'anonymous'; // replace the image url
@@ -75966,21 +76250,17 @@ function _createInstance() {
   }));
   return _createInstance.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js"}],"animation/generators/controller.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js"}],"animation/importManifest.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports.default = importManifest;
 
-var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
-var _utils = require("../../utils");
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -75990,267 +76270,93 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-var Controller = /*#__PURE__*/function () {
-  function Controller() {
-    var _this = this;
+function importManifest(_x) {
+  return _importManifest.apply(this, arguments);
+}
 
-    (0, _classCallCheck2.default)(this, Controller);
-    (0, _defineProperty2.default)(this, "stopAnimations", function () {
-      var animations = _this.animations;
+function _importManifest() {
+  _importManifest = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(_ref) {
+    var manifest, path, baseUrl, timeout, _controller, parts, key, target, _iterator, _step, part, controller, pendingTimeout, url, response, data;
 
-      var _iterator = _createForOfIteratorHelper(animations),
-          _step;
+    return _regenerator.default.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            manifest = _ref.manifest, path = _ref.path, baseUrl = _ref.baseUrl, timeout = _ref.timeout;
+            _context.prev = 1;
+            // get the manifest sub path and then
+            // the resource key (which is the last value)
+            parts = path.split(/\//g);
+            key = parts.pop(); // find the location to import data onto
 
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var animation = _step.value;
-          animation.stop();
+            target = manifest;
+            _iterator = _createForOfIteratorHelper(parts);
+
+            try {
+              for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                part = _step.value;
+                target = target[part] = target[part] || {};
+              } // if this has already been attached
+
+            } catch (err) {
+              _iterator.e(err);
+            } finally {
+              _iterator.f();
+            }
+
+            if (!target[key]) {
+              _context.next = 9;
+              break;
+            }
+
+            return _context.abrupt("return");
+
+          case 9:
+            if (timeout > 0) {
+              controller = new AbortController();
+              pendingTimeout = setTimeout(function () {
+                return controller.abort();
+              }, timeout);
+            } // request the data - make sure there are no
+            // accidential double slashes
+
+
+            url = "".concat(baseUrl, "/").concat(path, ".json").replace(/([^:]\/)\/+/g, '$1');
+            _context.next = 13;
+            return fetch(url, {
+              signal: (_controller = controller) === null || _controller === void 0 ? void 0 : _controller.signal
+            });
+
+          case 13:
+            response = _context.sent;
+            // cancel the timeout, if any
+            clearTimeout(pendingTimeout); // save the result
+
+            _context.next = 17;
+            return response.json();
+
+          case 17:
+            data = _context.sent;
+            target[key] = data; // return it, in case it's needed
+
+            return _context.abrupt("return", data);
+
+          case 22:
+            _context.prev = 22;
+            _context.t0 = _context["catch"](1);
+            console.error('Failed to load', path);
+            throw _context.t0;
+
+          case 26:
+          case "end":
+            return _context.stop();
         }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
       }
-    });
-    (0, _defineProperty2.default)(this, "stopEmitters", function () {
-      var emitters = _this.emitters;
-
-      var _iterator2 = _createForOfIteratorHelper(emitters),
-          _step2;
-
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-          var instance = _step2.value;
-          var emitter = instance.emitter;
-          emitter.emit = false;
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-    });
-    (0, _defineProperty2.default)(this, "activateEmitters", function () {
-      var emitters = _this.emitters;
-
-      var _iterator3 = _createForOfIteratorHelper(emitters),
-          _step3;
-
-      try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-          var instance = _step3.value;
-          var emitter = instance.emitter;
-          var config = emitter.config;
-          emitter.autoUpdate = true;
-          emitter.lifetime = (0, _utils.isNumber)(config.duration) ? config.duration / 1000 : undefined;
-          emitter.emit = true;
-        }
-      } catch (err) {
-        _iterator3.e(err);
-      } finally {
-        _iterator3.f();
-      }
-    });
-    (0, _defineProperty2.default)(this, "dispose", function () {
-      var objects = _this.objects;
-
-      _this.stopAnimations();
-
-      _this.stopEmitters();
-
-      var _iterator4 = _createForOfIteratorHelper(objects),
-          _step4;
-
-      try {
-        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
-          var obj = _step4.value;
-          if (obj.dispose) obj.dispose();
-        }
-      } catch (err) {
-        _iterator4.e(err);
-      } finally {
-        _iterator4.f();
-      }
-    });
-    (0, _defineProperty2.default)(this, "emitters", []);
-    (0, _defineProperty2.default)(this, "animations", []);
-    (0, _defineProperty2.default)(this, "sprites", []);
-    (0, _defineProperty2.default)(this, "masks", []);
-    (0, _defineProperty2.default)(this, "groups", []);
-    (0, _defineProperty2.default)(this, "repeaters", []);
-    (0, _defineProperty2.default)(this, "objects", []);
-  }
-
-  (0, _createClass2.default)(Controller, [{
-    key: "register",
-
-    /** registers a layer for the controller */
-    value: function register(obj) {
-      // determine types
-      if (obj.isEmitter) this.emitters.push(obj);else if (obj.isSprite) this.sprites.push(obj);else if (obj.isMask) this.masks.push(obj);else if (obj.isGroup) this.groups.push(obj);else if (obj.isRepeater) this.repeaters.push(obj); // track animations
-
-      if (obj.hasAnimation) this.animations.push(obj.animation);
-    }
-  }]);
-  return Controller;
-}();
-
-exports.default = Controller;
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.get = get;
-exports.set = set;
-exports.del = del;
-exports.clear = clear;
-exports.keys = keys;
-exports.Store = void 0;
-
-class Store {
-  constructor(dbName = 'keyval-store', storeName = 'keyval') {
-    this.storeName = storeName;
-    this._dbp = new Promise((resolve, reject) => {
-      const openreq = indexedDB.open(dbName, 1);
-
-      openreq.onerror = () => reject(openreq.error);
-
-      openreq.onsuccess = () => resolve(openreq.result); // First time setup: create an empty object store
-
-
-      openreq.onupgradeneeded = () => {
-        openreq.result.createObjectStore(storeName);
-      };
-    });
-  }
-
-  _withIDBStore(type, callback) {
-    return this._dbp.then(db => new Promise((resolve, reject) => {
-      const transaction = db.transaction(this.storeName, type);
-
-      transaction.oncomplete = () => resolve();
-
-      transaction.onabort = transaction.onerror = () => reject(transaction.error);
-
-      callback(transaction.objectStore(this.storeName));
-    }));
-  }
-
+    }, _callee, null, [[1, 22]]);
+  }));
+  return _importManifest.apply(this, arguments);
 }
-
-exports.Store = Store;
-let store;
-
-function getDefaultStore() {
-  if (!store) store = new Store();
-  return store;
-}
-
-function get(key, store = getDefaultStore()) {
-  let req;
-  return store._withIDBStore('readonly', store => {
-    req = store.get(key);
-  }).then(() => req.result);
-}
-
-function set(key, value, store = getDefaultStore()) {
-  return store._withIDBStore('readwrite', store => {
-    store.put(value, key);
-  });
-}
-
-function del(key, store = getDefaultStore()) {
-  return store._withIDBStore('readwrite', store => {
-    store.delete(key);
-  });
-}
-
-function clear(store = getDefaultStore()) {
-  return store._withIDBStore('readwrite', store => {
-    store.clear();
-  });
-}
-
-function keys(store = getDefaultStore()) {
-  const keys = [];
-  return store._withIDBStore('readonly', store => {
-    // This would be store.getAllKeys(), but it isn't supported by Edge or Safari.
-    // And openKeyCursor isn't supported by Safari.
-    (store.openKeyCursor || store.openCursor).call(store).onsuccess = function () {
-      if (!this.result) return;
-      keys.push(this.result.key);
-      this.result.continue();
-    };
-  }).then(() => keys);
-}
-},{}],"utils/assetCache.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.shared = exports.default = void 0;
-
-var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
-
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
-var _idbKeyval = require("idb-keyval");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/** creates an asset cache */
-var AssetCache =
-/** create a new cache */
-function AssetCache(db, table) {
-  var _this = this;
-
-  (0, _classCallCheck2.default)(this, AssetCache);
-  (0, _defineProperty2.default)(this, "getItem", function (key) {
-    var store = _this.store;
-    return new Promise(function (resolve) {
-      (0, _idbKeyval.get)(key, store).then(function () {
-        var record = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        var now = +new Date();
-        var data = record.data,
-            expires = record.expires;
-        var success = !!data && !isNaN(expires) && expires > now;
-        resolve(success ? data : null);
-      }) // for errors, just resolve with
-      // no value
-      .catch(function () {
-        return resolve(null);
-      });
-    });
-  });
-  (0, _defineProperty2.default)(this, "setItem", function (key, data) {
-    var expires = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 24 * 60 * 60 * 1000;
-    var store = _this.store;
-    return new Promise(function (resolve) {
-      (0, _idbKeyval.set)(key, {
-        data: data,
-        expires: +new Date() + expires
-      }, store).then(function () {
-        return resolve(true);
-      }).catch(function () {
-        return resolve(false);
-      });
-    });
-  });
-  (0, _defineProperty2.default)(this, "purge", function () {// TODO
-  });
-  this.store = new _idbKeyval.Store(db, table);
-}
-/** saves an image resource */
-; // shared common cache
-
-
-exports.default = AssetCache;
-var shared = new AssetCache('nt:cached-assets', 'images');
-exports.shared = shared;
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","idb-keyval":"../node_modules/idb-keyval/dist/idb-keyval.mjs"}],"animation/index.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js"}],"animation/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -76280,9 +76386,17 @@ var _lib = require("../pixi/lib");
 
 var _eventEmitter = require("../common/event-emitter");
 
+var _utils = require("./utils");
+
 var _path = require("./path");
 
+var _expressions = require("./expressions");
+
+var _assetCache = require("../utils/assetCache");
+
 var _rng = _interopRequireDefault(require("./rng"));
+
+var _controller = _interopRequireDefault(require("./generators/controller"));
 
 var _generators = _interopRequireDefault(require("./generators"));
 
@@ -76290,15 +76404,9 @@ var _getSprite = _interopRequireDefault(require("./resources/getSprite"));
 
 var _getSpritesheet = _interopRequireDefault(require("./resources/getSpritesheet"));
 
-var _expressions = require("./expressions");
-
-var _controller = _interopRequireDefault(require("./generators/controller"));
-
-var _utils = require("./utils");
-
-var _assetCache = require("../utils/assetCache");
-
 var _loadImage = _interopRequireDefault(require("./resources/loadImage"));
+
+var _importManifest = _interopRequireDefault(require("./importManifest"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -76421,6 +76529,42 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
         return _ref3.apply(this, arguments);
       };
     }());
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "importManifest", /*#__PURE__*/function () {
+      var _ref4 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(path) {
+        var _ref5,
+            _ref5$baseUrl,
+            baseUrl,
+            timeout,
+            _args4 = arguments;
+
+        return _regenerator.default.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                _ref5 = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : {}, _ref5$baseUrl = _ref5.baseUrl, baseUrl = _ref5$baseUrl === void 0 ? _this.baseUrl : _ref5$baseUrl, timeout = _ref5.timeout;
+                _context4.next = 3;
+                return (0, _importManifest.default)({
+                  manifest: _this.manifest,
+                  path: path,
+                  baseUrl: baseUrl,
+                  timeout: timeout
+                });
+
+              case 3:
+                return _context4.abrupt("return", _context4.sent);
+
+              case 4:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4);
+      }));
+
+      return function (_x6) {
+        return _ref4.apply(this, arguments);
+      };
+    }());
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "install", function (plugin, customizer, params) {
       _this.plugins[plugin] = {
         customizer: customizer,
@@ -76439,63 +76583,22 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
       return (0, _expressions.evaluateExpression)(value);
     });
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "compose", /*#__PURE__*/function () {
-      var _ref4 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee4(data, resource, relativeTo) {
+      var _ref6 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5(data, resource, relativeTo) {
         var controller, instance;
-        return _regenerator.default.wrap(function _callee4$(_context4) {
-          while (1) {
-            switch (_context4.prev = _context4.next) {
-              case 0:
-                controller = new _controller.default();
-                _context4.next = 3;
-                return (0, _generators.default)((0, _assertThisInitialized2.default)(_this), controller, resource, data, relativeTo);
-
-              case 3:
-                instance = _context4.sent;
-                instance.type = data.type;
-                instance.path = resource;
-                instance.controller = controller;
-                return _context4.abrupt("return", instance);
-
-              case 8:
-              case "end":
-                return _context4.stop();
-            }
-          }
-        }, _callee4);
-      }));
-
-      return function (_x6, _x7, _x8) {
-        return _ref4.apply(this, arguments);
-      };
-    }());
-    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "create", /*#__PURE__*/function () {
-      var _ref5 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee5(resource) {
-        var data;
         return _regenerator.default.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
-                data = _this.lookup(resource); // doesn't seem to exist
+                controller = new _controller.default();
+                _context5.next = 3;
+                return (0, _generators.default)((0, _assertThisInitialized2.default)(_this), controller, resource, data, relativeTo);
 
-                if (data) {
-                  _context5.next = 4;
-                  break;
-                }
-
-                console.error("Cannot resolve node ".concat(resource));
-                return _context5.abrupt("return");
-
-              case 4:
-                if (!(data.compose === undefined)) {
-                  _context5.next = 7;
-                  break;
-                }
-
-                console.error('nothing to compose at', resource);
-                return _context5.abrupt("return");
-
-              case 7:
-                return _context5.abrupt("return", _this.compose(data, resource));
+              case 3:
+                instance = _context5.sent;
+                instance.type = data.type;
+                instance.path = resource;
+                instance.controller = controller;
+                return _context5.abrupt("return", instance);
 
               case 8:
               case "end":
@@ -76505,8 +76608,49 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
         }, _callee5);
       }));
 
-      return function (_x9) {
-        return _ref5.apply(this, arguments);
+      return function (_x7, _x8, _x9) {
+        return _ref6.apply(this, arguments);
+      };
+    }());
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "create", /*#__PURE__*/function () {
+      var _ref7 = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee6(resource) {
+        var data;
+        return _regenerator.default.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                data = _this.lookup(resource); // doesn't seem to exist
+
+                if (data) {
+                  _context6.next = 4;
+                  break;
+                }
+
+                console.error("Cannot resolve node ".concat(resource));
+                return _context6.abrupt("return");
+
+              case 4:
+                if (!(data.compose === undefined)) {
+                  _context6.next = 7;
+                  break;
+                }
+
+                console.error('nothing to compose at', resource);
+                return _context6.abrupt("return");
+
+              case 7:
+                return _context6.abrupt("return", _this.compose(data, resource));
+
+              case 8:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6);
+      }));
+
+      return function (_x10) {
+        return _ref7.apply(this, arguments);
       };
     }());
     _this.rng = new _rng.default(options.seed); // TODO: expression functions are just lone functions
@@ -76536,7 +76680,7 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
 }(_eventEmitter.EventEmitter);
 
 exports.Animator = Animator;
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../pixi/lib":"pixi/lib.js","../common/event-emitter":"common/event-emitter.js","./path":"animation/path.js","./rng":"animation/rng.js","./generators":"animation/generators/index.js","./resources/getSprite":"animation/resources/getSprite.js","./resources/getSpritesheet":"animation/resources/getSpritesheet.js","./expressions":"animation/expressions.js","./generators/controller":"animation/generators/controller.js","./utils":"animation/utils.js","../utils/assetCache":"utils/assetCache.js","./resources/loadImage":"animation/resources/loadImage.js"}],"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../pixi/lib":"pixi/lib.js","../common/event-emitter":"common/event-emitter.js","./utils":"animation/utils.js","./path":"animation/path.js","./expressions":"animation/expressions.js","../utils/assetCache":"utils/assetCache.js","./rng":"animation/rng.js","./generators/controller":"animation/generators/controller.js","./generators":"animation/generators/index.js","./resources/getSprite":"animation/resources/getSprite.js","./resources/getSpritesheet":"animation/resources/getSpritesheet.js","./resources/loadImage":"animation/resources/loadImage.js","./importManifest":"animation/importManifest.js"}],"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js":[function(require,module,exports) {
 var arrayLikeToArray = require("./arrayLikeToArray");
 
 function _arrayWithoutHoles(arr) {

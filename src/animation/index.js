@@ -1,15 +1,17 @@
 import { PIXI } from '../pixi/lib';
 import { EventEmitter } from "../common/event-emitter";
+import { inheritFrom } from './utils';
 import { parsePath, resolvePath } from "./path";
+import { setRandomizer, evaluateExpression } from './expressions';
+import { shared as imageCache } from '../utils/assetCache';
+
 import Random from './rng';
+import Controller from './generators/controller';
 import createInstance from "./generators";
 import getSprite from "./resources/getSprite";
 import getSpritesheet from "./resources/getSpritesheet";
-import { setRandomizer, evaluateExpression } from './expressions';
-import Controller from './generators/controller';
-import { inheritFrom } from './utils';
-import { shared as imageCache } from '../utils/assetCache';
 import loadImage from './resources/loadImage';
+import importManifest from './importManifest';
 
 /** handles creating PIXI animations using defined files */
 export class Animator extends EventEmitter {
@@ -68,6 +70,16 @@ export class Animator extends EventEmitter {
 		else {
 			return await loadImage(`${this.baseUrl}/${spritesheetId}`);
 		}
+	}
+
+	// includes a new source of data
+	importManifest = async (path, { baseUrl = this.baseUrl, timeout } = { }) => {
+		return await importManifest({
+			manifest: this.manifest,
+			path,
+			baseUrl,
+			timeout,
+		})
 	}
 
 	/** handles a custom type */
