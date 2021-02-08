@@ -16,24 +16,27 @@ export default async function importManifest ({ manifest, path, baseUrl, timeout
       return
     }
 
-    // check if needing a timeout
-    let controller
-    let pendingTimeout
-    if (timeout > 0) {
-      controller = new AbortController()
-      pendingTimeout = setTimeout(() => controller.abort(), timeout)
+    let data
+    let attempts = 3
+    const url = `${baseUrl}/${path}.json`.replace(/([^:]\/)\/+/g, '$1')
+    while (attempts > 0) {
+      try {
+        data = await attemptFetch(url, timeout)
+        break
+
+      // if failed and still has attempts, request again
+      } catch (ex) {
+        if (--attempts > 0) {
+          continue
+        }
+
+        // no more attempts
+        console.error(`failed to import ${path}`)
+        throw ex
+      }
     }
 
-    // request the data - make sure there are no
-    // accidential double slashes
-    const url = `${baseUrl}/${path}.json`.replace(/([^:]\/)\/+/g, '$1')
-    const response = await fetch(url, { signal: controller?.signal })
-
-    // cancel the timeout, if any
-    clearTimeout(pendingTimeout)
-
     // save the result
-    const data = await response.json()
     target[key] = data
 
     // return it, in case it's needed
@@ -44,4 +47,23 @@ export default async function importManifest ({ manifest, path, baseUrl, timeout
     console.error('Failed to load', path)
     throw ex
   }
+}
+
+// performs an attempt to import data
+async function attemptFetch (url, timeout) {
+  // check if needing a timeout
+  let controller
+  let pendingTimeout
+  if (timeout > 0) {
+    controller = new AbortController()
+    pendingTimeout = setTimeout(() => controller.abort(), timeout)
+  }
+
+  // request the data - make sure there are no
+  // accidential double slashes
+  const response = await fetch(url, { signal: controller?.signal })
+
+  // cancel the timeout, if any
+  clearTimeout(pendingTimeout)
+  return await response.json()
 }

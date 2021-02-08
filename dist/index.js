@@ -76272,11 +76272,12 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 function importManifest(_x) {
   return _importManifest.apply(this, arguments);
-}
+} // performs an attempt to import data
+
 
 function _importManifest() {
   _importManifest = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(_ref) {
-    var manifest, path, baseUrl, timeout, _controller, parts, key, target, _iterator, _step, part, controller, pendingTimeout, url, response, data;
+    var manifest, path, baseUrl, timeout, parts, key, target, _iterator, _step, part, data, attempts, url;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -76312,6 +76313,79 @@ function _importManifest() {
             return _context.abrupt("return");
 
           case 9:
+            attempts = 3;
+            url = "".concat(baseUrl, "/").concat(path, ".json").replace(/([^:]\/)\/+/g, '$1');
+
+          case 11:
+            if (!(attempts > 0)) {
+              _context.next = 27;
+              break;
+            }
+
+            _context.prev = 12;
+            _context.next = 15;
+            return attemptFetch(url, timeout);
+
+          case 15:
+            data = _context.sent;
+            return _context.abrupt("break", 27);
+
+          case 19:
+            _context.prev = 19;
+            _context.t0 = _context["catch"](12);
+
+            if (!(--attempts > 0)) {
+              _context.next = 23;
+              break;
+            }
+
+            return _context.abrupt("continue", 11);
+
+          case 23:
+            // no more attempts
+            console.error("failed to import ".concat(path));
+            throw _context.t0;
+
+          case 25:
+            _context.next = 11;
+            break;
+
+          case 27:
+            // save the result
+            target[key] = data; // return it, in case it's needed
+
+            return _context.abrupt("return", data);
+
+          case 31:
+            _context.prev = 31;
+            _context.t1 = _context["catch"](1);
+            console.error('Failed to load', path);
+            throw _context.t1;
+
+          case 35:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, null, [[1, 31], [12, 19]]);
+  }));
+  return _importManifest.apply(this, arguments);
+}
+
+function attemptFetch(_x2, _x3) {
+  return _attemptFetch.apply(this, arguments);
+}
+
+function _attemptFetch() {
+  _attemptFetch = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(url, timeout) {
+    var _controller;
+
+    var controller, pendingTimeout, response;
+    return _regenerator.default.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            // check if needing a timeout
             if (timeout > 0) {
               controller = new AbortController();
               pendingTimeout = setTimeout(function () {
@@ -76321,40 +76395,29 @@ function _importManifest() {
             // accidential double slashes
 
 
-            url = "".concat(baseUrl, "/").concat(path, ".json").replace(/([^:]\/)\/+/g, '$1');
-            _context.next = 13;
+            _context2.next = 3;
             return fetch(url, {
               signal: (_controller = controller) === null || _controller === void 0 ? void 0 : _controller.signal
             });
 
-          case 13:
-            response = _context.sent;
+          case 3:
+            response = _context2.sent;
             // cancel the timeout, if any
-            clearTimeout(pendingTimeout); // save the result
-
-            _context.next = 17;
+            clearTimeout(pendingTimeout);
+            _context2.next = 7;
             return response.json();
 
-          case 17:
-            data = _context.sent;
-            target[key] = data; // return it, in case it's needed
+          case 7:
+            return _context2.abrupt("return", _context2.sent);
 
-            return _context.abrupt("return", data);
-
-          case 22:
-            _context.prev = 22;
-            _context.t0 = _context["catch"](1);
-            console.error('Failed to load', path);
-            throw _context.t0;
-
-          case 26:
+          case 8:
           case "end":
-            return _context.stop();
+            return _context2.stop();
         }
       }
-    }, _callee, null, [[1, 22]]);
+    }, _callee2);
   }));
-  return _importManifest.apply(this, arguments);
+  return _attemptFetch.apply(this, arguments);
 }
 },{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js"}],"animation/index.js":[function(require,module,exports) {
 "use strict";
