@@ -125,6 +125,7 @@ export default async function createSprite(animator, controller, path, compositi
 	}
 	catch(ex) {
 		console.error(`Failed to create sprite ${path} while ${phase}`);
+		console.error(ex)
 		throw ex;
 	}
 

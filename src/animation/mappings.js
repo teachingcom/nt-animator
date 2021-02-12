@@ -27,6 +27,8 @@ export const MAPPINGS = [
 	// animation
 	{ prop: 'fps', apply: (t, v) => t.animationSpeed = toAnimationSpeed(v) },
 	// { prop: '// currentFrame', apply: ? }?
+
+	{ prop: 'visible', apply: (t, v) => t.visible = !!v },
 	
 	// colors and styling
 	{ prop: 'alpha', apply: (t, v) => t.alpha = v },
