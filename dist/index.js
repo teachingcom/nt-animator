@@ -67753,7 +67753,7 @@ var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/sli
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
 var mappings = _interopRequireWildcard(require("../mappings"));
 
@@ -67765,58 +67765,50 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var GetRandomExpression = /*#__PURE__*/function () {
-  function GetRandomExpression(prop, params) {
-    var _this = this;
+var GetRandomExpression = function GetRandomExpression(prop, params) {
+  var _this = this;
 
-    (0, _classCallCheck2.default)(this, GetRandomExpression);
-    this.mapping = mappings.lookup(prop); // sort out the params
+  (0, _classCallCheck2.default)(this, GetRandomExpression);
+  (0, _defineProperty2.default)(this, "next", function () {
+    var value = randomizer.random() * (_this.max - _this.min) + _this.min;
 
-    this.toInt = !~params.indexOf('decimal');
-    this.isVariable = !!~params.indexOf('var'); // extract the range to work with
+    return _this.toInt ? 0 | value : value;
+  });
+  (0, _defineProperty2.default)(this, "update", function (sprite, stage) {
+    var next = _this.next();
 
-    var _params = (0, _slicedToArray2.default)(params, 2),
-        min = _params[0],
-        max = _params[1];
+    _this.mapping(sprite, next);
+  });
+  this.mapping = mappings.lookup(prop); // sort out the params
 
-    if (isNaN(max)) {
-      max = min;
-      min = 0;
-    } // save the values
+  this.toInt = !~params.indexOf('decimal');
+  this.isVariable = !!~params.indexOf('var'); // extract the range to work with
 
+  var _params = (0, _slicedToArray2.default)(params, 2),
+      min = _params[0],
+      max = _params[1];
 
-    this.max = max;
-    this.min = min;
-
-    if (!this.isVariable) {
-      var value = this.next();
-
-      this.update = function (sprite) {
-        return _this.mapping(sprite, value);
-      };
-    }
-  } // calculates the next value
+  if (isNaN(max)) {
+    max = min;
+    min = 0;
+  } // save the values
 
 
-  (0, _createClass2.default)(GetRandomExpression, [{
-    key: "next",
-    value: function next() {
-      var value = randomizer.random() * (this.max - this.min) + this.min;
-      return this.toInt ? 0 | value : value;
-    } // update the sprite
+  this.max = max;
+  this.min = min;
 
-  }, {
-    key: "update",
-    value: function update(sprite, stage) {
-      var next = this.next();
-      this.mapping(sprite, next);
-    }
-  }]);
-  return GetRandomExpression;
-}();
+  if (!this.isVariable) {
+    var value = this.next();
+
+    this.update = function (sprite) {
+      return _this.mapping(sprite, value);
+    };
+  }
+} // calculates the next value
+;
 
 exports.default = GetRandomExpression;
-},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","../mappings":"animation/mappings.js","../../randomizer":"randomizer.js"}],"animation/dynamic-expressions/sine-expressions.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../mappings":"animation/mappings.js","../../randomizer":"randomizer.js"}],"animation/dynamic-expressions/sine-expressions.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

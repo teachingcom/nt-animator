@@ -27,13 +27,13 @@ export default class GetRandomExpression {
   }
 
   // calculates the next value
-  next () {
+  next = () => {
     const value = (randomizer.random() * (this.max - this.min)) + this.min
     return this.toInt ? 0 | value : value
   }
 
   // update the sprite
-  update (sprite, stage) {
+  update = (sprite, stage) => {
     const next = this.next()
     this.mapping(sprite, next)
   }
