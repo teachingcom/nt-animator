@@ -5,7 +5,7 @@ class BaseRelativeTo {
     this.mapping = mappings.lookup(prop)
 
     // gather arguments
-    this.isVisibility = this.prop === 'visible'
+    this.isVisibility = prop === 'visible'
     this.flip = args.indexOf('flip') > -1
     this.toInt = args.indexOf('int') > -1
     this.min = args[0]
@@ -18,8 +18,8 @@ class BaseRelativeTo {
 
     // flips at center
     if (this.flip) {
-      const cx = relativeTo / 2
-      percent = Math.abs((at - cx) / cx)
+      const mid = relativeTo / 2
+      percent = Math.abs((at - mid) / mid)
 
     // full range
     } else {
@@ -28,7 +28,7 @@ class BaseRelativeTo {
 
     // specials
     if (this.isVisibility) {
-      this.visible = percent > this.min && percent < this.max
+      target.visible = percent > this.min && percent < this.max
       return
     }
 

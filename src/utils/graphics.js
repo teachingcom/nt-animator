@@ -1,9 +1,9 @@
 import { toColor } from "../animation/converters";
 
 /** creates a rendering surface */
-export function createContext() {
+export function createContext(options) {
 	const canvas = document.createElement('canvas');
-	const ctx = canvas.getContext('2d');
+	const ctx = canvas.getContext('2d', options);
 
 	function reset() {
 		canvas.width = canvas.width;

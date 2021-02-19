@@ -77,6 +77,7 @@ export class Animator extends EventEmitter {
 	importManifest = async (path, { baseUrl = this.baseUrl, timeout } = { }) => {
 		return await importManifest({
 			manifest: this.manifest,
+			version: this.manifest.version,
 			path,
 			baseUrl,
 			timeout,

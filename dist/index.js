@@ -67990,7 +67990,7 @@ var BaseRelativeTo = /*#__PURE__*/function () {
     (0, _classCallCheck2.default)(this, BaseRelativeTo);
     this.mapping = mappings.lookup(prop); // gather arguments
 
-    this.isVisibility = this.prop === 'visible';
+    this.isVisibility = prop === 'visible';
     this.flip = args.indexOf('flip') > -1;
     this.toInt = args.indexOf('int') > -1;
     this.min = args[0];
@@ -68004,15 +68004,15 @@ var BaseRelativeTo = /*#__PURE__*/function () {
       var percent; // flips at center
 
       if (this.flip) {
-        var cx = relativeTo / 2;
-        percent = Math.abs((at - cx) / cx); // full range
+        var mid = relativeTo / 2;
+        percent = Math.abs((at - mid) / mid); // full range
       } else {
         percent = at / relativeTo;
       } // specials
 
 
       if (this.isVisibility) {
-        this.visible = percent > this.min && percent < this.max;
+        target.visible = percent > this.min && percent < this.max;
         return;
       }
 
@@ -75703,9 +75703,9 @@ exports.createPlaceholderImage = createPlaceholderImage;
 var _converters = require("../animation/converters");
 
 /** creates a rendering surface */
-function createContext() {
+function createContext(options) {
   var canvas = document.createElement('canvas');
-  var ctx = canvas.getContext('2d');
+  var ctx = canvas.getContext('2d', options);
 
   function reset() {
     canvas.width = canvas.width;
@@ -76646,13 +76646,13 @@ function importManifest(_x) {
 
 function _importManifest() {
   _importManifest = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(_ref) {
-    var manifest, path, baseUrl, timeout, parts, key, target, _iterator, _step, part, data, attempts, url;
+    var manifest, version, path, baseUrl, timeout, parts, key, target, _iterator, _step, part, data, attempts, url;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            manifest = _ref.manifest, path = _ref.path, baseUrl = _ref.baseUrl, timeout = _ref.timeout;
+            manifest = _ref.manifest, version = _ref.version, path = _ref.path, baseUrl = _ref.baseUrl, timeout = _ref.timeout;
             _context.prev = 1;
             // get the manifest sub path and then
             // the resource key (which is the last value)
@@ -76683,7 +76683,7 @@ function _importManifest() {
 
           case 9:
             attempts = 3;
-            url = "".concat(baseUrl, "/").concat(path, ".json").replace(/([^:]\/)\/+/g, '$1');
+            url = "".concat(baseUrl, "/").concat(path, ".json?").concat(version).replace(/([^:]\/)\/+/g, '$1');
 
           case 11:
             if (!(attempts > 0)) {
@@ -76979,6 +76979,7 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
                 _context4.next = 3;
                 return (0, _importManifest.default)({
                   manifest: _this.manifest,
+                  version: _this.manifest.version,
                   path: path,
                   baseUrl: baseUrl,
                   timeout: timeout

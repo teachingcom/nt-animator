@@ -1,4 +1,4 @@
-export default async function importManifest ({ manifest, path, baseUrl, timeout }) {
+export default async function importManifest ({ manifest, version, path, baseUrl, timeout }) {
   try {
     // get the manifest sub path and then
     // the resource key (which is the last value)
@@ -18,7 +18,7 @@ export default async function importManifest ({ manifest, path, baseUrl, timeout
 
     let data
     let attempts = 3
-    const url = `${baseUrl}/${path}.json`.replace(/([^:]\/)\/+/g, '$1')
+    const url = `${baseUrl}/${path}.json?${version}`.replace(/([^:]\/)\/+/g, '$1')
     while (attempts > 0) {
       try {
         data = await attemptFetch(url, timeout)
