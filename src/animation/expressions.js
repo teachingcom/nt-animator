@@ -4,6 +4,7 @@ import * as randomizer from '../randomizer';
 
 // dynamic expressions
 import GetRandomExpression from './dynamic-expressions/get-random'
+import ModExpression from './dynamic-expressions/mod-expression'
 import { CosineExpression, SineExpression } from './dynamic-expressions/sine-expressions'
 import { RelativeToX, RelativeToY } from './dynamic-expressions/relative-expressions'
 
@@ -22,6 +23,7 @@ const EXPRESSIONS = {
 }
 
 const DYNAMICS = {
+  ':mod': { instance: ModExpression },
   ':cos': { instance: CosineExpression },
   ':sin': { instance: SineExpression },
   ':rnd': { instance: GetRandomExpression },

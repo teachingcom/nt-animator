@@ -16,6 +16,7 @@ import DetatchedContainer from './pixi/detatched-container';
 export const PIXI = { ...libPIXI, ResponsiveContainer, ResponsiveStage, DetatchedContainer };
 
 // helpful utils
+export { default as ToggleHelper } from './animation/toggle';
 export { default as loadImage } from './animation/resources/loadImage';
 export { EventEmitter } from './common/event-emitter';
 export { getBoundsForRole } from './pixi/utils/get-bounds-of-role';

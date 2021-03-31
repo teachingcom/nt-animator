@@ -4,6 +4,7 @@ class BaseSineExpression {
 
   offset = 0
   scale = 1
+  flip = 1
 
   constructor (prop, args) {
 		this.prop = prop
@@ -12,7 +13,13 @@ class BaseSineExpression {
     let min = 0
     let max = 1
     for (const arg of args) { 
-      if (arg.min) {
+      if (arg === 'int') {
+        this.convertToInt = true
+      }
+      else if (arg === 'invert') {
+        this.flip = -1
+      }
+      else if (arg.min) {
         min = arg.min
       }
       else if (arg.max) {
@@ -23,9 +30,6 @@ class BaseSineExpression {
       }
       else if (arg.offset) { 
         this.offset = arg.offset * 1000
-      }
-      else if (arg === 'int') {
-        this.convertToInt = true
       }
     }
 
@@ -39,15 +43,12 @@ class BaseSineExpression {
     // save the args
     this.min = min
     this.max = max
-    
-    // extra conversions
-    this.convertBy = prop === 'rotation' ? (Math.PI * 2) : 1
   }
 
   update = (target, stage) => {
     const ts = (Date.now() + this.offset) * this.scale
     const percent = ((this.calc(ts) + 1) / 2)
-		const value = (percent * (this.max - this.min)) + this.min
+		const value = (((percent * (this.max - this.min)) + this.min)) * this.flip
 		this.mapping(target, (this.convertToInt ? 0 | value : value))
   }
 
