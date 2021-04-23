@@ -55,6 +55,7 @@ export default function createAnimation(animator, path, composition, layer, inst
 				elapsed = 0,
 				yoyo = 0,
 				duration = 1000,
+				randomStart,
 				delay = 0,
 				ease
 			} = animation;
@@ -70,6 +71,7 @@ export default function createAnimation(animator, path, composition, layer, inst
 				elapsed: evaluateExpression(elapsed, duration) || 0,
 				easings,
 				duration,
+				randomStart,
 
 				// TODO: research how this works
 				// flip will cause an aniation to loop as well as loop, but

@@ -55,6 +55,8 @@ export default async function createRepeater(animator, controller, path, composi
 		const tiles = new PIXI.Container();
 
 		// fix prop names
+		normalizeTo(layer, 'expandWidth', 'expandX');
+		normalizeTo(layer, 'expandHeight', 'expandY');
 		normalizeTo(layer, 'repeatX', 'cols', 'columns');
 		normalizeTo(layer, 'repeatY', 'rows');
 		normalizeTo(layer, 'jitterX', 'jitter.x');
@@ -65,6 +67,8 @@ export default async function createRepeater(animator, controller, path, composi
 		const rows = isNumber(layer.repeatY) ? layer.repeatY : 1;
 		const originX = evaluateExpression(layer.props?.x || 0);
 		const originY = evaluateExpression(layer.props?.y || 0);
+		const expandWidth = isNumber(layer.expandWidth) ? layer.expandWidth : 0
+		const expandHeight = isNumber(layer.expandHeight) ? layer.expandHeight : 0
 
 		// check for defined distances
 		let useOffsetX = false;
@@ -103,6 +107,7 @@ export default async function createRepeater(animator, controller, path, composi
 		let bounds;
 		for (let i = 0; i < columns * rows; i++) {
 			const col = i % columns;
+			const isLast = col === columns - 1;
 			const row = Math.floor(i / columns);
 
 			// create the layer
@@ -138,6 +143,13 @@ export default async function createRepeater(animator, controller, path, composi
 			// include nudge
 			x += evaluateExpression(layer.nudgeX || 0);
 			y += evaluateExpression(layer.nudgeY || 0);
+
+			// special rules to avoid problems with
+			// tearing
+			if (!isLast) {
+				instance.width += expandWidth;
+				instance.height += expandHeight;
+			}
 
 			instance.x = x;
 			instance.y = y;

@@ -16,6 +16,13 @@ export default function animate(params) {
 		loop: params.loop !== false
 	};
 
+	// this is not quite right - I want to offset the
+	// animation starting point, but it doesn't work
+	// with animejs the way I want. Will have to review later
+	if (params.randomStart) {
+		config.delay = 0 | (Math.random() * (config.duration || 1000))
+	}
+
 	// update callback
 	if (params.update)
 		config.update = () => params.update(props);
@@ -83,6 +90,7 @@ class AnimationHandler {
 		this.config = config;
 		this.props = props;
 		this.animation = anime(config);
+
 	}
 
 	// local frame tracking
