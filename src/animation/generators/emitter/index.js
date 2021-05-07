@@ -176,7 +176,7 @@ export default async function createEmitter(animator, controller, path, composit
 		// boolean props
 		const autoplay = emit.auto === false || emit.autoplay === false || emit.autoPlay === false;
 		config.noRotation = !!emit.noRotation;
-		config.atBack = !!emit.atBack;
+		config.addAtBack = !!emit.atBack;
 		config.orderedArt = !!emit.orderedArt;
 		config.flipParticleX = !!(emit.flipParticleX || emit.flipX || emit['flip.x']);
 		config.flipParticleY = !!(emit.flipParticleY || emit.flipY || emit['flip.y']);

@@ -4,7 +4,7 @@ import createAnimation from './animation';
 import resolveImages from '../resources/resolveImages';
 
 import { assignDisplayObjectProps, applyExpressions, applyDynamicProperties } from '../assign';
-import { setDefaults, noop } from '../../utils';
+import { setDefaults, noop, isNumber } from '../../utils';
 import createTextureFromImage from '../resources/createTextureFromImage';
 import { map } from '../../utils/collection';
 import { normalizeProps } from '../normalize';
@@ -61,6 +61,16 @@ export default async function createSprite(animator, controller, path, compositi
 			sprite.isSprite = true;
 			sprite.autoPlay = false;
 			sprite.isAnimatedSprite = isAnimated;
+			
+			// choose the correct starting frame
+			const startFrame = layer.props?.startFrame;
+			if (isAnimated && startFrame) {
+				const goto = startFrame === 'random' ? (0 | (Math.random() * textures.length))
+				: isNumber(startFrame) ? startFrame
+				: 0;
+
+				sprite.gotoAndStop(goto);
+			}
 
 			// do not use built in animation engine
 			// has strange behaviors when multiple

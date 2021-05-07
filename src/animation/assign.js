@@ -1,5 +1,5 @@
 
-import { noop, appendFunc } from '../utils';
+import { noop, appendFunc, toPrecision } from '../utils';
 import { createDynamicExpression, isDynamic, evaluateExpression } from './expressions';
 import ResponsiveStage from '../pixi/stage';
 import { MAPPINGS } from './mappings';
@@ -43,6 +43,10 @@ export function assignDisplayObjectProps(target, props) {
 
 /** evaluates simple expressions */
 export function applyExpressions(obj) {
+	if (!obj) {
+		return;
+	}
+
 	for (const prop in obj) {
 		obj[prop] = evaluateExpression(obj[prop]);
 	}
@@ -78,7 +82,8 @@ export function applyDynamicProperties(obj, props) {
 
 		// create the update function
 		update = appendFunc(update, (obj, stage) => {			
-			obj.scale.x = Math.min(10, (obj.width / obj.getBounds().width) * (props.scaleX || 1)) * (stage.scaleX || 1);
+			const currentScale = obj.width / obj.getBounds().width
+			obj.scale.x = toPrecision(Math.min(10, (currentScale) * (props.scaleX || 1)) * (stage.scaleX || 1), 2);
 		});
 	}
 	
@@ -86,9 +91,18 @@ export function applyDynamicProperties(obj, props) {
 	if (props.lockHeight) {
 		hasDynamicProperties = true;
 
-		// create the update function
-		update = appendFunc(update, (obj, stage) => {			
-			obj.scale.y = Math.min(10, (obj.height / obj.getBounds().height) * (props.scaleY || 1)) * (stage.scaleY || 1);
+		// locking height allows for sprites that are skewed
+		// to maintain their original height so they have the
+		// appearance of being leaned as opposed to skew/squashed
+		// this function will change the y-scale to maintain the original
+		// height for the object the entire time. This is only used in
+		// a few places (like signs)
+		// this also rounds scaling down to a smaller precision since
+		// the track uses "snap to pixel" and not rounding will cause
+		// these to bump up and down in size by 1 pixel slightly
+		update = appendFunc(update, (obj, stage) => {		
+			const currentScale = obj.height / obj.getBounds().height	
+			obj.scale.y = toPrecision(Math.min(10, (currentScale) * (props.scaleY || 1)) * (stage.scaleY || 1), 2);
 		});
 	}
 

@@ -2,6 +2,8 @@ import * as mappings from '../mappings'
 
 class BaseSineExpression {
 
+  static start = Date.now()
+
   offset = 0
   scale = 1
   flip = 1
@@ -19,14 +21,17 @@ class BaseSineExpression {
       else if (arg === 'invert') {
         this.flip = -1
       }
-      else if (arg.min) {
+      else if ('min' in arg) {
         min = arg.min
       }
-      else if (arg.max) {
+      else if ('max' in arg) {
         max = arg.max
       }
-      else if (arg.scale) { 
+      else if ('scale' in arg) { 
         this.scale = arg.scale * 0.01
+      }
+      else if (arg === 'stagger' || arg.stagger) { 
+        this.offset += 0 | (arg.stagger || 10000) * Math.random()
       }
       else if (arg.offset) { 
         this.offset = arg.offset * 1000
@@ -46,7 +51,7 @@ class BaseSineExpression {
   }
 
   update = (target, stage) => {
-    const ts = (Date.now() + this.offset) * this.scale
+    const ts = ((Date.now() - BaseSineExpression.start) + this.offset) * this.scale
     const percent = ((this.calc(ts) + 1) / 2)
 		const value = (((percent * (this.max - this.min)) + this.min)) * this.flip
 		this.mapping(target, (this.convertToInt ? 0 | value : value))

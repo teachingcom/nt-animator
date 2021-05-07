@@ -31,6 +31,28 @@ export default async function resolveImages(animator, path, composition, layer) 
 			images = images.concat(source);
 	}
 
+	// check for any shorthand to fill longer complex animations
+	// when assigning images you can use the syntax of
+	// [5, t] to append [t,t,t,t,t]
+	// [3, t, u] to append [t,u,t,u,t,u]
+	let expanded = [ ];
+	for (let item of images) {
+		// just a string
+		if (isString(item)) {
+			expanded.push(item);
+		}
+		// special syntax
+		else if (isArray(item)) {
+			const append = item.slice(1);
+			for (let i = 0; i < item[0]; i++) {
+				expanded = expanded.concat(append);
+			}
+		}
+	}
+
+	// replace the images
+	images = expanded;
+
 	// unpack all image reference
 	delete layer.image;
 	layer.images = images;

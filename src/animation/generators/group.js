@@ -88,6 +88,7 @@ export default async function createGroup(animator, controller, path, compositio
 		createAnimation(animator, path, composition, layer, group);
 
 		// add to the view
+		container.config = layer;
 		container.zIndex = group.zIndex;
 		container.addChild(group);
 
@@ -96,10 +97,10 @@ export default async function createGroup(animator, controller, path, compositio
 		group.pivot.y = 0;
 
 		// bakes a layer to a single object
-		// if (layer.merge) {
-		// 	group.cacheAsBitmap = true;
-		// 	group.batch = 'merged';
-		// }
+		if (layer.merge) {
+			group.cacheAsBitmap = true;
+			group.batch = 'merged';
+		}
 
 		// include this instance
 		controller.register(container);

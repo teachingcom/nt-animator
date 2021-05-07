@@ -67109,7 +67109,7 @@ exports.isNumber = isNumber;
 exports.isBoolean = isBoolean;
 exports.setDefaults = setDefaults;
 exports.appendFunc = appendFunc;
-exports.noop = exports.RAD = exports.TAU = void 0;
+exports.noop = exports.toPrecision = exports.RAD = exports.TAU = void 0;
 
 var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
@@ -67170,8 +67170,16 @@ function isNumber(obj) {
 function isBoolean(obj) {
   return obj === true || obj === false;
 }
+/** rounds to a precision and avoids string casting, if possible */
+
+
+var toPrecision = function toPrecision(num, val) {
+  return val === 1 ? (0 | num * 10) / 10 : val === 2 ? (0 | num * 100) / 100 : val === 3 ? (0 | num * 1000) / 1000 : val === 4 ? (0 | num * 10000) / 10000 : parseFloat(num.toPrecision(val));
+};
 /** non-action function */
 
+
+exports.toPrecision = toPrecision;
 
 var noop = function noop() {};
 /** assigns default values to another object
@@ -68026,7 +68034,7 @@ var BaseSineExpression = function BaseSineExpression(prop, args) {
   (0, _defineProperty2.default)(this, "scale", 1);
   (0, _defineProperty2.default)(this, "flip", 1);
   (0, _defineProperty2.default)(this, "update", function (target, stage) {
-    var ts = (Date.now() + _this.offset) * _this.scale;
+    var ts = (Date.now() - BaseSineExpression.start + _this.offset) * _this.scale;
 
     var percent = (_this.calc(ts) + 1) / 2;
     var value = (percent * (_this.max - _this.min) + _this.min) * _this.flip;
@@ -68049,12 +68057,14 @@ var BaseSineExpression = function BaseSineExpression(prop, args) {
         this.convertToInt = true;
       } else if (arg === 'invert') {
         this.flip = -1;
-      } else if (arg.min) {
+      } else if ('min' in arg) {
         min = arg.min;
-      } else if (arg.max) {
+      } else if ('max' in arg) {
         max = arg.max;
-      } else if (arg.scale) {
+      } else if ('scale' in arg) {
         this.scale = arg.scale * 0.01;
+      } else if (arg === 'stagger' || arg.stagger) {
+        this.offset += 0 | (arg.stagger || 10000) * Math.random();
       } else if (arg.offset) {
         this.offset = arg.offset * 1000;
       }
@@ -68076,6 +68086,8 @@ var BaseSineExpression = function BaseSineExpression(prop, args) {
   this.min = min;
   this.max = max;
 };
+
+(0, _defineProperty2.default)(BaseSineExpression, "start", Date.now());
 
 var CosineExpression = /*#__PURE__*/function (_BaseSineExpression) {
   (0, _inherits2.default)(CosineExpression, _BaseSineExpression);
@@ -68301,7 +68313,501 @@ var RelativeToY = /*#__PURE__*/function (_BaseRelativeTo2) {
 
 
 exports.RelativeToY = RelativeToY;
-},{"@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","../mappings":"animation/mappings.js"}],"animation/expressions.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","../mappings":"animation/mappings.js"}],"animation/dynamic-expressions/bezier-aproximator.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function simplified(val) {
+  return (0 | val * 100) / 100;
+}
+
+var BezierAproximator = /*#__PURE__*/function () {
+  (0, _createClass2.default)(BezierAproximator, null, [{
+    key: "create",
+    // creates a new bezier aproximation
+    value: function create(a, b, c, d, linear) {
+      a = simplified(a);
+      b = simplified(b);
+      c = simplified(c);
+      d = simplified(d);
+      linear = linear ? 1 : 0; // check if already created
+
+      var key = [a, b, c, d, linear].join(':');
+      var instance = BezierAproximator.cached[key];
+
+      if (instance) {
+        return instance;
+      } // create and save
+
+
+      instance = new BezierAproximator(a, b, c, d, linear);
+      BezierAproximator.cached[key] = instance;
+      return instance;
+    }
+  }]);
+
+  function BezierAproximator(a, b, c, d, linear) {
+    (0, _classCallCheck2.default)(this, BezierAproximator);
+    (0, _defineProperty2.default)(this, "_lut", []);
+    this.a = a;
+    this.b = b;
+    this.c = c;
+    this.d = d;
+    this.linear = linear; // Calculate constants in parametric bezier formular
+    // http://www.moshplant.com/direct-or/bezier/math.html
+
+    this.cX = 3 * a;
+    this.bX = 3 * (c - a) - this.cX;
+    this.aX = 1 - this.cX - this.bX;
+    this.cY = 3 * b;
+    this.bY = 3 * (d - b) - this.cY;
+    this.aY = 1 - this.cY - this.bY; // prepopulate values
+
+    this._precalculate();
+  } // look up table of values so this isn't
+  // constantly calculated
+
+
+  (0, _createClass2.default)(BezierAproximator, [{
+    key: "_bezierX",
+    // Functions for calculating x, x', y for t
+    value: function _bezierX(t) {
+      return t * (this.cX + t * (this.bX + t * this.aX));
+    }
+  }, {
+    key: "_bezierXDerivative",
+    value: function _bezierXDerivative(t) {
+      return this.cX + t * (2 * this.bX + 3 * this.aX * t);
+    } // Use Newton-Raphson method to find t for a given x.
+    // Since x = a*t^3 + b*t^2 + c*t, we find the root for
+    // a*t^3 + b*t^2 + c*t - x = 0, and thus t.
+
+  }, {
+    key: "_newtonRaphson",
+    value: function _newtonRaphson(x) {
+      var prev;
+      var t = x;
+
+      do {
+        prev = t;
+        t = t - (this._bezierX(t) - x) / this._bezierXDerivative(t);
+      } while (Math.abs(t - prev) > 1e-4);
+
+      return t;
+    } // precalculate all values
+
+  }, {
+    key: "_precalculate",
+    value: function _precalculate() {
+      var lut = []; // calculate all values
+
+      for (var i = 0; i < 1; i += 0.005) {
+        var t = this._newtonRaphson(i) || 0;
+        var v = t * (this.cY + t * (this.bY + t * this.aY));
+        lut.push(v);
+      }
+
+      this._lut = lut;
+      this._lut = [].concat(lut);
+      lut.reverse();
+      this._lut = [].concat((0, _toConsumableArray2.default)(this._lut), lut);
+      this._total = this._lut.length;
+    }
+  }, {
+    key: "calc",
+    value: function calc(t) {
+      t = t * 100; // t = (t * min) + (t * max) - (t * min)
+
+      if (t < 0) {
+        t = 200 + t;
+      }
+
+      return this._lut[t % this._total];
+    }
+  }]);
+  return BezierAproximator;
+}();
+
+exports.default = BezierAproximator;
+(0, _defineProperty2.default)(BezierAproximator, "cached", {});
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js"}],"animation/dynamic-expressions/bezier-expression.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var mappings = _interopRequireWildcard(require("../mappings"));
+
+var _bezierAproximator = _interopRequireDefault(require("./bezier-aproximator"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var BezierExpression = function BezierExpression(prop, args) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, BezierExpression);
+  (0, _defineProperty2.default)(this, "offset", 0);
+  (0, _defineProperty2.default)(this, "scale", 1);
+  (0, _defineProperty2.default)(this, "flip", 1);
+  (0, _defineProperty2.default)(this, "startAt", 0);
+  (0, _defineProperty2.default)(this, "endAt", 0);
+  (0, _defineProperty2.default)(this, "update", function (target, stage) {
+    var ts = (Date.now() - BezierExpression.start + _this.offset) * _this.scale;
+
+    var scale = _this.bezier.calc(ts);
+
+    var value = _this.min + _this.range * scale; // calculate the current mod value
+    // const value = (ts % this.modOf) * this.flip
+    // apply the value
+
+    _this.mapping(target, _this.convertToInt ? 0 | value : value);
+  });
+  this.prop = prop;
+  this.mapping = mappings.lookup(prop); // first 4 arguments should always be the curve
+
+  var a = parseFloat(args.shift());
+  var b = parseFloat(args.shift());
+  var c = parseFloat(args.shift());
+  var d = parseFloat(args.shift()); // validate
+
+  if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d)) {
+    console.warn('invalid bezier expression', a, b, c, d);
+    a = b = 0;
+    c = d = 0;
+  } // get remaining args
+
+
+  var _iterator = _createForOfIteratorHelper(args),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var arg = _step.value;
+
+      if (arg === 'int') {
+        this.convertToInt = true;
+      } else if ('min' in arg) {
+        this.min = parseFloat(arg.min);
+      } else if ('max' in arg) {
+        this.max = parseFloat(arg.max);
+      } else if (arg === 'invert') {
+        this.flip = -1;
+      } else if (arg.scale) {
+        this.scale = arg.scale * 0.005;
+      } else if (arg.offset) {
+        this.offset = arg.offset * 1000;
+      }
+    } // save the args
+
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  this.bezier = _bezierAproximator.default.create(a, b, c, d, true);
+  this.range = this.max - this.min;
+};
+
+exports.default = BezierExpression;
+(0, _defineProperty2.default)(BezierExpression, "start", Date.now());
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../mappings":"animation/mappings.js","./bezier-aproximator":"animation/dynamic-expressions/bezier-aproximator.js"}],"animation/average-aproximator.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SAMPLES = 2000;
+var SMOOTH = 100;
+
+var AverageSequenceAproximator = /*#__PURE__*/function () {
+  (0, _createClass2.default)(AverageSequenceAproximator, null, [{
+    key: "create",
+    value: function create(values, invert) {
+      // create the key for this
+      var key = [].concat((0, _toConsumableArray2.default)(values.map(simplified)), [invert ? 1 : 0]).join(':'); // check if this was already generated
+
+      var instance = AverageSequenceAproximator.cache[key];
+
+      if (!instance) {
+        instance = new AverageSequenceAproximator(values, invert);
+        AverageSequenceAproximator.cache[key] = instance;
+      }
+
+      return instance;
+    } // creates a new aproximator
+
+  }]);
+
+  function AverageSequenceAproximator(values, invert) {
+    (0, _classCallCheck2.default)(this, AverageSequenceAproximator);
+    (0, _defineProperty2.default)(this, "_lut", []);
+    this.values = values;
+    this.invert = invert;
+
+    this._precalculate();
+  } // get a value from the lut
+
+
+  (0, _createClass2.default)(AverageSequenceAproximator, [{
+    key: "calc",
+    value: function calc(val) {
+      return this._lut[0 | val % this._total];
+    } // preloads a look up table of values
+
+  }, {
+    key: "_precalculate",
+    value: function _precalculate() {
+      var values = this.values,
+          invert = this.invert; // determine how many sections to create
+
+      var total = values.length;
+      var section = 0 | SAMPLES / total;
+      var count = section * total; // create a scaled range of values
+
+      var samples = [];
+
+      for (var i = 0; i < count; i++) {
+        var percent = i % section / section;
+        var current = 0 | i / section;
+        var next = (current + 1) % total;
+        var val = lerp(values[current], values[next], percent);
+        samples.push(val);
+      } // if it should play back in reverse, create the backside samples
+
+
+      if (invert) {
+        var inverted = [].concat(samples);
+        inverted.reverse();
+        samples.concat(inverted);
+      } // try and smooth out the transitions a bit
+      // this just averages all samples together - it also
+
+
+      this._total = samples.length;
+
+      for (var _i = 0; _i < this._total; _i++) {
+        var wrap = _i + this._total;
+        var avg = SMOOTH; // gather nearby values
+
+        var _current = samples[_i];
+
+        for (var j = 1; j < avg; j++) {
+          _current += samples[(_i + j) % this._total];
+          _current += samples[(wrap - j) % this._total];
+        }
+
+        this._lut[_i] = _current / (avg * 2 + 1);
+      }
+    }
+  }]);
+  return AverageSequenceAproximator;
+}();
+
+exports.default = AverageSequenceAproximator;
+(0, _defineProperty2.default)(AverageSequenceAproximator, "cache", {});
+
+function simplified(val) {
+  return (0 | val * 100) / 100;
+}
+
+function lerp(x, y, t) {
+  return x * (1 - t) + y * t;
+}
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js"}],"animation/dynamic-expressions/average-expression.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _averageAproximator = _interopRequireDefault(require("../average-aproximator"));
+
+var mappings = _interopRequireWildcard(require("../mappings"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var AverageExpression = function AverageExpression(prop, args) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, AverageExpression);
+  (0, _defineProperty2.default)(this, "offset", 0);
+  (0, _defineProperty2.default)(this, "scale", 1);
+  (0, _defineProperty2.default)(this, "flip", false);
+  (0, _defineProperty2.default)(this, "startAt", 0);
+  (0, _defineProperty2.default)(this, "endAt", 0);
+  (0, _defineProperty2.default)(this, "update", function (target, stage) {
+    var ts = (Date.now() - AverageExpression.start + _this.offset) * _this.scale;
+
+    var scale = _this.avg.calc(ts);
+
+    var value = _this.min + _this.range * scale; // apply the value
+
+    _this.mapping(target, _this.convertToInt ? 0 | value : value);
+  });
+  this.prop = prop;
+  this.mapping = mappings.lookup(prop);
+  this.values = []; // get remaining args
+
+  var isGatheringNumbers = true;
+
+  var _iterator = _createForOfIteratorHelper(args),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var arg = _step.value;
+
+      // the first arguments are expected to be the range
+      if (isGatheringNumbers) {
+        var val = parseFloat(arg);
+
+        if (!isNaN(val)) {
+          this.values.push(val);
+          continue;
+        } // done gathering numbers
+        else {
+            isGatheringNumbers = false;
+          }
+      } // check for other args
+
+
+      if (arg === 'int') {
+        this.convertToInt = true;
+      } else if ('min' in arg) {
+        this.min = parseFloat(arg.min);
+      } else if ('max' in arg) {
+        this.max = parseFloat(arg.max);
+      } else if (arg === 'invert') {
+        this.flip = true;
+      } else if (arg.scale) {
+        this.scale = arg.scale * 0.1;
+      } else if (arg.offset) {
+        this.offset = arg.offset * 1000;
+      }
+    } // save the args
+
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  this.avg = _averageAproximator.default.create(this.values, this.flip);
+  this.range = this.max - this.min;
+}; // function createCubicBezier( p1x, p1y, p2x, p2y ) {
+// 	// Calculate constants in parametric bezier formular
+// 	// http://www.moshplant.com/direct-or/bezier/math.html
+// 	var cX = 3 * p1x,
+// 		bX = 3 * ( p2x - p1x ) - cX,
+// 		aX = 1 - cX - bX,
+// 		cY = 3 * p1y,
+// 		bY = 3 * ( p2y - p1y ) - cY,
+// 		aY = 1 - cY - bY;
+// 	// Functions for calculating x, x', y for t
+// 	var bezierX = function ( t ) {
+// 		return t * ( cX + t * ( bX + t * aX ) );
+// 	};
+// 	var bezierXDerivative = function ( t ) {
+// 		return cX + t * ( 2 * bX + 3 * aX * t );
+// 	};
+// 	// Use Newton-Raphson method to find t for a given x.
+// 	// Since x = a*t^3 + b*t^2 + c*t, we find the root for
+// 	// a*t^3 + b*t^2 + c*t - x = 0, and thus t.
+// 	var newtonRaphson = function ( x ) {
+// 		var prev,
+// 			// Initial estimation is linear
+// 			t = x;
+// 		do {
+// 			prev = t;
+// 			t = t - ( ( bezierX( t ) - x ) / bezierXDerivative( t ) );
+// 		} while ( Math.abs( t - prev ) > 1e-4 );
+// 		return t;
+// 	};
+// 	return function ( x ) {
+// 		var t = newtonRaphson( x );
+// 		// This is y given t on the bezier curve.
+// 		return t * ( cY + t * ( bY + t * aY ) );
+// 	}
+// };
+// // // B(t) = (1 - t)^3P0 + 3(1 - t)^2tP1 + 3(1 - t)t^2P2 + t^3P3
+// // function interpolateCubicBezier(start, control1, control2, end) {
+// // 	// 0 <= t <= 1
+// // 	return function interpolator(t) {
+// // 		return [
+// //       (Math.pow(1 - t, 3) * start[0]) +
+// //       (3 * Math.pow(1 - t, 2) * t * control1[0]) +
+// //       (3 * (1 - t) * Math.pow(t, 2) * control2[0]) +
+// // 			(Math.pow(t, 3) * end[0]),
+// // 			(Math.pow(1 - t, 3) * start[1]) +
+// //       (3 * Math.pow(1 - t, 2) * t * control1[1]) +
+// //       (3 * (1 - t) * Math.pow(t, 2) * control2[1]) +
+// // 			(Math.pow(t, 3) * end[1]),
+// // 		];
+// // 	};
+// // }
+
+
+exports.default = AverageExpression;
+(0, _defineProperty2.default)(AverageExpression, "start", Date.now());
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../average-aproximator":"animation/average-aproximator.js","../mappings":"animation/mappings.js"}],"animation/expressions.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -68338,6 +68844,10 @@ var _modExpression = _interopRequireDefault(require("./dynamic-expressions/mod-e
 var _sineExpressions = require("./dynamic-expressions/sine-expressions");
 
 var _relativeExpressions = require("./dynamic-expressions/relative-expressions");
+
+var _bezierExpression = _interopRequireDefault(require("./dynamic-expressions/bezier-expression"));
+
+var _averageExpression = _interopRequireDefault(require("./dynamic-expressions/average-expression"));
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
@@ -68381,6 +68891,9 @@ var EXPRESSIONS = {
   }
 };
 var DYNAMICS = {
+  ':avg': {
+    instance: _averageExpression.default
+  },
   ':mod': {
     instance: _modExpression.default
   },
@@ -68389,6 +68902,9 @@ var DYNAMICS = {
   },
   ':sin': {
     instance: _sineExpressions.SineExpression
+  },
+  ':bez': {
+    instance: _bezierExpression.default
   },
   ':rnd': {
     instance: _getRandom.default
@@ -68587,7 +69103,7 @@ function shuffle(items) {
 
   items.push.apply(items, shuffled);
 }
-},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js","./mappings":"animation/mappings.js","../randomizer":"randomizer.js","./dynamic-expressions/get-random":"animation/dynamic-expressions/get-random.js","./dynamic-expressions/mod-expression":"animation/dynamic-expressions/mod-expression.js","./dynamic-expressions/sine-expressions":"animation/dynamic-expressions/sine-expressions.js","./dynamic-expressions/relative-expressions":"animation/dynamic-expressions/relative-expressions.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js","./mappings":"animation/mappings.js","../randomizer":"randomizer.js","./dynamic-expressions/get-random":"animation/dynamic-expressions/get-random.js","./dynamic-expressions/mod-expression":"animation/dynamic-expressions/mod-expression.js","./dynamic-expressions/sine-expressions":"animation/dynamic-expressions/sine-expressions.js","./dynamic-expressions/relative-expressions":"animation/dynamic-expressions/relative-expressions.js","./dynamic-expressions/bezier-expression":"animation/dynamic-expressions/bezier-expression.js","./dynamic-expressions/average-expression":"animation/dynamic-expressions/average-expression.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -69692,6 +70208,10 @@ function assignDisplayObjectProps(target, props) {
 
 
 function applyExpressions(obj) {
+  if (!obj) {
+    return;
+  }
+
   for (var prop in obj) {
     obj[prop] = (0, _expressions.evaluateExpression)(obj[prop]);
   }
@@ -69722,16 +70242,26 @@ function applyDynamicProperties(obj, props) {
     hasDynamicProperties = true; // create the update function
 
     update = (0, _utils.appendFunc)(update, function (obj, stage) {
-      obj.scale.x = Math.min(10, obj.width / obj.getBounds().width * (props.scaleX || 1)) * (stage.scaleX || 1);
+      var currentScale = obj.width / obj.getBounds().width;
+      obj.scale.x = (0, _utils.toPrecision)(Math.min(10, currentScale * (props.scaleX || 1)) * (stage.scaleX || 1), 2);
     });
   } // check for special functions
 
 
   if (props.lockHeight) {
-    hasDynamicProperties = true; // create the update function
+    hasDynamicProperties = true; // locking height allows for sprites that are skewed
+    // to maintain their original height so they have the
+    // appearance of being leaned as opposed to skew/squashed
+    // this function will change the y-scale to maintain the original
+    // height for the object the entire time. This is only used in
+    // a few places (like signs)
+    // this also rounds scaling down to a smaller precision since
+    // the track uses "snap to pixel" and not rounding will cause
+    // these to bump up and down in size by 1 pixel slightly
 
     update = (0, _utils.appendFunc)(update, function (obj, stage) {
-      obj.scale.y = Math.min(10, obj.height / obj.getBounds().height * (props.scaleY || 1)) * (stage.scaleY || 1);
+      var currentScale = obj.height / obj.getBounds().height;
+      obj.scale.y = (0, _utils.toPrecision)(Math.min(10, currentScale * (props.scaleY || 1)) * (stage.scaleY || 1), 2);
     });
   } // if nothing was found, just skip
 
@@ -72116,10 +72646,8 @@ function _loadSpritesheet() {
 }
 
 function generateSprites(image, spritesheetId, spritesheet, ext) {
-  var base = _lib.PIXI.Texture.from(image);
+  var base = _lib.PIXI.Texture.from(image); // create each sprite slice
 
-  base.baseTexture.wrapMode = _lib.PIXI.WRAP_MODES.CLAMP;
-  base.wrapMode = _lib.PIXI.WRAP_MODES.CLAMP; // create each sprite slice
 
   for (var id in spritesheet) {
     var record = spritesheet[id]; // if this is not an array, skip it
@@ -72286,7 +72814,7 @@ function resolveImages(_x, _x2, _x3, _x4) {
 
 function _resolveImages() {
   _resolveImages = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, path, composition, layer) {
-    var config, relativeTo, parsed, images, _i, _arr, source, pending, _iterator, _step, item, imageId, spritesheetId, ref, url, _promise, promise;
+    var config, relativeTo, parsed, images, _i, _arr, source, expanded, _iterator, _step, item, append, i, pending, _iterator2, _step2, _item, imageId, spritesheetId, ref, url, _promise, promise;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -72312,45 +72840,76 @@ function _resolveImages() {
               source = (0, _expressions.evaluateExpression)(source); // update
 
               if ((0, _utils.isString)(source)) images.push(source);else if ((0, _utils.isArray)(source)) images = images.concat(source);
-            } // unpack all image reference
+            } // check for any shorthand to fill longer complex animations
+            // when assigning images you can use the syntax of
+            // [5, t] to append [t,t,t,t,t]
+            // [3, t, u] to append [t,u,t,u,t,u]
 
+
+            expanded = [];
+            _iterator = _createForOfIteratorHelper(images);
+
+            try {
+              for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                item = _step.value;
+
+                // just a string
+                if ((0, _utils.isString)(item)) {
+                  expanded.push(item);
+                } // special syntax
+                else if ((0, _utils.isArray)(item)) {
+                    append = item.slice(1);
+
+                    for (i = 0; i < item[0]; i++) {
+                      expanded = expanded.concat(append);
+                    }
+                  }
+              } // replace the images
+
+            } catch (err) {
+              _iterator.e(err);
+            } finally {
+              _iterator.f();
+            }
+
+            images = expanded; // unpack all image reference
 
             delete layer.image;
             layer.images = images;
             (0, _utils2.unpack)(animator, composition, layer, 'images'); // with each image, handle loading the correct resource
 
             pending = [];
-            _iterator = _createForOfIteratorHelper(images);
-            _context.prev = 11;
+            _iterator2 = _createForOfIteratorHelper(images);
+            _context.prev = 15;
 
-            _iterator.s();
+            _iterator2.s();
 
-          case 13:
-            if ((_step = _iterator.n()).done) {
-              _context.next = 28;
+          case 17:
+            if ((_step2 = _iterator2.n()).done) {
+              _context.next = 32;
               break;
             }
 
-            item = _step.value;
+            _item = _step2.value;
             imageId = void 0;
             spritesheetId = void 0; // read the path
 
-            ref = (0, _path.parsePath)(item); // handle loading exernal image urls
+            ref = (0, _path.parsePath)(_item); // handle loading exernal image urls
 
             if (!ref.isUrl) {
-              _context.next = 23;
+              _context.next = 27;
               break;
             }
 
             url = (0, _path.createUrlFromRef)(ref);
             _promise = (0, _loadImage.default)(url);
             pending.push(_promise);
-            return _context.abrupt("continue", 26);
+            return _context.abrupt("continue", 30);
 
-          case 23:
+          case 27:
             // check for an image relative to the current resource
             if (ref.isLocal) {
-              imageId = item;
+              imageId = _item;
               spritesheetId = relativeTo || path;
             } // check for an image shared through the project
             else if (ref.isAbsolute) {
@@ -72362,40 +72921,40 @@ function _resolveImages() {
             promise = (0, _getSprite.default)(animator, spritesheetId, imageId);
             pending.push(promise);
 
-          case 26:
-            _context.next = 13;
-            break;
-
-          case 28:
-            _context.next = 33;
-            break;
-
           case 30:
-            _context.prev = 30;
-            _context.t0 = _context["catch"](11);
+            _context.next = 17;
+            break;
 
-            _iterator.e(_context.t0);
+          case 32:
+            _context.next = 37;
+            break;
 
-          case 33:
-            _context.prev = 33;
+          case 34:
+            _context.prev = 34;
+            _context.t0 = _context["catch"](15);
 
-            _iterator.f();
+            _iterator2.e(_context.t0);
 
-            return _context.finish(33);
+          case 37:
+            _context.prev = 37;
 
-          case 36:
-            _context.next = 38;
+            _iterator2.f();
+
+            return _context.finish(37);
+
+          case 40:
+            _context.next = 42;
             return Promise.all(pending);
 
-          case 38:
+          case 42:
             return _context.abrupt("return", _context.sent);
 
-          case 39:
+          case 43:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[11, 30, 33, 36]]);
+    }, _callee, null, [[15, 34, 37, 40]]);
   }));
   return _resolveImages.apply(this, arguments);
 }
@@ -72613,7 +73172,7 @@ function createSprite(_x, _x2, _x3, _x4, _x5) {
 
 function _createSprite() {
   _createSprite = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, composition, layer) {
-    var update, dispose, phase, type, isSprite, isMarker, sprite, _layer$props, textures, isAnimated, _layer$props2, _layer$props3;
+    var update, dispose, phase, type, isSprite, isMarker, sprite, _layer$props, _layer$props2, textures, isAnimated, startFrame, goto, _layer$props3, _layer$props4;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -72630,7 +73189,7 @@ function _createSprite() {
             isMarker = !isSprite; // create the required sprite
 
             if (!isSprite) {
-              _context.next = 22;
+              _context.next = 24;
               break;
             }
 
@@ -72649,18 +73208,26 @@ function _createSprite() {
             sprite.loop = ((_layer$props = layer.props) === null || _layer$props === void 0 ? void 0 : _layer$props.loop) !== false;
             sprite.isSprite = true;
             sprite.autoPlay = false;
-            sprite.isAnimatedSprite = isAnimated; // do not use built in animation engine
+            sprite.isAnimatedSprite = isAnimated; // choose the correct starting frame
+
+            startFrame = (_layer$props2 = layer.props) === null || _layer$props2 === void 0 ? void 0 : _layer$props2.startFrame;
+
+            if (isAnimated && startFrame) {
+              goto = startFrame === 'random' ? 0 | Math.random() * textures.length : (0, _utils.isNumber)(startFrame) ? startFrame : 0;
+              sprite.gotoAndStop(goto);
+            } // do not use built in animation engine
             // has strange behaviors when multiple
             // instances are active
+
 
             if (isAnimated && layer.autoplay !== false) {
               (0, _animatedSprite.default)(sprite, layer.props);
             }
 
-            _context.next = 23;
+            _context.next = 25;
             break;
 
-          case 22:
+          case 24:
             // markers act like normal sprites and are used to define
             // bounds and positions without needing an actual sprite
             if (isMarker) {
@@ -72668,7 +73235,7 @@ function _createSprite() {
               sprite.visible = false;
             }
 
-          case 23:
+          case 25:
             // shared data
             sprite.role = (0, _utils2.toRole)(layer.role);
             sprite.path = path; // set some default values
@@ -72696,8 +73263,8 @@ function _createSprite() {
             if (isMarker) {
               sprite.alpha = layer.debug ? 0.5 : 0; // scale to match the preferred pixel sizes
 
-              sprite.scale.x = (((_layer$props2 = layer.props) === null || _layer$props2 === void 0 ? void 0 : _layer$props2.width) || sprite.width) / sprite.width;
-              sprite.scale.y = (((_layer$props3 = layer.props) === null || _layer$props3 === void 0 ? void 0 : _layer$props3.height) || sprite.height) / sprite.height;
+              sprite.scale.x = (((_layer$props3 = layer.props) === null || _layer$props3 === void 0 ? void 0 : _layer$props3.width) || sprite.width) / sprite.width;
+              sprite.scale.y = (((_layer$props4 = layer.props) === null || _layer$props4 === void 0 ? void 0 : _layer$props4.height) || sprite.height) / sprite.height;
             } // add to the controller
 
 
@@ -72711,19 +73278,19 @@ function _createSprite() {
               dispose: dispose
             }]);
 
-          case 44:
-            _context.prev = 44;
+          case 46:
+            _context.prev = 46;
             _context.t0 = _context["catch"](3);
             console.error("Failed to create sprite ".concat(path, " while ").concat(phase));
             console.error(_context.t0);
             throw _context.t0;
 
-          case 49:
+          case 51:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[3, 44]]);
+    }, _callee, null, [[3, 46]]);
   }));
   return _createSprite.apply(this, arguments);
 }
@@ -75627,7 +76194,7 @@ function _createEmitter() {
 
             autoplay = emit.auto === false || emit.autoplay === false || emit.autoPlay === false;
             config.noRotation = !!emit.noRotation;
-            config.atBack = !!emit.atBack;
+            config.addAtBack = !!emit.atBack;
             config.orderedArt = !!emit.orderedArt;
             config.flipParticleX = !!(emit.flipParticleX || emit.flipX || emit['flip.x']);
             config.flipParticleY = !!(emit.flipParticleY || emit.flipY || emit['flip.y']); // if rotation is disabled
@@ -75853,16 +76420,18 @@ function _createGroup() {
             phase = 'creating animations';
             (0, _animation.default)(animator, path, composition, layer, group); // add to the view
 
+            container.config = layer;
             container.zIndex = group.zIndex;
             container.addChild(group); // set some default values
 
             group.pivot.x = 0;
             group.pivot.y = 0; // bakes a layer to a single object
-            // if (layer.merge) {
-            // 	group.cacheAsBitmap = true;
-            // 	group.batch = 'merged';
-            // }
-            // include this instance
+
+            if (layer.merge) {
+              group.cacheAsBitmap = true;
+              group.batch = 'merged';
+            } // include this instance
+
 
             controller.register(container); // attach the update function
 
@@ -75873,18 +76442,18 @@ function _createGroup() {
               dispose: dispose
             }]);
 
-          case 37:
-            _context.prev = 37;
+          case 39:
+            _context.prev = 39;
             _context.t0 = _context["catch"](4);
             console.error("Failed to create group ".concat(path, " while ").concat(phase));
             throw _context.t0;
 
-          case 41:
+          case 43:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[4, 37]]);
+    }, _callee, null, [[4, 39]]);
   }));
   return _createGroup.apply(this, arguments);
 }

@@ -7,6 +7,8 @@ import GetRandomExpression from './dynamic-expressions/get-random'
 import ModExpression from './dynamic-expressions/mod-expression'
 import { CosineExpression, SineExpression } from './dynamic-expressions/sine-expressions'
 import { RelativeToX, RelativeToY } from './dynamic-expressions/relative-expressions'
+import BezierExpression from "./dynamic-expressions/bezier-expression";
+import AverageExpression from "./dynamic-expressions/average-expression";
 
 /** expression types */
 const EXPRESSIONS = {
@@ -23,9 +25,11 @@ const EXPRESSIONS = {
 }
 
 const DYNAMICS = {
+  ':avg': { instance: AverageExpression },
   ':mod': { instance: ModExpression },
   ':cos': { instance: CosineExpression },
   ':sin': { instance: SineExpression },
+  ':bez': { instance: BezierExpression },
   ':rnd': { instance: GetRandomExpression },
   ':rx': { instance: RelativeToX },
   ':ry': { instance: RelativeToY }
