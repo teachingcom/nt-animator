@@ -1,3 +1,4 @@
+import { isObject } from '../../utils'
 import * as mappings from '../mappings'
 
 class BaseSineExpression {
@@ -11,26 +12,36 @@ class BaseSineExpression {
   constructor (prop, args) {
 		this.prop = prop
 		this.mapping = mappings.lookup(prop)
+    this.modifier = () => 1
 
     let min = 0
     let max = 1
     for (const arg of args) { 
+      const isObj = isObject(arg)
       if (arg === 'int') {
         this.convertToInt = true
       }
       else if (arg === 'invert') {
         this.flip = -1
       }
-      else if ('min' in arg) {
+      else if (isObj && 'min' in arg) {
         min = arg.min
       }
-      else if ('max' in arg) {
+      else if (isObj && 'max' in arg) {
         max = arg.max
       }
-      else if ('scale' in arg) { 
+      else if (isObj && 'relative_to_stage' in arg) {
+        const key = arg.relative_to_stage
+        this.modifier = (target, stage) => stage[key] || 0
+      }
+      else if (isObj && 'relative_to_self' in arg) {
+        const key = arg.relative_to_self
+        this.modifier = (target, stage) => target[key] || 0
+      }
+      else if (isObj && 'scale' in arg) { 
         this.scale = arg.scale * 0.01
       }
-      else if (arg === 'stagger' || arg.stagger) { 
+      else if (arg === 'stagger' || (isObj && arg.stagger)) { 
         this.offset += 0 | (arg.stagger || 10000) * Math.random()
       }
       else if (arg.offset) { 
@@ -52,7 +63,8 @@ class BaseSineExpression {
 
   update = (target, stage) => {
     const ts = ((Date.now() - BaseSineExpression.start) + this.offset) * this.scale
-    const percent = ((this.calc(ts) + 1) / 2)
+    const sine = this.calc(ts) * this.modifier(target, stage)
+    const percent = ((sine + 1) / 2)
 		const value = (((percent * (this.max - this.min)) + this.min)) * this.flip
 		this.mapping(target, (this.convertToInt ? 0 | value : value))
   }

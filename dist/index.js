@@ -68008,6 +68008,8 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
+var _utils = require("../../utils");
+
 var mappings = _interopRequireWildcard(require("../mappings"));
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
@@ -68036,13 +68038,20 @@ var BaseSineExpression = function BaseSineExpression(prop, args) {
   (0, _defineProperty2.default)(this, "update", function (target, stage) {
     var ts = (Date.now() - BaseSineExpression.start + _this.offset) * _this.scale;
 
-    var percent = (_this.calc(ts) + 1) / 2;
+    var sine = _this.calc(ts) * _this.modifier(target, stage);
+
+    var percent = (sine + 1) / 2;
     var value = (percent * (_this.max - _this.min) + _this.min) * _this.flip;
 
     _this.mapping(target, _this.convertToInt ? 0 | value : value);
   });
   this.prop = prop;
   this.mapping = mappings.lookup(prop);
+
+  this.modifier = function () {
+    return 1;
+  };
+
   var min = 0;
   var max = 1;
 
@@ -68052,18 +68061,35 @@ var BaseSineExpression = function BaseSineExpression(prop, args) {
   try {
     for (_iterator.s(); !(_step = _iterator.n()).done;) {
       var arg = _step.value;
+      var isObj = (0, _utils.isObject)(arg);
 
       if (arg === 'int') {
         this.convertToInt = true;
       } else if (arg === 'invert') {
         this.flip = -1;
-      } else if ('min' in arg) {
+      } else if (isObj && 'min' in arg) {
         min = arg.min;
-      } else if ('max' in arg) {
+      } else if (isObj && 'max' in arg) {
         max = arg.max;
-      } else if ('scale' in arg) {
+      } else if (isObj && 'relative_to_stage' in arg) {
+        (function () {
+          var key = arg.relative_to_stage;
+
+          _this.modifier = function (target, stage) {
+            return stage[key] || 0;
+          };
+        })();
+      } else if (isObj && 'relative_to_self' in arg) {
+        (function () {
+          var key = arg.relative_to_self;
+
+          _this.modifier = function (target, stage) {
+            return target[key] || 0;
+          };
+        })();
+      } else if (isObj && 'scale' in arg) {
         this.scale = arg.scale * 0.01;
-      } else if (arg === 'stagger' || arg.stagger) {
+      } else if (arg === 'stagger' || isObj && arg.stagger) {
         this.offset += 0 | (arg.stagger || 10000) * Math.random();
       } else if (arg.offset) {
         this.offset = arg.offset * 1000;
@@ -68136,7 +68162,7 @@ var SineExpression = /*#__PURE__*/function (_BaseSineExpression2) {
 }(BaseSineExpression);
 
 exports.SineExpression = SineExpression;
-},{"@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../mappings":"animation/mappings.js"}],"animation/dynamic-expressions/relative-expressions.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js","../mappings":"animation/mappings.js"}],"animation/dynamic-expressions/relative-expressions.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
