@@ -1,6 +1,7 @@
 import { isArray, isString, isNumber, isBoolean, TAU } from "../utils";
 import * as mappings from './mappings';
 import * as randomizer from '../randomizer';
+import * as variables from './variables';
 
 // dynamic expressions
 import GetRandomExpression from './dynamic-expressions/get-random'
@@ -9,6 +10,7 @@ import { CosineExpression, SineExpression } from './dynamic-expressions/sine-exp
 import { RelativeToX, RelativeToY } from './dynamic-expressions/relative-expressions'
 import BezierExpression from "./dynamic-expressions/bezier-expression";
 import AverageExpression from "./dynamic-expressions/average-expression";
+import SumExpression from "./dynamic-expressions/sum-expression";
 
 /** expression types */
 const EXPRESSIONS = {
@@ -21,10 +23,12 @@ const EXPRESSIONS = {
   ':pick': { func: pick },
   ':seq': { func: sequence },
   ':sequence': { func: sequence },
-  ':range': { func: range }
+  ':range': { func: range },
+  ':var': { func: getVariable }
 }
 
 const DYNAMICS = {
+  ':sum': { instance: SumExpression },
   ':avg': { instance: AverageExpression },
   ':mod': { instance: ModExpression },
   ':cos': { instance: CosineExpression },
@@ -33,6 +37,10 @@ const DYNAMICS = {
   ':rnd': { instance: GetRandomExpression },
   ':rx': { instance: RelativeToX },
   ':ry': { instance: RelativeToY }
+}
+
+function getVariable(name) {
+  return variables.pull(name);
 }
 
 export function addTo(add, relativeTo) {

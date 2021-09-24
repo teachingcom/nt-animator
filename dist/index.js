@@ -46446,39 +46446,31 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
+libPIXI.utils.sayHello = function () {};
+
 var PIXI = _objectSpread({}, libPIXI);
 
 exports.PIXI = PIXI;
 },{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","pixi.js-legacy":"../node_modules/pixi.js-legacy/lib/pixi-legacy.es.js"}],"pixi/utils/skip-hello.js":[function(require,module,exports) {
-"use strict";
-
-var _lib = require("../../pixi/lib");
-
-// These do not work for some reason
-_lib.PIXI.utils.skipHello();
-
-_lib.PIXI.utils._saidHello = true; // HACK: inspect messages and disregard first pixi message
-// this will replace the very first message related to pixi
-// and then revert to normal use
-
-var _log = console.log;
-
-console.log = function () {
-  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-    args[_key] = arguments[_key];
-  }
-
-  var msg = args[0]; // if this is the hello message - cancel it
-
-  if (/pixijs/i.test(msg)) {
-    console.log = _log;
-    return;
-  } // use log normally
-
-
-  _log.apply(console, args);
-};
-},{"../../pixi/lib":"pixi/lib.js"}],"../node_modules/regenerator-runtime/runtime.js":[function(require,module,exports) {
+// import { PIXI as libPIXI } from '../../pixi/lib';
+// // These do not work for some reason
+// libPIXI.utils.skipHello();
+// libPIXI.utils._saidHello = true;
+// // HACK: inspect messages and disregard first pixi message
+// // this will replace the very first message related to pixi
+// // and then revert to normal use
+// const _log = console.log;
+// console.log = (...args) => {
+// 	const [ msg ] = args;
+// 	// if this is the hello message - cancel it
+// 	if (/pixijs/i.test(msg)) {
+// 		console.log = _log;
+// 		return;
+// 	}
+// 	// use log normally
+// 	_log.apply(console, args);
+// };
+},{}],"../node_modules/regenerator-runtime/runtime.js":[function(require,module,exports) {
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
@@ -67846,6 +67838,24 @@ function random() {
 function setRandomizer(val) {
   randomizer = val;
 }
+},{}],"animation/variables.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.save = save;
+exports.pull = pull;
+var variables = {}; // saves a value
+
+function save(name, value) {
+  variables[name] = value;
+} // grabs a stored value
+
+
+function pull(name) {
+  return variables[name];
+}
 },{}],"animation/dynamic-expressions/get-random.js":[function(require,module,exports) {
 "use strict";
 
@@ -68833,7 +68843,95 @@ var AverageExpression = function AverageExpression(prop, args) {
 
 exports.default = AverageExpression;
 (0, _defineProperty2.default)(AverageExpression, "start", Date.now());
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../average-aproximator":"animation/average-aproximator.js","../mappings":"animation/mappings.js"}],"animation/expressions.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../average-aproximator":"animation/average-aproximator.js","../mappings":"animation/mappings.js"}],"animation/dynamic-expressions/sum-expression.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _utils = require("../../utils");
+
+var mappings = _interopRequireWildcard(require("../mappings"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var SumExpression = function SumExpression(prop, args) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, SumExpression);
+  (0, _defineProperty2.default)(this, "offset", 0);
+  (0, _defineProperty2.default)(this, "scale", 1);
+  (0, _defineProperty2.default)(this, "flip", 1);
+  (0, _defineProperty2.default)(this, "update", function (target, stage) {
+    _this.value += _this.per;
+    var value = (_this.mod ? _this.value % _this.mod : _this.value) * _this.flip;
+
+    _this.mapping(target, _this.convertToInt ? 0 | value : value);
+  });
+  this.prop = prop;
+  this.mapping = mappings.lookup(prop);
+
+  this.modifier = function () {
+    return 1;
+  };
+
+  var _value = 0;
+  var per = 1;
+
+  var _iterator = _createForOfIteratorHelper(args),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var arg = _step.value;
+      var isObj = (0, _utils.isObject)(arg);
+
+      if (arg === 'int') {
+        this.convertToInt = true;
+      } else if (arg === 'invert') {
+        this.flip = -1;
+      } else if (isObj && 'start' in arg) {
+        _value = arg.start;
+      } else if (isObj && 'per' in arg) {
+        per = arg.per;
+      } else if (isObj && 'mod' in arg) {
+        this.mod = arg.mod;
+      } else if (arg === 'stagger' || isObj && arg.stagger) {
+        this.offset += 0 | (arg.stagger || 10000) * Math.random();
+      } else if (arg.offset) {
+        this.offset = arg.offset * 1000;
+      }
+    } // save the args
+
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  this.value = _value + (this.offset || 0);
+  this.per = per || 1;
+};
+
+exports.default = SumExpression;
+(0, _defineProperty2.default)(SumExpression, "start", Date.now());
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js","../mappings":"animation/mappings.js"}],"animation/expressions.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -68863,6 +68961,8 @@ var mappings = _interopRequireWildcard(require("./mappings"));
 
 var randomizer = _interopRequireWildcard(require("../randomizer"));
 
+var variables = _interopRequireWildcard(require("./variables"));
+
 var _getRandom = _interopRequireDefault(require("./dynamic-expressions/get-random"));
 
 var _modExpression = _interopRequireDefault(require("./dynamic-expressions/mod-expression"));
@@ -68874,6 +68974,8 @@ var _relativeExpressions = require("./dynamic-expressions/relative-expressions")
 var _bezierExpression = _interopRequireDefault(require("./dynamic-expressions/bezier-expression"));
 
 var _averageExpression = _interopRequireDefault(require("./dynamic-expressions/average-expression"));
+
+var _sumExpression = _interopRequireDefault(require("./dynamic-expressions/sum-expression"));
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
@@ -68914,9 +69016,15 @@ var EXPRESSIONS = {
   },
   ':range': {
     func: range
+  },
+  ':var': {
+    func: getVariable
   }
 };
 var DYNAMICS = {
+  ':sum': {
+    instance: _sumExpression.default
+  },
   ':avg': {
     instance: _averageExpression.default
   },
@@ -68942,6 +69050,10 @@ var DYNAMICS = {
     instance: _relativeExpressions.RelativeToY
   }
 };
+
+function getVariable(name) {
+  return variables.pull(name);
+}
 
 function addTo(add, relativeTo) {
   return relativeTo + add;
@@ -69129,7 +69241,7 @@ function shuffle(items) {
 
   items.push.apply(items, shuffled);
 }
-},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js","./mappings":"animation/mappings.js","../randomizer":"randomizer.js","./dynamic-expressions/get-random":"animation/dynamic-expressions/get-random.js","./dynamic-expressions/mod-expression":"animation/dynamic-expressions/mod-expression.js","./dynamic-expressions/sine-expressions":"animation/dynamic-expressions/sine-expressions.js","./dynamic-expressions/relative-expressions":"animation/dynamic-expressions/relative-expressions.js","./dynamic-expressions/bezier-expression":"animation/dynamic-expressions/bezier-expression.js","./dynamic-expressions/average-expression":"animation/dynamic-expressions/average-expression.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js","./mappings":"animation/mappings.js","../randomizer":"randomizer.js","./variables":"animation/variables.js","./dynamic-expressions/get-random":"animation/dynamic-expressions/get-random.js","./dynamic-expressions/mod-expression":"animation/dynamic-expressions/mod-expression.js","./dynamic-expressions/sine-expressions":"animation/dynamic-expressions/sine-expressions.js","./dynamic-expressions/relative-expressions":"animation/dynamic-expressions/relative-expressions.js","./dynamic-expressions/bezier-expression":"animation/dynamic-expressions/bezier-expression.js","./dynamic-expressions/average-expression":"animation/dynamic-expressions/average-expression.js","./dynamic-expressions/sum-expression":"animation/dynamic-expressions/sum-expression.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -72506,59 +72618,45 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = loadImage;
 
-function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-// resources that are currently loading
-var pending = {};
-var images = {};
 /** handles loading an external image url
  * @param {string} url The url of the image to load
 */
-
 function loadImage(url, version) {
   return new Promise(function (resolve, reject) {
     // prevent accidental double slashes
     var parts = url.split('://');
     var last = parts.length - 1;
     parts[last] = parts[last].replace(/\/+/g, '/');
-    url = parts.join('://'); // check if already existing
-
-    if (url in images) {
-      return resolve(images[url]);
-    } // if already waiting for a resource
-
-
-    if (pending[url]) {
-      pending[url].push({
-        resolve: resolve,
-        reject: reject
-      });
-      return;
-    } // reserve the image
-
+    url = parts.join('://'); // reserve the image
 
     var img; // limit attempts to reload
 
-    var attempts = 3; // if no active queue is available, start it now
+    var attempts = 3; // tracking image loading
 
-    pending[url] = [{
-      resolve: resolve,
-      reject: reject
-    }]; // attempts to load an image
+    var checkIfLoaded; // get the image to load
+
+    var src = "".concat(url).concat(version ? "?".concat(version) : ''); // attempts to load an image
 
     var request = function request() {
+      var success = handle(true);
+      var fail = handle(false); // create the image
+
       img = new Image();
-      img.onload = handle(true);
-      img.onerror = handle(false);
-      img.crossOrigin = 'anonymous'; // replace the image url
+      img.onload = success;
+      img.onerror = fail;
+      img.crossOrigin = 'anonymous'; // backup solution for if an image loads
+      // but never has a chance to report that
+      // it was successful
+
+      checkIfLoaded = setInterval(function () {
+        if (img.complete && img.naturalHeight !== 0) {
+          success();
+        }
+      }, 200); // replace the image url
 
       setTimeout(function () {
-        return img.src = "".concat(url).concat(version ? "?".concat(version) : '');
-      });
+        img.src = src;
+      }, 10);
     }; // create resolution actions
 
 
@@ -72567,30 +72665,22 @@ function loadImage(url, version) {
         // if wasn't successful, but is allowed to try again
         if (!success && --attempts > 0) {
           return request();
-        } // all finished, resolve the result
+        } // // all finished, resolve the result
+        // images[url] = success ? img : null
+        // clear extra checks
 
 
-        images[url] = success ? img : null; // execute all waiting requests
+        clearInterval(checkIfLoaded); // finished
 
-        try {
-          var _iterator = _createForOfIteratorHelper(pending[url]),
-              _step;
-
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done;) {
-              var handler = _step.value;
-              var _resolve = handler.resolve;
-
-              _resolve(success ? img : null);
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-        } finally {
-          delete pending[url];
-        }
+        resolve(success ? img : null); // // execute all waiting requests
+        // try {
+        //   for (const handler of pending[url]) {
+        //     const { resolve } = handler
+        //     resolve(success ? img : null)
+        //   }
+        // } finally {
+        //   delete pending[url]
+        // }
       };
     }; // kick off the first attempt
 
@@ -73010,6 +73100,7 @@ function createTextureFromImage(img) {
     } // get sprite info
 
 
+    console.log('will create', img);
     spritesheet = img.getAttribute('spritesheet');
     sprite = img.getAttribute('sprite');
     var useCache = spritesheet && sprite; // texture to load
@@ -73287,7 +73378,15 @@ function _createSprite() {
             (0, _animation.default)(animator, path, composition, layer, sprite); // few additional adjustments
 
             if (isMarker) {
-              sprite.alpha = layer.debug ? 0.5 : 0; // scale to match the preferred pixel sizes
+              if (layer.debug) {
+                sprite.visible = true;
+                sprite.alpha = layer.debug;
+
+                if (isNaN(sprite.alpha)) {
+                  sprite.alpha = 1;
+                }
+              } // scale to match the preferred pixel sizes
+
 
               sprite.scale.x = (((_layer$props3 = layer.props) === null || _layer$props3 === void 0 ? void 0 : _layer$props3.width) || sprite.width) / sprite.width;
               sprite.scale.y = (((_layer$props4 = layer.props) === null || _layer$props4 === void 0 ? void 0 : _layer$props4.height) || sprite.height) / sprite.height;
@@ -76054,7 +76153,7 @@ function createEmitter(_x, _x2, _x3, _x4, _x5) {
 
 function _createEmitter() {
   _createEmitter = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, composition, layer) {
-    var container, generator, update, dispose, phase, textures, _layer$emit, emit, auto, config, _loop, prop, _ret, autoplay, emitter, create;
+    var container, generator, update, dispose, phase, textures, _layer$emit, emit, auto, config, _loop, prop, _ret, manualStart, emitter, create;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -76218,7 +76317,7 @@ function _createEmitter() {
               return t.blendMode = v;
             }); // boolean props
 
-            autoplay = emit.auto === false || emit.autoplay === false || emit.autoPlay === false;
+            manualStart = emit.auto === false || emit.autoplay === false || emit.autoPlay === false;
             config.noRotation = !!emit.noRotation;
             config.addAtBack = !!emit.atBack;
             config.orderedArt = !!emit.orderedArt;
@@ -76278,7 +76377,7 @@ function _createEmitter() {
             }; // manual start
 
 
-            if (autoplay) {
+            if (manualStart) {
               emitter.autoUpdate = false;
               emitter.activate = create;
               emitter.emit = false;
@@ -76641,51 +76740,53 @@ function _createMask() {
 
             phase = '';
             _context.prev = 2;
-            // NOTE: sprites are added a wrapper container on purpose
+            console.log('is going to create mask'); // NOTE: sprites are added a wrapper container on purpose
             // because any animations that modify scale will interfere
             // with scaling done to fit within responsive containers
+
             container = new _lib.PIXI.Container();
             container.isMask = true;
             container.role = (0, _utils2.toRole)(layer.role);
             container.path = layer.path; // gather all required images
 
             phase = 'resolving images';
-            _context.next = 10;
+            _context.next = 11;
             return (0, _resolveImages.default)(animator, path, composition, layer);
 
-          case 10:
+          case 11:
             images = _context.sent;
             // create textures for each sprite
             phase = 'generating textures';
-            _context.prev = 12;
-            textures = (0, _collection.map)(images, _createTextureFromImage.default);
-            _context.next = 20;
+            _context.prev = 13;
+            textures = images; // map(images, createTextureFromImage);
+
+            _context.next = 21;
             break;
 
-          case 16:
-            _context.prev = 16;
-            _context.t0 = _context["catch"](12);
+          case 17:
+            _context.prev = 17;
+            _context.t0 = _context["catch"](13);
             console.error("Failed to create a texture for ".concat(path), composition);
             throw _context.t0;
 
-          case 20:
+          case 21:
             // create the instance of the sprite
             phase = 'creating mask instance'; // using bounds
 
             if (!(textures.length === 0)) {
-              _context.next = 32;
+              _context.next = 33;
               break;
             }
 
             if (!(isNaN(layer.width) || isNaN(layer.height) || layer.width === 0 || layer.height === 0)) {
-              _context.next = 25;
+              _context.next = 26;
               break;
             }
 
             phase = 'validating mask bounds';
             throw new _errors.InvalidMaskBoundsException();
 
-          case 25:
+          case 26:
             // create the mask
             maskGenerator.canvas.width = layer.width;
             maskGenerator.canvas.height = layer.height;
@@ -76693,16 +76794,17 @@ function _createMask() {
             maskGenerator.ctx.fillRect(0, 0, layer.width, layer.height); // create the sprite
 
             mask = new _lib.PIXI.Sprite.from(maskGenerator.canvas);
-            _context.next = 35;
+            _context.next = 37;
             break;
 
-          case 32:
+          case 33:
+            console.log("create from sprite");
             isAnimated = images.length > 1;
             mask = isAnimated ? new _lib.PIXI.AnimatedSprite(textures) : new _lib.PIXI.Sprite(textures[0]); // if animated, start playback
 
             if (isAnimated) mask.play();
 
-          case 35:
+          case 37:
             // match up names
             (0, _normalize.normalizeProps)(layer.props); // create dynamically rendered properties
 
@@ -76733,18 +76835,18 @@ function _createMask() {
               update: update
             }]);
 
-          case 53:
-            _context.prev = 53;
+          case 55:
+            _context.prev = 55;
             _context.t1 = _context["catch"](2);
             console.error("Failed to create mask ".concat(path, " while ").concat(phase));
             throw _context.t1;
 
-          case 57:
+          case 59:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 53], [12, 16]]);
+    }, _callee, null, [[2, 55], [13, 17]]);
   }));
   return _createMask.apply(this, arguments);
 }
@@ -77133,6 +77235,12 @@ function _createRepeater() {
               }
 
               tiles.sortChildren();
+            } // bakes a layer to a single object
+
+
+            if (layer.merge) {
+              tiles.cacheAsBitmap = true;
+              tiles.batch = 'merged';
             } // position
 
 
@@ -77146,18 +77254,18 @@ function _createRepeater() {
               dispose: dispose
             }]);
 
-          case 84:
-            _context.prev = 84;
+          case 85:
+            _context.prev = 85;
             _context.t0 = _context["catch"](4);
             console.error("Failed to create group ".concat(path, " while ").concat(phase));
             throw _context.t0;
 
-          case 88:
+          case 89:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[4, 84]]);
+    }, _callee, null, [[4, 85]]);
   }));
   return _createRepeater.apply(this, arguments);
 }
@@ -77237,6 +77345,14 @@ var _collection = require("../../utils/collection");
 
 var _repeater = _interopRequireDefault(require("./repeater"));
 
+var _expressions = require("../expressions");
+
+var variables = _interopRequireWildcard(require("../variables"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -77250,7 +77366,7 @@ function createInstance(_x, _x2, _x3, _x4, _x5) {
 
 function _createInstance() {
   _createInstance = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, data, relativeTo) {
-    var instance, container, pending, i, layer, type, sprite, emitter, repeated, group, mask, _animator$plugins$typ, customizer, params, custom, composite, layers, _i, _layer, didSetMask, j, target;
+    var instance, container, pending, i, layer, type, value, sprite, emitter, repeated, group, mask, _animator$plugins$typ, customizer, params, custom, composite, layers, _i, _layer, didSetMask, j, target;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -77292,7 +77408,10 @@ function _createInstance() {
             // sprite layers
             type = layer.type;
 
-            if (type === 'sprite' || type === 'marker') {
+            if (type === 'var') {
+              value = (0, _expressions.evaluateExpression)(layer.value);
+              variables.save(layer.name, value);
+            } else if (type === 'sprite' || type === 'marker') {
               sprite = (0, _sprite.default)(animator, controller, path, data, layer);
               pending.push(sprite);
             } // particle emitters
@@ -77424,7 +77543,7 @@ function _createInstance() {
   }));
   return _createInstance.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js"}],"animation/importManifest.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js","../expressions":"animation/expressions.js","../variables":"animation/variables.js"}],"animation/importManifest.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -77471,77 +77590,68 @@ function _importManifest() {
               for (_iterator.s(); !(_step = _iterator.n()).done;) {
                 part = _step.value;
                 target = target[part] = target[part] || {};
-              } // if this has already been attached
-
+              }
             } catch (err) {
               _iterator.e(err);
             } finally {
               _iterator.f();
             }
 
-            if (!target[key]) {
-              _context.next = 9;
-              break;
-            }
-
-            return _context.abrupt("return");
-
-          case 9:
             attempts = 3;
             url = "".concat(baseUrl, "/").concat(path, ".json?").concat(version).replace(/([^:]\/)\/+/g, '$1');
 
-          case 11:
+          case 9:
             if (!(attempts > 0)) {
-              _context.next = 27;
+              _context.next = 25;
               break;
             }
 
-            _context.prev = 12;
-            _context.next = 15;
+            _context.prev = 10;
+            _context.next = 13;
             return attemptFetch(url, timeout);
 
-          case 15:
+          case 13:
             data = _context.sent;
-            return _context.abrupt("break", 27);
+            return _context.abrupt("break", 25);
 
-          case 19:
-            _context.prev = 19;
-            _context.t0 = _context["catch"](12);
+          case 17:
+            _context.prev = 17;
+            _context.t0 = _context["catch"](10);
 
             if (!(--attempts > 0)) {
-              _context.next = 23;
+              _context.next = 21;
               break;
             }
 
-            return _context.abrupt("continue", 11);
+            return _context.abrupt("continue", 9);
 
-          case 23:
+          case 21:
             // no more attempts
             console.error("failed to import ".concat(path));
             throw _context.t0;
 
-          case 25:
-            _context.next = 11;
+          case 23:
+            _context.next = 9;
             break;
 
-          case 27:
+          case 25:
             // save the result
             target[key] = data; // return it, in case it's needed
 
             return _context.abrupt("return", data);
 
-          case 31:
-            _context.prev = 31;
+          case 29:
+            _context.prev = 29;
             _context.t1 = _context["catch"](1);
             console.error('Failed to load', path);
             throw _context.t1;
 
-          case 35:
+          case 33:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[1, 31], [12, 19]]);
+    }, _callee, null, [[1, 29], [10, 17]]);
   }));
   return _importManifest.apply(this, arguments);
 }
@@ -77593,7 +77703,22 @@ function _attemptFetch() {
   }));
   return _attemptFetch.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js"}],"animation/index.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js"}],"animation/resources/addTexture.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = addTexture;
+
+// installs a special 
+function addTexture(animator, spriteId, texture) {
+  var spritesheets = animator.manifest.spritesheets;
+  var spritesheet = spritesheets.textures = spritesheets.textures || {};
+  spritesheet.__initialized__ = true;
+  spritesheet[spriteId] = texture;
+}
+},{}],"animation/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -77647,6 +77772,8 @@ var _importManifest = _interopRequireDefault(require("./importManifest"));
 
 var _randomizer = require("../randomizer");
 
+var _addTexture = _interopRequireDefault(require("./resources/addTexture"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
@@ -77674,6 +77801,9 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "imageCache", _assetCache.shared);
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "preloadSpritesheet", function (spritesheetId) {
       return _this.getSpritesheet(spritesheetId);
+    });
+    (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "addTexture", function (id, texture) {
+      return (0, _addTexture.default)((0, _assertThisInitialized2.default)(_this), id, texture);
     });
     (0, _defineProperty2.default)((0, _assertThisInitialized2.default)(_this), "getSpritesheet", /*#__PURE__*/function () {
       var _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(id) {
@@ -77920,7 +78050,7 @@ var Animator = /*#__PURE__*/function (_EventEmitter) {
 }(_eventEmitter.EventEmitter);
 
 exports.Animator = Animator;
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../pixi/lib":"pixi/lib.js","../common/event-emitter":"common/event-emitter.js","./utils":"animation/utils.js","./path":"animation/path.js","./expressions":"animation/expressions.js","../utils/assetCache":"utils/assetCache.js","./rng":"animation/rng.js","./generators/controller":"animation/generators/controller.js","./generators":"animation/generators/index.js","./resources/getSprite":"animation/resources/getSprite.js","./resources/getSpritesheet":"animation/resources/getSpritesheet.js","./resources/loadImage":"animation/resources/loadImage.js","./importManifest":"animation/importManifest.js","../randomizer":"randomizer.js"}],"pixi/detatched-container.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/assertThisInitialized":"../node_modules/@babel/runtime/helpers/assertThisInitialized.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../pixi/lib":"pixi/lib.js","../common/event-emitter":"common/event-emitter.js","./utils":"animation/utils.js","./path":"animation/path.js","./expressions":"animation/expressions.js","../utils/assetCache":"utils/assetCache.js","./rng":"animation/rng.js","./generators/controller":"animation/generators/controller.js","./generators":"animation/generators/index.js","./resources/getSprite":"animation/resources/getSprite.js","./resources/getSpritesheet":"animation/resources/getSpritesheet.js","./resources/loadImage":"animation/resources/loadImage.js","./importManifest":"animation/importManifest.js","../randomizer":"randomizer.js","./resources/addTexture":"animation/resources/addTexture.js"}],"pixi/detatched-container.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

@@ -43,6 +43,8 @@ export default async function createMask(animator, controller, path, composition
 	let phase = '';
 	try {
 
+		console.log('is going to create mask')
+
 		// NOTE: sprites are added a wrapper container on purpose
 		// because any animations that modify scale will interfere
 		// with scaling done to fit within responsive containers
@@ -59,7 +61,7 @@ export default async function createMask(animator, controller, path, composition
 		phase = 'generating textures';
 		let textures;
 		try {
-			textures = map(images, createTextureFromImage);
+			textures = images // map(images, createTextureFromImage);
 		}
 		// had a problem
 		catch (ex) {
@@ -91,6 +93,7 @@ export default async function createMask(animator, controller, path, composition
 		}
 		// is a sprite of some type
 		else {
+			console.log("create from sprite")
 			const isAnimated = images.length > 1;
 			mask = isAnimated
 				? new PIXI.AnimatedSprite(textures)

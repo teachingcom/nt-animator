@@ -203,6 +203,12 @@ export default async function createRepeater(animator, controller, path, composi
 			tiles.sortChildren();
 		}
 
+		// bakes a layer to a single object
+		if (layer.merge) {
+			tiles.cacheAsBitmap = true;
+			tiles.batch = 'merged';
+		}
+
 		// position
 		tiles.x = complete.width / 2;
 		tiles.y = complete.height / 2;

@@ -10,6 +10,8 @@ import createGroup from './group';
 import createMask from './mask';
 import { flatten } from '../../utils/collection';
 import createRepeater from './repeater';
+import { evaluateExpression } from '../expressions';
+import * as variables from '../variables';
 
 // creates an instance of a car
 export default async function createInstance(animator, controller, path, data, relativeTo) {
@@ -41,7 +43,11 @@ export default async function createInstance(animator, controller, path, data, r
 		
 		// sprite layers
 		const { type } = layer;
-		if (type === 'sprite' || type === 'marker') {
+		if (type === 'var') {
+			const value = evaluateExpression(layer.value);
+			variables.save(layer.name, value);
+		}
+		else if (type === 'sprite' || type === 'marker') {
 			const sprite = createSprite(animator, controller, path, data, layer);
 			pending.push(sprite);
 		}

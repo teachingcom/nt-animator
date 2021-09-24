@@ -1,8 +1,4 @@
 
-// resources that are currently loading
-const pending = { }
-const images = { }
-
 /** handles loading an external image url
  * @param {string} url The url of the image to load
 */
@@ -14,35 +10,42 @@ export default function loadImage (url, version) {
     parts[last] = parts[last].replace(/\/+/g, '/')
     url = parts.join('://')
 
-    // check if already existing
-    if (url in images) {
-      return resolve(images[url])
-    }
-
-    // if already waiting for a resource
-    if (pending[url]) {
-      pending[url].push({ resolve, reject })
-      return
-    }
-
     // reserve the image
     let img
 
     // limit attempts to reload
     let attempts = 3
 
-    // if no active queue is available, start it now
-    pending[url] = [{ resolve, reject }]
+    // tracking image loading
+    let checkIfLoaded;
+
+    // get the image to load
+    const src = `${url}${version ? `?${version}` : ''}`
 
     // attempts to load an image
     const request = () => {
+      const success = handle(true)
+      const fail = handle(false)
+      
+      // create the image
       img = new Image()
-      img.onload = handle(true)
-      img.onerror = handle(false)
+      img.onload = success
+      img.onerror = fail
       img.crossOrigin = 'anonymous'
 
+      // backup solution for if an image loads
+      // but never has a chance to report that
+      // it was successful
+      checkIfLoaded = setInterval(() => {
+        if (img.complete && img.naturalHeight !== 0) {
+          success()
+        }
+      }, 200)
+
       // replace the image url
-      setTimeout(() => (img.src = `${url}${version ? `?${version}` : ''}`))
+      setTimeout(() => {
+        img.src = src
+      }, 10)
     }
 
     // create resolution actions
@@ -53,18 +56,24 @@ export default function loadImage (url, version) {
           return request()
         }
 
-        // all finished, resolve the result
-        images[url] = success ? img : null
+        // // all finished, resolve the result
+        // images[url] = success ? img : null
 
-        // execute all waiting requests
-        try {
-          for (const handler of pending[url]) {
-            const { resolve } = handler
-            resolve(success ? img : null)
-          }
-        } finally {
-          delete pending[url]
-        }
+        // clear extra checks
+        clearInterval(checkIfLoaded)
+
+        // finished
+        resolve(success ? img : null)
+
+        // // execute all waiting requests
+        // try {
+        //   for (const handler of pending[url]) {
+        //     const { resolve } = handler
+        //     resolve(success ? img : null)
+        //   }
+        // } finally {
+        //   delete pending[url]
+        // }
       }
 
     // kick off the first attempt

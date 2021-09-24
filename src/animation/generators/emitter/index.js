@@ -174,7 +174,7 @@ export default async function createEmitter(animator, controller, path, composit
 		assignIf(emit.blend, isString, config, (t, v) => t.blendMode = v);
 
 		// boolean props
-		const autoplay = emit.auto === false || emit.autoplay === false || emit.autoPlay === false;
+		const manualStart = emit.auto === false || emit.autoplay === false || emit.autoPlay === false;
 		config.noRotation = !!emit.noRotation;
 		config.addAtBack = !!emit.atBack;
 		config.orderedArt = !!emit.orderedArt;
@@ -244,7 +244,7 @@ export default async function createEmitter(animator, controller, path, composit
 		}
 
 		// manual start
-		if (autoplay) {
+		if (manualStart) {
 			emitter.autoUpdate = false;
 			emitter.activate = create;
 			emitter.emit = false;

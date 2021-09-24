@@ -119,7 +119,13 @@ export default async function createSprite(animator, controller, path, compositi
 
 		// few additional adjustments
 		if (isMarker) {
-			sprite.alpha = layer.debug ? 0.5 : 0;
+			if (layer.debug) {
+				sprite.visible = true;
+				sprite.alpha = layer.debug;
+				if (isNaN(sprite.alpha)) {
+					sprite.alpha = 1;
+				}
+			}
 			
 			// scale to match the preferred pixel sizes
 			sprite.scale.x = (layer.props?.width || sprite.width) / sprite.width;

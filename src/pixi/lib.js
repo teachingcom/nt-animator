@@ -1,2 +1,3 @@
-import * as libPIXI from 'pixi.js-legacy';
-export const PIXI = { ...libPIXI };
+import * as libPIXI from 'pixi.js-legacy'
+libPIXI.utils.sayHello = function() { }
+export const PIXI = { ...libPIXI }

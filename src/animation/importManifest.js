@@ -11,11 +11,6 @@ export default async function importManifest ({ manifest, version, path, baseUrl
       target = target[part] = target[part] || { }
     }
 
-    // if this has already been attached
-    if (target[key]) {
-      return
-    }
-
     let data
     let attempts = 3
     const url = `${baseUrl}/${path}.json?${version}`.replace(/([^:]\/)\/+/g, '$1')

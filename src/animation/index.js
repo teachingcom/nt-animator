@@ -13,6 +13,7 @@ import getSpritesheet from "./resources/getSpritesheet";
 import loadImage from './resources/loadImage';
 import importManifest from './importManifest';
 import { setRandomizer } from '../randomizer';
+import addTexture from './resources/addTexture';
 
 /** handles creating PIXI animations using defined files */
 export class Animator extends EventEmitter {
@@ -50,6 +51,9 @@ export class Animator extends EventEmitter {
 	// alias for get spritesheet, just to make it clearer
 	// what it's used for elsewhere
 	preloadSpritesheet = spritesheetId => this.getSpritesheet(spritesheetId)
+
+	// handles adding dynamically created textures
+	addTexture = (id, texture) => addTexture(this, id, texture)
 
 	/** handles loading a single sprite */
 	getSpritesheet = async id => getSpritesheet(this, id)
