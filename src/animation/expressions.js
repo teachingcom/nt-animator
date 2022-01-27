@@ -11,6 +11,7 @@ import { RelativeToX, RelativeToY } from './dynamic-expressions/relative-express
 import BezierExpression from "./dynamic-expressions/bezier-expression";
 import AverageExpression from "./dynamic-expressions/average-expression";
 import SumExpression from "./dynamic-expressions/sum-expression";
+import CycleExpression from "./dynamic-expressions/cycle-expression";
 
 /** expression types */
 const EXPRESSIONS = {
@@ -29,6 +30,7 @@ const EXPRESSIONS = {
 
 const DYNAMICS = {
   ':sum': { instance: SumExpression },
+  ':cycle': { instance: CycleExpression },
   ':avg': { instance: AverageExpression },
   ':mod': { instance: ModExpression },
   ':cos': { instance: CosineExpression },

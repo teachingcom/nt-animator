@@ -16,7 +16,7 @@ export default async function loadSpritesheet (animator, spritesheetId, spritesh
     // if the image failed to load, and we're not using placeholder
     // images, then crash here
     if (!image) {
-      throw new ImageRequestFailedException()
+      throw new ImageRequestFailedException(url)
     }
 
     // create a spritesheet with the image. If the image is
@@ -54,4 +54,6 @@ function generateSprites (image, spritesheetId, spritesheet, ext) {
   }
 }
 
-function ImageRequestFailedException () { }
+function ImageRequestFailedException (src) {
+  this.src = src
+}

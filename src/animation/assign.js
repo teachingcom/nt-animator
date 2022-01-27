@@ -101,8 +101,9 @@ export function applyDynamicProperties(obj, props) {
 		// the track uses "snap to pixel" and not rounding will cause
 		// these to bump up and down in size by 1 pixel slightly
 		update = appendFunc(update, (obj, stage) => {		
-			const currentScale = obj.height / obj.getBounds().height	
+			const currentScale = Math.ceil((obj.height / obj.getBounds().height) * 100) / 100;
 			obj.scale.y = toPrecision(Math.min(10, (currentScale) * (props.scaleY || 1)) * (stage.scaleY || 1), 2);
+			obj.y = Math.floor(obj.y)
 		});
 	}
 

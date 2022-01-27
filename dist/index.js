@@ -68931,6 +68931,90 @@ var SumExpression = function SumExpression(prop, args) {
 
 exports.default = SumExpression;
 (0, _defineProperty2.default)(SumExpression, "start", Date.now());
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js","../mappings":"animation/mappings.js"}],"animation/dynamic-expressions/cycle-expression.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _utils = require("../../utils");
+
+var mappings = _interopRequireWildcard(require("../mappings"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var CycleExpression = function CycleExpression(prop, args) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, CycleExpression);
+  (0, _defineProperty2.default)(this, "offset", 0);
+  (0, _defineProperty2.default)(this, "update", function (target, stage) {
+    var now = Date.now();
+    var index = (now + _this.offset - CycleExpression.start) / _this.interval % _this.valueCount;
+    var value = _this.values[0 | index];
+
+    _this.mapping(target, _this.convertToInt ? 0 | value : value);
+  });
+  this.prop = prop;
+  this.mapping = mappings.lookup(prop);
+
+  this.modifier = function () {
+    return 1;
+  };
+
+  var values = [];
+  var interval = 1000;
+
+  var _iterator = _createForOfIteratorHelper(args),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var arg = _step.value;
+      var isObj = (0, _utils.isObject)(arg);
+
+      if (arg === 'int') {
+        this.convertToInt = true;
+      } else if (isObj && 'interval' in arg) {
+        interval = arg.interval;
+      } else if (isObj && 'values' in arg) {
+        values = arg.values;
+      } else if (arg === 'stagger' || isObj && arg.stagger) {
+        this.offset += 0 | (arg.stagger || 10000) * Math.random();
+      } else if (arg.offset) {
+        this.offset = arg.offset * 1000;
+      }
+    } // save the args
+
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  this.interval = interval;
+  this.values = values;
+  this.valueCount = this.values.length;
+};
+
+exports.default = CycleExpression;
+(0, _defineProperty2.default)(CycleExpression, "start", Date.now());
 },{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js","../mappings":"animation/mappings.js"}],"animation/expressions.js":[function(require,module,exports) {
 "use strict";
 
@@ -68976,6 +69060,8 @@ var _bezierExpression = _interopRequireDefault(require("./dynamic-expressions/be
 var _averageExpression = _interopRequireDefault(require("./dynamic-expressions/average-expression"));
 
 var _sumExpression = _interopRequireDefault(require("./dynamic-expressions/sum-expression"));
+
+var _cycleExpression = _interopRequireDefault(require("./dynamic-expressions/cycle-expression"));
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
@@ -69024,6 +69110,9 @@ var EXPRESSIONS = {
 var DYNAMICS = {
   ':sum': {
     instance: _sumExpression.default
+  },
+  ':cycle': {
+    instance: _cycleExpression.default
   },
   ':avg': {
     instance: _averageExpression.default
@@ -69241,7 +69330,7 @@ function shuffle(items) {
 
   items.push.apply(items, shuffled);
 }
-},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js","./mappings":"animation/mappings.js","../randomizer":"randomizer.js","./variables":"animation/variables.js","./dynamic-expressions/get-random":"animation/dynamic-expressions/get-random.js","./dynamic-expressions/mod-expression":"animation/dynamic-expressions/mod-expression.js","./dynamic-expressions/sine-expressions":"animation/dynamic-expressions/sine-expressions.js","./dynamic-expressions/relative-expressions":"animation/dynamic-expressions/relative-expressions.js","./dynamic-expressions/bezier-expression":"animation/dynamic-expressions/bezier-expression.js","./dynamic-expressions/average-expression":"animation/dynamic-expressions/average-expression.js","./dynamic-expressions/sum-expression":"animation/dynamic-expressions/sum-expression.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js","./mappings":"animation/mappings.js","../randomizer":"randomizer.js","./variables":"animation/variables.js","./dynamic-expressions/get-random":"animation/dynamic-expressions/get-random.js","./dynamic-expressions/mod-expression":"animation/dynamic-expressions/mod-expression.js","./dynamic-expressions/sine-expressions":"animation/dynamic-expressions/sine-expressions.js","./dynamic-expressions/relative-expressions":"animation/dynamic-expressions/relative-expressions.js","./dynamic-expressions/bezier-expression":"animation/dynamic-expressions/bezier-expression.js","./dynamic-expressions/average-expression":"animation/dynamic-expressions/average-expression.js","./dynamic-expressions/sum-expression":"animation/dynamic-expressions/sum-expression.js","./dynamic-expressions/cycle-expression":"animation/dynamic-expressions/cycle-expression.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -70398,8 +70487,9 @@ function applyDynamicProperties(obj, props) {
     // these to bump up and down in size by 1 pixel slightly
 
     update = (0, _utils.appendFunc)(update, function (obj, stage) {
-      var currentScale = obj.height / obj.getBounds().height;
+      var currentScale = Math.ceil(obj.height / obj.getBounds().height * 100) / 100;
       obj.scale.y = (0, _utils.toPrecision)(Math.min(10, currentScale * (props.scaleY || 1)) * (stage.scaleY || 1), 2);
+      obj.y = Math.floor(obj.y);
     });
   } // if nothing was found, just skip
 
@@ -72616,11 +72706,22 @@ function decToHex(dec) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.setMaximumImageLoadAttempts = setMaximumImageLoadAttempts;
 exports.default = loadImage;
+var TIME_BETWEEN_IMAGE_LOAD_ATTEMPTS = 1000;
+var MAXIMUM_IMAGE_LOAD_ATTEMPTS = 10; // Number.MAX_SAFE_INTEGER;
+// manage image loading attempt times
 
+function setMaximumImageLoadAttempts(maxAttempts) {
+  var timeBetweenAttempts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : TIME_BETWEEN_IMAGE_LOAD_ATTEMPTS;
+  MAXIMUM_IMAGE_LOAD_ATTEMPTS = maxAttempts;
+  TIME_BETWEEN_IMAGE_LOAD_ATTEMPTS = timeBetweenAttempts;
+}
 /** handles loading an external image url
  * @param {string} url The url of the image to load
 */
+
+
 function loadImage(url, version) {
   return new Promise(function (resolve, reject) {
     // prevent accidental double slashes
@@ -72629,9 +72730,11 @@ function loadImage(url, version) {
     parts[last] = parts[last].replace(/\/+/g, '/');
     url = parts.join('://'); // reserve the image
 
-    var img; // limit attempts to reload
+    var img;
+    var willFail = false; // Math.random() < 0.3
+    // limit attempts to reload
 
-    var attempts = 3; // tracking image loading
+    var attempts = MAXIMUM_IMAGE_LOAD_ATTEMPTS; // tracking image loading
 
     var checkIfLoaded; // get the image to load
 
@@ -72639,7 +72742,12 @@ function loadImage(url, version) {
 
     var request = function request() {
       var success = handle(true);
-      var fail = handle(false); // create the image
+      var fail = handle(false);
+
+      if (willFail) {
+        return fail();
+      } // create the image
+
 
       img = new Image();
       img.onload = success;
@@ -72652,7 +72760,7 @@ function loadImage(url, version) {
         if (img.complete && img.naturalHeight !== 0) {
           success();
         }
-      }, 200); // replace the image url
+      }, TIME_BETWEEN_IMAGE_LOAD_ATTEMPTS); // replace the image url
 
       setTimeout(function () {
         img.src = src;
@@ -72670,7 +72778,12 @@ function loadImage(url, version) {
         // clear extra checks
 
 
-        clearInterval(checkIfLoaded); // finished
+        clearInterval(checkIfLoaded);
+
+        if (!success) {
+          console.error("[error] failed to load ".concat(url));
+        } // finished
+
 
         resolve(success ? img : null); // // execute all waiting requests
         // try {
@@ -72743,7 +72856,7 @@ function _loadSpritesheet() {
               break;
             }
 
-            throw new ImageRequestFailedException();
+            throw new ImageRequestFailedException(url);
 
           case 7:
             // create a spritesheet with the image. If the image is
@@ -72791,7 +72904,9 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
   }
 }
 
-function ImageRequestFailedException() {}
+function ImageRequestFailedException(src) {
+  this.src = src;
+}
 },{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./loadImage":"animation/resources/loadImage.js"}],"animation/resources/getSpritesheet.js":[function(require,module,exports) {
 "use strict";
 
@@ -78331,6 +78446,12 @@ Object.defineProperty(exports, "loadImage", {
     return _loadImage.default;
   }
 });
+Object.defineProperty(exports, "setMaximumImageLoadAttempts", {
+  enumerable: true,
+  get: function () {
+    return _loadImage.setMaximumImageLoadAttempts;
+  }
+});
 Object.defineProperty(exports, "EventEmitter", {
   enumerable: true,
   get: function () {
@@ -78399,7 +78520,7 @@ var _detatchedContainer = _interopRequireDefault(require("./pixi/detatched-conta
 
 var _toggle = _interopRequireDefault(require("./animation/toggle"));
 
-var _loadImage = _interopRequireDefault(require("./animation/resources/loadImage"));
+var _loadImage = _interopRequireWildcard(require("./animation/resources/loadImage"));
 
 var _eventEmitter = require("./common/event-emitter");
 
@@ -78412,6 +78533,10 @@ var _animatedSprite = _interopRequireDefault(require("./pixi/utils/animated-spri
 var _graphics = require("./utils/graphics");
 
 var _remove = require("./pixi/utils/remove");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 

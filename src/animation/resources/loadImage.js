@@ -1,3 +1,11 @@
+let TIME_BETWEEN_IMAGE_LOAD_ATTEMPTS = 1000;
+let MAXIMUM_IMAGE_LOAD_ATTEMPTS = 10; // Number.MAX_SAFE_INTEGER;
+
+// manage image loading attempt times
+export function setMaximumImageLoadAttempts(maxAttempts, timeBetweenAttempts = TIME_BETWEEN_IMAGE_LOAD_ATTEMPTS) {
+  MAXIMUM_IMAGE_LOAD_ATTEMPTS = maxAttempts;
+  TIME_BETWEEN_IMAGE_LOAD_ATTEMPTS = timeBetweenAttempts;
+}
 
 /** handles loading an external image url
  * @param {string} url The url of the image to load
@@ -13,11 +21,13 @@ export default function loadImage (url, version) {
     // reserve the image
     let img
 
+    let willFail = false // Math.random() < 0.3
+
     // limit attempts to reload
-    let attempts = 3
+    let attempts = MAXIMUM_IMAGE_LOAD_ATTEMPTS
 
     // tracking image loading
-    let checkIfLoaded;
+    let checkIfLoaded
 
     // get the image to load
     const src = `${url}${version ? `?${version}` : ''}`
@@ -26,6 +36,10 @@ export default function loadImage (url, version) {
     const request = () => {
       const success = handle(true)
       const fail = handle(false)
+
+      if (willFail) {
+        return fail()
+      }
       
       // create the image
       img = new Image()
@@ -40,7 +54,7 @@ export default function loadImage (url, version) {
         if (img.complete && img.naturalHeight !== 0) {
           success()
         }
-      }, 200)
+      }, TIME_BETWEEN_IMAGE_LOAD_ATTEMPTS)
 
       // replace the image url
       setTimeout(() => {
@@ -61,6 +75,10 @@ export default function loadImage (url, version) {
 
         // clear extra checks
         clearInterval(checkIfLoaded)
+
+        if (!success) {
+          console.error(`[error] failed to load ${url}`)
+        }
 
         // finished
         resolve(success ? img : null)
