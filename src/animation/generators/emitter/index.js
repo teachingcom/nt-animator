@@ -181,6 +181,46 @@ export default async function createEmitter(animator, controller, path, composit
 		config.flipParticleX = !!(emit.flipParticleX || emit.flipX || emit['flip.x']);
 		config.flipParticleY = !!(emit.flipParticleY || emit.flipY || emit['flip.y']);
 
+		if ('tint' in emit) {
+			config.hasAssignedTint = true;
+			config.tint = emit.tint;
+		}
+
+		// check for animated trail sequences
+		let sequences = [ ];
+		if (layer.sequences || layer.sequence) {
+
+			// normalize to any array of sequences
+			let source = layer.sequences || layer.sequence;
+			if (!isArray(source)) {
+				source = [ source ];
+			}
+
+			// build out each sequence
+			for (const sequence of source) {
+
+				// create each sequence
+				const frames = [ ];
+
+				// append each frame
+				for (const frame of sequence.frames) {
+					const texture = textures.find(item => item.identity === frame);
+					frames.push({
+						texture: texture,
+						count: 1
+					});
+				}
+
+				// add the animation
+				sequences.push({
+					loop: sequence.loop !== false,
+					framerate: sequence.fps,
+					textures: frames
+				})
+			}
+
+		}
+
 		// if rotation is disabled
 		if (config.noRotation) {
 			config.rotationSpeed = undefined;
@@ -216,7 +256,14 @@ export default async function createEmitter(animator, controller, path, composit
 		phase = 'creating emitter instance';
 
 		// create the particle generator
-		const emitter = new Particles.Emitter(generator, textures, config);
+		let emitter;
+		if (sequences.length) {
+			emitter = new Particles.Emitter(generator, sequences, config);
+			emitter.particleConstructor = Particles.AnimatedParticle;
+		}
+		else {
+			emitter = new Particles.Emitter(generator, textures, config);
+		}
 		dispose = () => emitter.destroy();
 		
 		// save some properties
@@ -234,7 +281,6 @@ export default async function createEmitter(animator, controller, path, composit
 
 		// create the emitter
 		const create = () => {
-
 			emitter.autoUpdate = false;
 			emitter.emit = true;
 

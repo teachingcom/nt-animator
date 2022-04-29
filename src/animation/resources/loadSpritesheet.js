@@ -50,6 +50,7 @@ function generateSprites (image, spritesheetId, spritesheet, ext) {
     // save the texture
     const rect = new PIXI.Rectangle(x, y, width, height)
     const texture = new PIXI.Texture(base, rect)
+    texture.identity = id
     spritesheet[id] = texture
   }
 }

@@ -67277,88 +67277,7 @@ function RecursiveLimitExceededException() {}
 function InvalidTextureRequestException() {}
 
 function InvalidMaskBoundsException() {}
-},{}],"animation/utils.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.inheritFrom = inheritFrom;
-exports.clone = clone;
-exports.toRole = toRole;
-exports.unpack = unpack;
-
-var _fastCopy = _interopRequireDefault(require("fast-copy"));
-
-var _deepDefaults = _interopRequireDefault(require("deep-defaults"));
-
-var _utils = require("../utils");
-
-var _path = require("./path");
-
-var _errors = require("./errors");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/** inherits properties from an animation node */
-function inheritFrom(animator, composition, layer, prop) {
-  var base = layer[prop];
-  if (!base) return; // apply the inherited properties
-
-  var basedOn = clone(animator, composition, base);
-  (0, _deepDefaults.default)(layer, basedOn);
-  layer.basedOn = base;
-  return layer;
-}
-/** clones an individual data node */
-
-
-function clone(animator, data, path) {
-  if ((0, _utils.isString)(path)) {
-    path = (0, _path.parsePath)(path);
-  }
-
-  var source = path.isAbsolute ? animator.manifest : data;
-  var cloned = (0, _path.resolvePath)(source, path.parts);
-  return (0, _fastCopy.default)(cloned);
-}
-/** converts a role string to an array */
-
-
-function toRole(str) {
-  return (str || '').split(/ +/g);
-}
-/** expands out a node to clone all data refs */
-
-
-function unpack(animator, root, source, prop) {
-  var limit = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
-
-  if (++limit > 10) {
-    throw new _errors.RecursiveLimitExceededException();
-  } // get the value to check
-
-
-  var obj = prop ? source[prop] : source; // check to resolve a path
-
-  if ((0, _utils.isString)(obj)) {
-    var ref = (0, _path.parsePath)(obj); // if this refers to cloning local data
-
-    if (ref.isRelative) {
-      source[prop] = clone(animator, root, ref); // recurisvely unpack looking for
-      // other cloned refs
-
-      unpack(animator, root, source, prop, limit);
-    }
-  } // if this is a collection, perform this for
-  // each of the properties
-  else if ((0, _utils.isIterable)(obj)) {
-      for (var id in obj) {
-        unpack(animator, root, obj, id, limit);
-      }
-    }
-}
-},{"fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-defaults":"../node_modules/deep-defaults/lib/index.js","../utils":"utils/index.js","./path":"animation/path.js","./errors":"animation/errors.js"}],"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":[function(require,module,exports) {
+},{}],"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":[function(require,module,exports) {
 function _arrayLikeToArray(arr, len) {
   if (len == null || len > arr.length) len = arr.length;
 
@@ -68577,7 +68496,117 @@ var BezierExpression = function BezierExpression(prop, args) {
 
 exports.default = BezierExpression;
 (0, _defineProperty2.default)(BezierExpression, "start", Date.now());
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../mappings":"animation/mappings.js","./bezier-aproximator":"animation/dynamic-expressions/bezier-aproximator.js"}],"animation/average-aproximator.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../mappings":"animation/mappings.js","./bezier-aproximator":"animation/dynamic-expressions/bezier-aproximator.js"}],"animation/dynamic-expressions/range-expression.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _utils = require("../../utils");
+
+var mappings = _interopRequireWildcard(require("../mappings"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var RangeExpression = function RangeExpression(prop, args) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, RangeExpression);
+  (0, _defineProperty2.default)(this, "offset", 0);
+  (0, _defineProperty2.default)(this, "scale", 1);
+  (0, _defineProperty2.default)(this, "flip", 1);
+  (0, _defineProperty2.default)(this, "update", function (target, stage) {
+    var value = _this.min + (_this.max - _this.min) * _this.modifier(target, stage);
+
+    _this.mapping(target, _this.convertToInt ? 0 | value : value);
+  });
+  this.prop = prop;
+  this.mapping = mappings.lookup(prop);
+
+  this.modifier = function () {
+    return 1;
+  };
+
+  var min = 0;
+  var max = 1;
+
+  var _iterator = _createForOfIteratorHelper(args),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var arg = _step.value;
+      var isObj = (0, _utils.isObject)(arg);
+
+      if (arg === 'int') {
+        this.convertToInt = true;
+      } else if (arg === 'invert') {
+        this.flip = -1;
+      } else if (isObj && 'min' in arg) {
+        min = arg.min;
+      } else if (isObj && 'max' in arg) {
+        max = arg.max;
+      } else if (isObj && 'relative_to_stage' in arg) {
+        (function () {
+          var key = arg.relative_to_stage;
+
+          _this.modifier = function (target, stage) {
+            return stage[key] || 0;
+          };
+        })();
+      } else if (isObj && 'relative_to_self' in arg) {
+        (function () {
+          var key = arg.relative_to_self;
+
+          _this.modifier = function (target, stage) {
+            return target[key] || 0;
+          };
+        })();
+      } else if (isObj && 'scale' in arg) {
+        this.scale = arg.scale * 0.01;
+      } else if (arg === 'stagger' || isObj && arg.stagger) {
+        this.offset += 0 | (arg.stagger || 10000) * Math.random();
+      } else if (arg.offset) {
+        this.offset = arg.offset * 1000;
+      }
+    } // if there's no max value then
+    // max the range from 0-min
+
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  if (isNaN(max)) {
+    max = min;
+    min = 0;
+  } // save the args
+
+
+  this.min = min;
+  this.max = max;
+};
+
+exports.default = RangeExpression;
+(0, _defineProperty2.default)(RangeExpression, "start", Date.now());
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js","../mappings":"animation/mappings.js"}],"animation/average-aproximator.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -69015,6 +69044,147 @@ var CycleExpression = function CycleExpression(prop, args) {
 
 exports.default = CycleExpression;
 (0, _defineProperty2.default)(CycleExpression, "start", Date.now());
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js","../mappings":"animation/mappings.js"}],"animation/dynamic-expressions/JitterExpression.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.JitterExpression = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _utils = require("../../utils");
+
+var mappings = _interopRequireWildcard(require("../mappings"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var JitterExpression = function JitterExpression(prop, args) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, JitterExpression);
+  (0, _defineProperty2.default)(this, "offset", 0);
+  (0, _defineProperty2.default)(this, "scale", 1);
+  (0, _defineProperty2.default)(this, "flip", 1);
+  (0, _defineProperty2.default)(this, "update", function (target, stage) {
+    var ts = (Date.now() - JitterExpression.start + _this.offset) * _this.scale;
+
+    if (ts > _this.nextUpdate) {
+      _this.target = Math.random() * (_this.max - _this.min) + _this.min;
+
+      if (!_this.current) {
+        _this.current = _this.target;
+        _this.nextUpdate = ts;
+      } else {
+        _this.nextUpdate = ts + _this.freq;
+      }
+    } else {
+      _this.current += (_this.target - _this.current) * _this.rate * _this.modifier(target, stage);
+    } // if (!this.current) {
+    // 	this.current = this.start 
+    // }
+
+
+    console.log(_this.target, _this.current);
+    var value = _this.current * _this.flip;
+
+    _this.mapping(target, _this.convertToInt ? 0 | value : value); // const sine = this.calc(ts) * this.modifier(target, stage)
+    // const percent = ((sine + 1) / 2)
+    // const value = (((percent * (this.max - this.min)) + this.min)) * this.flip
+
+  });
+  this.prop = prop;
+  this.mapping = mappings.lookup(prop);
+
+  this.modifier = function () {
+    return 1;
+  };
+
+  var min = 0;
+  var max = 1;
+  var freq = 1000;
+  var rate = 0.1;
+
+  var _iterator = _createForOfIteratorHelper(args),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var arg = _step.value;
+      var isObj = (0, _utils.isObject)(arg);
+
+      if (arg === 'int') {
+        this.convertToInt = true;
+      } else if (arg === 'invert') {
+        this.flip = -1;
+      } else if (isObj && 'min' in arg) {
+        min = arg.min;
+      } else if (isObj && 'max' in arg) {
+        max = arg.max;
+      } else if (isObj && 'freq' in arg) {
+        freq = arg.freq;
+      } else if (isObj && 'rate' in arg) {
+        rate = arg.rate;
+      } else if (isObj && 'relative_to_stage' in arg) {
+        (function () {
+          var key = arg.relative_to_stage;
+
+          _this.modifier = function (target, stage) {
+            return stage[key] || 0;
+          };
+        })();
+      } else if (isObj && 'relative_to_self' in arg) {
+        (function () {
+          var key = arg.relative_to_self;
+
+          _this.modifier = function (target, stage) {
+            return target[key] || 0;
+          };
+        })();
+      } else if (isObj && 'scale' in arg) {
+        this.scale = arg.scale * 0.01;
+      } else if (arg === 'stagger' || isObj && arg.stagger) {
+        this.offset += 0 | (arg.stagger || 10000) * Math.random();
+      } else if (arg.offset) {
+        this.offset = arg.offset * 1000;
+      }
+    } // if there's no max value then
+    // max the range from 0-min
+
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  if (isNaN(max)) {
+    max = min;
+    min = 0;
+  } // save the args
+
+
+  this.min = min;
+  this.max = max;
+  this.freq = freq;
+  this.rate = rate;
+  this.nextUpdate = 0;
+};
+
+exports.JitterExpression = JitterExpression;
+(0, _defineProperty2.default)(JitterExpression, "start", Date.now());
 },{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js","../mappings":"animation/mappings.js"}],"animation/expressions.js":[function(require,module,exports) {
 "use strict";
 
@@ -69026,6 +69196,7 @@ exports.subtractBy = subtractBy;
 exports.multiplyBy = multiplyBy;
 exports.divideBy = divideBy;
 exports.percentOf = percentOf;
+exports.chance = chance;
 exports.range = range;
 exports.expression = expression;
 exports.pick = pick;
@@ -69038,6 +69209,8 @@ exports.createDynamicExpression = createDynamicExpression;
 var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 
 var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
 var _utils = require("../utils");
 
@@ -69057,11 +69230,15 @@ var _relativeExpressions = require("./dynamic-expressions/relative-expressions")
 
 var _bezierExpression = _interopRequireDefault(require("./dynamic-expressions/bezier-expression"));
 
+var _rangeExpression = _interopRequireDefault(require("./dynamic-expressions/range-expression"));
+
 var _averageExpression = _interopRequireDefault(require("./dynamic-expressions/average-expression"));
 
 var _sumExpression = _interopRequireDefault(require("./dynamic-expressions/sum-expression"));
 
 var _cycleExpression = _interopRequireDefault(require("./dynamic-expressions/cycle-expression"));
+
+var _JitterExpression = require("./dynamic-expressions/JitterExpression");
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
@@ -69091,6 +69268,9 @@ var EXPRESSIONS = {
   ':exp': {
     func: expression
   },
+  ':chance': {
+    func: chance
+  },
   ':pick': {
     func: pick
   },
@@ -69117,8 +69297,14 @@ var DYNAMICS = {
   ':avg': {
     instance: _averageExpression.default
   },
+  ':jit': {
+    instance: _JitterExpression.JitterExpression
+  },
   ':mod': {
     instance: _modExpression.default
+  },
+  ':percent': {
+    instance: _rangeExpression.default
   },
   ':cos': {
     instance: _sineExpressions.CosineExpression
@@ -69164,9 +69350,73 @@ function percentOf(percent, relativeTo) {
   return relativeTo * (percent / 100);
 }
 
+function chance() {
+  var convert = function convert(val) {
+    return val;
+  }; // collect up options and get args
+
+
+  var choices = [];
+
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  for (var _i = 0, _args = args; _i < _args.length; _i++) {
+    var option = _args[_i];
+
+    if (option === 'int') {
+      convert = parseInt;
+    } else if (option === 'float') {
+      convert = parseBool;
+    } else if (option === 'bool') {
+      convert = function convert(val) {
+        return !!val;
+      };
+    } else if ((0, _typeof2.default)(option) === 'object') {
+      for (var key in option) {
+        var _chance = option[key];
+        choices.push({
+          value: key,
+          chance: _chance
+        });
+      }
+    }
+  } // sort them by most likely to least likely
+
+
+  choices.sort(function (a, b) {
+    return b.chance - a.chance;
+  }); // sum up the total options
+
+  var sum = 0;
+
+  for (var _i2 = 0, _choices = choices; _i2 < _choices.length; _i2++) {
+    var choice = _choices[_i2];
+    sum += choice.chance;
+    choice.threshold = sum;
+  } // make the selection
+
+
+  var match = choices[0];
+  var selected = Math.random() * sum;
+
+  for (var _i3 = 0, _choices2 = choices; _i3 < _choices2.length; _i3++) {
+    var _option = _choices2[_i3];
+
+    if (selected < _option.threshold) {
+      match = _option;
+      break;
+    }
+  } // return the result
+
+
+  return convert(match.value);
+}
+
 function range() {
-  for (var _len = arguments.length, params = new Array(_len), _key = 0; _key < _len; _key++) {
-    params[_key] = arguments[_key];
+  for (var _len2 = arguments.length, params = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    params[_key2] = arguments[_key2];
   }
 
   // sort out the params
@@ -69186,8 +69436,8 @@ function range() {
 }
 
 function expression() {
-  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    args[_key2] = arguments[_key2];
+  for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+    args[_key3] = arguments[_key3];
   }
 
   var val = args[0];
@@ -69201,8 +69451,8 @@ function expression() {
 }
 
 function pick() {
-  for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-    args[_key3] = arguments[_key3];
+  for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+    args[_key4] = arguments[_key4];
   }
 
   return args[Math.floor(args.length * randomizer.random())];
@@ -69215,8 +69465,8 @@ function pick() {
 var SEQUENCES = {};
 
 function sequence() {
-  for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-    args[_key4] = arguments[_key4];
+  for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+    args[_key5] = arguments[_key5];
   }
 
   // create a key to allow for a shared list
@@ -69261,8 +69511,8 @@ function evaluateExpression(expression) {
   var handler = EXPRESSIONS[token];
   var rest = expression.slice(1);
 
-  for (var _len5 = arguments.length, args = new Array(_len5 > 1 ? _len5 - 1 : 0), _key5 = 1; _key5 < _len5; _key5++) {
-    args[_key5 - 1] = arguments[_key5];
+  for (var _len6 = arguments.length, args = new Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
+    args[_key6 - 1] = arguments[_key6];
   }
 
   rest.push.apply(rest, args); // this expression will probably fail
@@ -69293,8 +69543,8 @@ function createDynamicExpression(prop, source) {
   var handler = DYNAMICS[token];
   var rest = expression.slice(1);
 
-  for (var _len6 = arguments.length, args = new Array(_len6 > 2 ? _len6 - 2 : 0), _key6 = 2; _key6 < _len6; _key6++) {
-    args[_key6 - 2] = arguments[_key6];
+  for (var _len7 = arguments.length, args = new Array(_len7 > 2 ? _len7 - 2 : 0), _key7 = 2; _key7 < _len7; _key7++) {
+    args[_key7 - 2] = arguments[_key7];
   }
 
   rest.push.apply(rest, args); // simple function handler
@@ -69306,8 +69556,8 @@ function createDynamicExpression(prop, source) {
     return function () {
       var _handler$func;
 
-      for (var _len7 = arguments.length, params = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
-        params[_key7] = arguments[_key7];
+      for (var _len8 = arguments.length, params = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
+        params[_key8] = arguments[_key8];
       }
 
       return (_handler$func = handler.func).call.apply(_handler$func, [null].concat(params, (0, _toConsumableArray2.default)(rest)));
@@ -69330,7 +69580,92 @@ function shuffle(items) {
 
   items.push.apply(items, shuffled);
 }
-},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../utils":"utils/index.js","./mappings":"animation/mappings.js","../randomizer":"randomizer.js","./variables":"animation/variables.js","./dynamic-expressions/get-random":"animation/dynamic-expressions/get-random.js","./dynamic-expressions/mod-expression":"animation/dynamic-expressions/mod-expression.js","./dynamic-expressions/sine-expressions":"animation/dynamic-expressions/sine-expressions.js","./dynamic-expressions/relative-expressions":"animation/dynamic-expressions/relative-expressions.js","./dynamic-expressions/bezier-expression":"animation/dynamic-expressions/bezier-expression.js","./dynamic-expressions/average-expression":"animation/dynamic-expressions/average-expression.js","./dynamic-expressions/sum-expression":"animation/dynamic-expressions/sum-expression.js","./dynamic-expressions/cycle-expression":"animation/dynamic-expressions/cycle-expression.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","../utils":"utils/index.js","./mappings":"animation/mappings.js","../randomizer":"randomizer.js","./variables":"animation/variables.js","./dynamic-expressions/get-random":"animation/dynamic-expressions/get-random.js","./dynamic-expressions/mod-expression":"animation/dynamic-expressions/mod-expression.js","./dynamic-expressions/sine-expressions":"animation/dynamic-expressions/sine-expressions.js","./dynamic-expressions/relative-expressions":"animation/dynamic-expressions/relative-expressions.js","./dynamic-expressions/bezier-expression":"animation/dynamic-expressions/bezier-expression.js","./dynamic-expressions/range-expression":"animation/dynamic-expressions/range-expression.js","./dynamic-expressions/average-expression":"animation/dynamic-expressions/average-expression.js","./dynamic-expressions/sum-expression":"animation/dynamic-expressions/sum-expression.js","./dynamic-expressions/cycle-expression":"animation/dynamic-expressions/cycle-expression.js","./dynamic-expressions/JitterExpression":"animation/dynamic-expressions/JitterExpression.js"}],"animation/utils.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.inheritFrom = inheritFrom;
+exports.clone = clone;
+exports.toRole = toRole;
+exports.unpack = unpack;
+
+var _fastCopy = _interopRequireDefault(require("fast-copy"));
+
+var _deepDefaults = _interopRequireDefault(require("deep-defaults"));
+
+var _utils = require("../utils");
+
+var _path = require("./path");
+
+var _errors = require("./errors");
+
+var _expressions = require("./expressions");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/** inherits properties from an animation node */
+function inheritFrom(animator, composition, layer, prop) {
+  var base = layer[prop];
+  if (!base) return; // eval as needed
+
+  base = (0, _expressions.evaluateExpression)(base); // apply the inherited properties
+
+  var basedOn = clone(animator, composition, base);
+  (0, _deepDefaults.default)(layer, basedOn);
+  layer.basedOn = base;
+  return layer;
+}
+/** clones an individual data node */
+
+
+function clone(animator, data, path) {
+  if ((0, _utils.isString)(path)) {
+    path = (0, _path.parsePath)(path);
+  }
+
+  var source = path.isAbsolute ? animator.manifest : data;
+  var cloned = (0, _path.resolvePath)(source, path.parts);
+  return (0, _fastCopy.default)(cloned);
+}
+/** converts a role string to an array */
+
+
+function toRole(str) {
+  return (str || '').split(/ +/g);
+}
+/** expands out a node to clone all data refs */
+
+
+function unpack(animator, root, source, prop) {
+  var limit = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+
+  if (++limit > 10) {
+    throw new _errors.RecursiveLimitExceededException();
+  } // get the value to check
+
+
+  var obj = prop ? source[prop] : source; // check to resolve a path
+
+  if ((0, _utils.isString)(obj)) {
+    var ref = (0, _path.parsePath)(obj); // if this refers to cloning local data
+
+    if (ref.isRelative) {
+      source[prop] = clone(animator, root, ref); // recurisvely unpack looking for
+      // other cloned refs
+
+      unpack(animator, root, source, prop, limit);
+    }
+  } // if this is a collection, perform this for
+  // each of the properties
+  else if ((0, _utils.isIterable)(obj)) {
+      for (var id in obj) {
+        unpack(animator, root, obj, id, limit);
+      }
+    }
+}
+},{"fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-defaults":"../node_modules/deep-defaults/lib/index.js","../utils":"utils/index.js","./path":"animation/path.js","./errors":"animation/errors.js","./expressions":"animation/expressions.js"}],"../node_modules/idb-keyval/dist/idb-keyval.mjs":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -72900,6 +73235,7 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
 
     var rect = new _lib.PIXI.Rectangle(x, y, width, height);
     var texture = new _lib.PIXI.Texture(base, rect);
+    texture.identity = id;
     spritesheet[id] = texture;
   }
 }
@@ -76054,119 +76390,84 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// PIXI.Transform.prototype.updateTransform = function(parentTransform) {
-// 	const lt = this.localTransform;
-// 	if (this._localID !== this._currentLocalID)
-// 	{
-// 			const scaleX = this.scale.x;
-// 			const scaleY = this.scale.y;
-// 			const pivotX = this.pivot.x;
-// 			const pivotY = this.pivot.y;
-// 			// get the matrix values of the displayobject based on its transform properties..
-// 			lt.a = this._cx * scaleX;
-// 			lt.b = this._sx * scaleX;
-// 			lt.c = this._cy * scaleY;
-// 			lt.d = this._sy * scaleY;
-// 			lt.tx = this.position.x - ((pivotX * lt.a) + (pivotY * lt.c));
-// 			lt.ty = this.position.y - ((pivotX * lt.b) + (pivotY * lt.d));
-// 			this._currentLocalID = this._localID;
-// 			// force an update..
-// 			this._parentID = -1;
-// 	}
-// 	if (this._parentID !== parentTransform._worldID)
-// 	{
-// 			// concat the parent matrix with the objects transform.
-// 			const pt = parentTransform.worldTransform;
-// 			const wt = this.worldTransform;
-// 			wt.a = (lt.a * pt.a) + (lt.b * pt.c);
-// 			wt.b = (lt.a * pt.b) + (lt.b * pt.d);
-// 			wt.c = (lt.c * pt.a) + (lt.d * pt.c);
-// 			wt.d = (lt.c * pt.b) + (lt.d * pt.d);
-// 			wt.tx = (lt.tx * pt.a) + (lt.ty * pt.c) + pt.tx;
-// 			wt.ty = (lt.tx * pt.b) + (lt.ty * pt.d) + pt.ty;
-// 			this._parentID = parentTransform._worldID;
-// 			// update the id of the transform..
-// 			this._worldID++;
-// 	}
-// 	this.firstPassIsDone = true;
-// };
-// NOTE: this overrides default PIXI behavior for particles
-// There are several properties about particles that cannot be
-// adjusted using the configuration. This overrides the update process
-// to use the normal update sequence, but then apply additional
-// modifiers
-// Particles traveling to the left are flipped upside down since their
-// "direction" is technically 180 degrees. This this change allows for
-// sprites to have their images flipped or rotated based on a starting
-// value. 
-var __override_update__ = Particles.Particle.prototype.update;
-
-Particles.Particle.prototype.update = function () {
-  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-    args[_key] = arguments[_key];
-  }
-
-  // perform normal updateialzation
-  __override_update__.apply(this, args); // apply the default starting rotation
-
-
-  if (this.rotationModifier) {
-    this.rotation += this.rotationModifier;
-  } // allow sprite flipping on x axis
-
-
-  if (this.emitter.config.flipParticleX && this.scale.x > 0) this.scale.x *= -1; // allow sprite flipping on y axis
-
-  if (this.emitter.config.flipParticleY && this.scale.y > 0) this.scale.y *= -1;
-};
 /** NOTE: This will override default PIXI Particle behavior
  * When creating a new particle this will define random start
  * rotations for particles, if needed
  */
-
-
 var DEFAULT_RANDOM_ROTATIONS = [0, 360];
-var __override_init__ = Particles.Particle.prototype.init;
 
-Particles.Particle.prototype.init = function () {
-  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-    args[_key2] = arguments[_key2];
-  }
+function applyParticleOverride(target) {
+  var init = target.prototype.init;
+  var update = target.prototype.update; // override the update function
 
-  // perform normal updateialzation
-  __override_init__.apply(this, args); // apply the default starting rotation
+  target.update = function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
 
+    // perform normal updateialzation
+    update.apply(this, args); // apply the default starting rotation
 
-  var _this$emitter$config = this.emitter.config,
-      rotationSpeed = _this$emitter$config.rotationSpeed,
-      randomStartRotation = _this$emitter$config.randomStartRotation,
-      hasRandomStartRotation = _this$emitter$config.hasRandomStartRotation,
-      hasDefinedRotationOffset = _this$emitter$config.hasDefinedRotationOffset,
-      definedRotationOffset = _this$emitter$config.definedRotationOffset; // has a defined start rotation
-
-  if (hasDefinedRotationOffset) {
-    this.rotation = this.rotationModifier = definedRotationOffset;
-  } // has a random range of start rotations
-  else if (hasRandomStartRotation) {
-      var _ref = randomStartRotation || DEFAULT_RANDOM_ROTATIONS,
-          _ref2 = (0, _slicedToArray2.default)(_ref, 2),
-          min = _ref2[0],
-          max = _ref2[1];
-
-      var angle = Math.random() * (max - min) + min;
-      this.rotation = this.rotationModifier = angle * _utils.RAD;
-    } // no rotation modification
-    else {
-        this.rotation = this.rotationModifier = 0;
-      } // if there's a constant rotation applied, then
-  // this should be every frame. otherwise, do it
-  // once any stop
+    if (this.rotationModifier) {
+      this.rotation += this.rotationModifier;
+    } // allow sprite flipping on x axis
 
 
-  if (!!rotationSpeed) {
-    this.rotationModifier = undefined;
-  }
-};
+    if (this.emitter.config.flipParticleX && this.scale.x > 0) this.scale.x *= -1; // allow sprite flipping on y axis
+
+    if (this.emitter.config.flipParticleY && this.scale.y > 0) this.scale.y *= -1;
+  };
+
+  target.prototype.init = function () {
+    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    // perform normal updateialzation
+    init.apply(this, args); // apply the default starting rotation
+
+    var _this$emitter$config = this.emitter.config,
+        rotationSpeed = _this$emitter$config.rotationSpeed,
+        tint = _this$emitter$config.tint,
+        randomStartRotation = _this$emitter$config.randomStartRotation,
+        hasRandomStartRotation = _this$emitter$config.hasRandomStartRotation,
+        hasAssignedTint = _this$emitter$config.hasAssignedTint,
+        hasDefinedRotationOffset = _this$emitter$config.hasDefinedRotationOffset,
+        definedRotationOffset = _this$emitter$config.definedRotationOffset;
+
+    if (hasAssignedTint) {
+      var index = Math.floor(Math.random() * tint.length);
+      this.tint = tint[index];
+    } // has a defined start rotation
+
+
+    if (hasDefinedRotationOffset) {
+      this.rotation = this.rotationModifier = definedRotationOffset;
+    } // has a random range of start rotations
+    else if (hasRandomStartRotation) {
+        var _ref = randomStartRotation || DEFAULT_RANDOM_ROTATIONS,
+            _ref2 = (0, _slicedToArray2.default)(_ref, 2),
+            min = _ref2[0],
+            max = _ref2[1];
+
+        var angle = Math.random() * (max - min) + min;
+        this.rotation = this.rotationModifier = angle * _utils.RAD;
+      } // no rotation modification
+      else {
+          this.rotation = this.rotationModifier = 0;
+        } // if there's a constant rotation applied, then
+    // this should be every frame. otherwise, do it
+    // once any stop
+
+
+    if (!!rotationSpeed) {
+      this.rotationModifier = undefined;
+    }
+  };
+}
+
+applyParticleOverride(Particles.AnimatedParticle);
+applyParticleOverride(Particles.Particle);
 },{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../../../pixi/lib":"pixi/lib.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../../../utils":"utils/index.js"}],"animation/generators/emitter/index.js":[function(require,module,exports) {
 "use strict";
 
@@ -76213,7 +76514,12 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// apply PIXI rendering overrides
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 // emitter property mappings
 var MAPPINGS = {
   alpha: {
@@ -76268,7 +76574,7 @@ function createEmitter(_x, _x2, _x3, _x4, _x5) {
 
 function _createEmitter() {
   _createEmitter = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, composition, layer) {
-    var container, generator, update, dispose, phase, textures, _layer$emit, emit, auto, config, _loop, prop, _ret, manualStart, emitter, create;
+    var container, generator, update, dispose, phase, textures, _layer$emit, emit, auto, config, _loop, prop, _ret, manualStart, sequences, source, _iterator, _step, sequence, frames, _iterator2, _step2, _loop2, emitter, create;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -76437,7 +76743,70 @@ function _createEmitter() {
             config.addAtBack = !!emit.atBack;
             config.orderedArt = !!emit.orderedArt;
             config.flipParticleX = !!(emit.flipParticleX || emit.flipX || emit['flip.x']);
-            config.flipParticleY = !!(emit.flipParticleY || emit.flipY || emit['flip.y']); // if rotation is disabled
+            config.flipParticleY = !!(emit.flipParticleY || emit.flipY || emit['flip.y']);
+
+            if ('tint' in emit) {
+              config.hasAssignedTint = true;
+              config.tint = emit.tint;
+            } // check for animated trail sequences
+
+
+            sequences = [];
+
+            if (layer.sequences || layer.sequence) {
+              // normalize to any array of sequences
+              source = layer.sequences || layer.sequence;
+
+              if (!(0, _utils.isArray)(source)) {
+                source = [source];
+              } // build out each sequence
+
+
+              _iterator = _createForOfIteratorHelper(source);
+
+              try {
+                for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                  sequence = _step.value;
+                  // create each sequence
+                  frames = []; // append each frame
+
+                  _iterator2 = _createForOfIteratorHelper(sequence.frames);
+
+                  try {
+                    _loop2 = function _loop2() {
+                      var frame = _step2.value;
+                      var texture = textures.find(function (item) {
+                        return item.identity === frame;
+                      });
+                      frames.push({
+                        texture: texture,
+                        count: 1
+                      });
+                    };
+
+                    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+                      _loop2();
+                    } // add the animation
+
+                  } catch (err) {
+                    _iterator2.e(err);
+                  } finally {
+                    _iterator2.f();
+                  }
+
+                  sequences.push({
+                    loop: sequence.loop !== false,
+                    framerate: sequence.fps,
+                    textures: frames
+                  });
+                }
+              } catch (err) {
+                _iterator.e(err);
+              } finally {
+                _iterator.f();
+              }
+            } // if rotation is disabled
+
 
             if (config.noRotation) {
               config.rotationSpeed = undefined;
@@ -76466,7 +76835,12 @@ function _createEmitter() {
 
             phase = 'creating emitter instance'; // create the particle generator
 
-            emitter = new Particles.Emitter(generator, textures, config);
+            if (sequences.length) {
+              emitter = new Particles.Emitter(generator, sequences, config);
+              emitter.particleConstructor = Particles.AnimatedParticle;
+            } else {
+              emitter = new Particles.Emitter(generator, textures, config);
+            }
 
             dispose = function dispose() {
               return emitter.destroy();
@@ -76522,18 +76896,18 @@ function _createEmitter() {
               dispose: dispose
             }]);
 
-          case 69:
-            _context.prev = 69;
+          case 72:
+            _context.prev = 72;
             _context.t2 = _context["catch"](7);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
             throw _context.t2;
 
-          case 73:
+          case 76:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[7, 69]]);
+    }, _callee, null, [[7, 72]]);
   }));
   return _createEmitter.apply(this, arguments);
 }

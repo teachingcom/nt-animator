@@ -9,9 +9,11 @@ import ModExpression from './dynamic-expressions/mod-expression'
 import { CosineExpression, SineExpression } from './dynamic-expressions/sine-expressions'
 import { RelativeToX, RelativeToY } from './dynamic-expressions/relative-expressions'
 import BezierExpression from "./dynamic-expressions/bezier-expression";
+import PercentExpression from "./dynamic-expressions/range-expression";
 import AverageExpression from "./dynamic-expressions/average-expression";
 import SumExpression from "./dynamic-expressions/sum-expression";
 import CycleExpression from "./dynamic-expressions/cycle-expression";
+import { JitterExpression } from "./dynamic-expressions/JitterExpression";
 
 /** expression types */
 const EXPRESSIONS = {
@@ -21,6 +23,7 @@ const EXPRESSIONS = {
   ':/': { func: divideBy },
   ':%': { func: percentOf },
   ':exp': { func: expression },
+  ':chance': { func: chance },
   ':pick': { func: pick },
   ':seq': { func: sequence },
   ':sequence': { func: sequence },
@@ -32,7 +35,9 @@ const DYNAMICS = {
   ':sum': { instance: SumExpression },
   ':cycle': { instance: CycleExpression },
   ':avg': { instance: AverageExpression },
+  ':jit': { instance: JitterExpression },
   ':mod': { instance: ModExpression },
+  ':percent': { instance: PercentExpression },
   ':cos': { instance: CosineExpression },
   ':sin': { instance: SineExpression },
   ':bez': { instance: BezierExpression },
@@ -63,6 +68,53 @@ export function divideBy(divide, relativeTo) {
 
 export function percentOf(percent, relativeTo) {
   return relativeTo * (percent / 100);
+}
+
+export function chance(...args) {
+  let convert = val => val;
+  
+  // collect up options and get args
+  let choices = [ ];
+  for (const option of args) {
+    if (option === 'int') {
+      convert = parseInt;
+    }
+    else if (option === 'float') {
+      convert = parseBool;
+    }
+    else if (option === 'bool') {
+      convert = val => !!val;
+    }
+    else if (typeof option === 'object') {
+      for (const key in option) {
+        const chance = option[key];
+        choices.push({ value: key, chance });
+      }
+    }
+  }
+
+  // sort them by most likely to least likely
+  choices.sort((a, b) => b.chance - a.chance);
+
+  // sum up the total options
+  let sum = 0;
+  for (const choice of choices) {
+    sum += choice.chance;
+    choice.threshold = sum;
+  }
+
+  // make the selection
+  let [ match ] = choices;
+  const selected = Math.random() * sum;
+  for (const option of choices) {
+    if (selected < option.threshold) {
+      match = option;
+      break;
+    }
+  }
+
+  // return the result
+  return convert(match.value);
 }
 
 export function range(...params) {

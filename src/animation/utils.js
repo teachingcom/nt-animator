@@ -4,11 +4,15 @@ import deepDefaults from 'deep-defaults';
 import { isString, isIterable } from "../utils";
 import { parsePath, resolvePath } from "./path";
 import { RecursiveLimitExceededException } from "./errors";
+import { evaluateExpression } from './expressions';
 
 /** inherits properties from an animation node */
 export function inheritFrom(animator, composition, layer, prop) {
-	const base = layer[prop];
+	let base = layer[prop];
 	if (!base) return;
+
+	// eval as needed
+	base = evaluateExpression(base);
 
 	// apply the inherited properties
 	const basedOn = clone(animator, composition, base);
