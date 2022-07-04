@@ -12,6 +12,7 @@ import { flatten } from '../../utils/collection';
 import createRepeater from './repeater';
 import { evaluateExpression } from '../expressions';
 import * as variables from '../variables';
+import { findDisplayObjectsOfRole } from '../../pixi/utils/find-objects-of-role';
 
 // creates an instance of a car
 export default async function createInstance(animator, controller, path, data, relativeTo) {
@@ -100,41 +101,16 @@ export default async function createInstance(animator, controller, path, data, r
 		container.update = appendFunc(container.update, layer.update);
 		container.dispose = appendFunc(container.dispose, layer.dispose);
 		container.addChildAt(layer.displayObject, 0);
-
-		// if it's a mask, then apply to previous layers
-		if (layer.displayObject.isMask) {
-			let didSetMask = false;
-
-			// loop backwards and apply the mask
-			for (let j = i + 1; j < layers.length; j++) {
-				const target = layers[j];
-
-				// if the z-index for this layer is
-				// above the mask, then ignore by default
-				// TODO: would we like to add a property to allow
-				// masks to work from the bottom?
-				if ((target.displayObject.zIndex || 0) > (layer.displayObject.zIndex || 0))
-					continue;
-
-				// if ignoring the mask, don't bother
-				if (!!target.data.ignoreMask || !!target.data.breakMask)
-					continue;
-
-				// apply the mask
-				target.displayObject.mask = layer.displayObject;
-				didSetMask = true;
-			}
-
-			// if there's an idle mask
-			if (!didSetMask) {
-				console.warn(`Unused mask created for ${path}. Mask will be hidden`);
-				layer.displayObject.visible = false;
-			}
-
-		}
-
 	}
 
+	// mask assignment
+	const masks = findDisplayObjectsOfRole(container, 'mask');
+	for (const mask of masks) {
+		const applyTo = findDisplayObjectsOfRole(container, `mask:${mask.name}`)
+		for (const target of applyTo) {
+			target.mask = mask.maskInstance;
+		}
+	}
 
 	// update based on ordering
 	container.sortChildren();

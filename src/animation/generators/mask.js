@@ -42,9 +42,6 @@ export default async function createMask(animator, controller, path, composition
 	// tracking setup phase
 	let phase = '';
 	try {
-
-		console.log('is going to create mask')
-
 		// NOTE: sprites are added a wrapper container on purpose
 		// because any animations that modify scale will interfere
 		// with scaling done to fit within responsive containers
@@ -93,7 +90,6 @@ export default async function createMask(animator, controller, path, composition
 		}
 		// is a sprite of some type
 		else {
-			console.log("create from sprite")
 			const isAnimated = images.length > 1;
 			mask = isAnimated
 				? new PIXI.AnimatedSprite(textures)
@@ -126,6 +122,12 @@ export default async function createMask(animator, controller, path, composition
 		container.zIndex = mask.zIndex;
 		container.addChild(mask);
 		container.isMask = true;
+		container.name = layer.name;
+		container.maskInstance = mask;
+
+		// never hue shift a mask
+		container.config = { ignoreHueShift: true };
+
 
 		// set some default values
 		mask.pivot.x = mask.width / 2;

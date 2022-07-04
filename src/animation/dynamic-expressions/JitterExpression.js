@@ -91,18 +91,8 @@ export class JitterExpression {
 			this.current += ((this.target - this.current) * this.rate) * this.modifier(target, stage)
 		}
 
-		// if (!this.current) {
-		// 	this.current = this.start 
-		// }
-
-		console.log(this.target, this.current);
-
 		const value = this.current * this.flip
 		this.mapping(target, (this.convertToInt ? 0 | value : value))
-		
-    // const sine = this.calc(ts) * this.modifier(target, stage)
-    // const percent = ((sine + 1) / 2)
-		// const value = (((percent * (this.max - this.min)) + this.min)) * this.flip
   }
 
 }

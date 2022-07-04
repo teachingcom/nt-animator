@@ -15,7 +15,6 @@ export default function createTextureFromImage(img) {
 		}
 
 		// get sprite info
-		console.log('will create', img)
 		spritesheet = img.getAttribute('spritesheet');
 		sprite = img.getAttribute('sprite');
 		const useCache = spritesheet && sprite;

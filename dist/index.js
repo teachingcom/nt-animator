@@ -69093,18 +69093,11 @@ var JitterExpression = function JitterExpression(prop, args) {
       }
     } else {
       _this.current += (_this.target - _this.current) * _this.rate * _this.modifier(target, stage);
-    } // if (!this.current) {
-    // 	this.current = this.start 
-    // }
+    }
 
-
-    console.log(_this.target, _this.current);
     var value = _this.current * _this.flip;
 
-    _this.mapping(target, _this.convertToInt ? 0 | value : value); // const sine = this.calc(ts) * this.modifier(target, stage)
-    // const percent = ((sine + 1) / 2)
-    // const value = (((percent * (this.max - this.min)) + this.min)) * this.flip
-
+    _this.mapping(target, _this.convertToInt ? 0 | value : value);
   });
   this.prop = prop;
   this.mapping = mappings.lookup(prop);
@@ -73551,7 +73544,6 @@ function createTextureFromImage(img) {
     } // get sprite info
 
 
-    console.log('will create', img);
     spritesheet = img.getAttribute('spritesheet');
     sprite = img.getAttribute('sprite');
     var useCache = spritesheet && sprite; // texture to load
@@ -76400,13 +76392,13 @@ function applyParticleOverride(target) {
   var init = target.prototype.init;
   var update = target.prototype.update; // override the update function
 
-  target.update = function () {
+  target.prototype.update = function () {
     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
     }
 
     // perform normal updateialzation
-    update.apply(this, args); // apply the default starting rotation
+    var result = update.apply(this, args); // apply the default starting rotation
 
     if (this.rotationModifier) {
       this.rotation += this.rotationModifier;
@@ -76416,6 +76408,7 @@ function applyParticleOverride(target) {
     if (this.emitter.config.flipParticleX && this.scale.x > 0) this.scale.x *= -1; // allow sprite flipping on y axis
 
     if (this.emitter.config.flipParticleY && this.scale.y > 0) this.scale.y *= -1;
+    return result;
   };
 
   target.prototype.init = function () {
@@ -77229,53 +77222,52 @@ function _createMask() {
 
             phase = '';
             _context.prev = 2;
-            console.log('is going to create mask'); // NOTE: sprites are added a wrapper container on purpose
+            // NOTE: sprites are added a wrapper container on purpose
             // because any animations that modify scale will interfere
             // with scaling done to fit within responsive containers
-
             container = new _lib.PIXI.Container();
             container.isMask = true;
             container.role = (0, _utils2.toRole)(layer.role);
             container.path = layer.path; // gather all required images
 
             phase = 'resolving images';
-            _context.next = 11;
+            _context.next = 10;
             return (0, _resolveImages.default)(animator, path, composition, layer);
 
-          case 11:
+          case 10:
             images = _context.sent;
             // create textures for each sprite
             phase = 'generating textures';
-            _context.prev = 13;
+            _context.prev = 12;
             textures = images; // map(images, createTextureFromImage);
 
-            _context.next = 21;
+            _context.next = 20;
             break;
 
-          case 17:
-            _context.prev = 17;
-            _context.t0 = _context["catch"](13);
+          case 16:
+            _context.prev = 16;
+            _context.t0 = _context["catch"](12);
             console.error("Failed to create a texture for ".concat(path), composition);
             throw _context.t0;
 
-          case 21:
+          case 20:
             // create the instance of the sprite
             phase = 'creating mask instance'; // using bounds
 
             if (!(textures.length === 0)) {
-              _context.next = 33;
+              _context.next = 32;
               break;
             }
 
             if (!(isNaN(layer.width) || isNaN(layer.height) || layer.width === 0 || layer.height === 0)) {
-              _context.next = 26;
+              _context.next = 25;
               break;
             }
 
             phase = 'validating mask bounds';
             throw new _errors.InvalidMaskBoundsException();
 
-          case 26:
+          case 25:
             // create the mask
             maskGenerator.canvas.width = layer.width;
             maskGenerator.canvas.height = layer.height;
@@ -77283,17 +77275,16 @@ function _createMask() {
             maskGenerator.ctx.fillRect(0, 0, layer.width, layer.height); // create the sprite
 
             mask = new _lib.PIXI.Sprite.from(maskGenerator.canvas);
-            _context.next = 37;
+            _context.next = 35;
             break;
 
-          case 33:
-            console.log("create from sprite");
+          case 32:
             isAnimated = images.length > 1;
             mask = isAnimated ? new _lib.PIXI.AnimatedSprite(textures) : new _lib.PIXI.Sprite(textures[0]); // if animated, start playback
 
             if (isAnimated) mask.play();
 
-          case 37:
+          case 35:
             // match up names
             (0, _normalize.normalizeProps)(layer.props); // create dynamically rendered properties
 
@@ -77311,7 +77302,13 @@ function _createMask() {
 
             container.zIndex = mask.zIndex;
             container.addChild(mask);
-            container.isMask = true; // set some default values
+            container.isMask = true;
+            container.name = layer.name;
+            container.maskInstance = mask; // never hue shift a mask
+
+            container.config = {
+              ignoreHueShift: true
+            }; // set some default values
 
             mask.pivot.x = mask.width / 2;
             mask.pivot.y = mask.height / 2; // include this instance
@@ -77324,18 +77321,18 @@ function _createMask() {
               update: update
             }]);
 
-          case 55:
-            _context.prev = 55;
+          case 56:
+            _context.prev = 56;
             _context.t1 = _context["catch"](2);
             console.error("Failed to create mask ".concat(path, " while ").concat(phase));
             throw _context.t1;
 
-          case 59:
+          case 60:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 55], [13, 17]]);
+    }, _callee, null, [[2, 56], [12, 16]]);
   }));
   return _createMask.apply(this, arguments);
 }
@@ -77828,7 +77825,7 @@ var _emitter = _interopRequireDefault(require("./emitter"));
 
 var _group = _interopRequireDefault(require("./group"));
 
-var _mask = _interopRequireDefault(require("./mask"));
+var _mask2 = _interopRequireDefault(require("./mask"));
 
 var _collection = require("../../utils/collection");
 
@@ -77838,11 +77835,19 @@ var _expressions = require("../expressions");
 
 var variables = _interopRequireWildcard(require("../variables"));
 
+var _findObjectsOfRole = require("../../pixi/utils/find-objects-of-role");
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
@@ -77855,7 +77860,7 @@ function createInstance(_x, _x2, _x3, _x4, _x5) {
 
 function _createInstance() {
   _createInstance = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, data, relativeTo) {
-    var instance, container, pending, i, layer, type, value, sprite, emitter, repeated, group, mask, _animator$plugins$typ, customizer, params, custom, composite, layers, _i, _layer, didSetMask, j, target;
+    var instance, container, pending, i, layer, type, value, sprite, emitter, repeated, group, mask, _animator$plugins$typ, customizer, params, custom, composite, layers, _i, _layer, masks, _iterator, _step, _mask, applyTo, _iterator2, _step2, target;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -77917,7 +77922,7 @@ function _createInstance() {
                     pending.push(group);
                   } // masking effects
                   else if (type === 'mask') {
-                      mask = (0, _mask.default)(animator, controller, path, data, layer);
+                      mask = (0, _mask2.default)(animator, controller, path, data, layer);
                       pending.push(mask);
                     } // not a valid type
                     else {
@@ -77947,83 +77952,47 @@ function _createInstance() {
             composite = _context.sent;
             layers = (0, _collection.flatten)(composite); // append each layer
 
-            _i = layers.length;
+            for (_i = layers.length; _i-- > 0;) {
+              _layer = layers[_i]; // add to the view
 
-          case 23:
-            if (!(_i-- > 0)) {
-              _context.next = 45;
-              break;
+              container.update = (0, _utils2.appendFunc)(container.update, _layer.update);
+              container.dispose = (0, _utils2.appendFunc)(container.dispose, _layer.dispose);
+              container.addChildAt(_layer.displayObject, 0);
+            } // mask assignment
+
+
+            masks = (0, _findObjectsOfRole.findDisplayObjectsOfRole)(container, 'mask');
+            _iterator = _createForOfIteratorHelper(masks);
+
+            try {
+              for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                _mask = _step.value;
+                applyTo = (0, _findObjectsOfRole.findDisplayObjectsOfRole)(container, "mask:".concat(_mask.name));
+                _iterator2 = _createForOfIteratorHelper(applyTo);
+
+                try {
+                  for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+                    target = _step2.value;
+                    target.mask = _mask.maskInstance;
+                  }
+                } catch (err) {
+                  _iterator2.e(err);
+                } finally {
+                  _iterator2.f();
+                }
+              } // update based on ordering
+
+            } catch (err) {
+              _iterator.e(err);
+            } finally {
+              _iterator.f();
             }
 
-            _layer = layers[_i]; // add to the view
-
-            container.update = (0, _utils2.appendFunc)(container.update, _layer.update);
-            container.dispose = (0, _utils2.appendFunc)(container.dispose, _layer.dispose);
-            container.addChildAt(_layer.displayObject, 0); // if it's a mask, then apply to previous layers
-
-            if (!_layer.displayObject.isMask) {
-              _context.next = 43;
-              break;
-            }
-
-            didSetMask = false; // loop backwards and apply the mask
-
-            j = _i + 1;
-
-          case 31:
-            if (!(j < layers.length)) {
-              _context.next = 42;
-              break;
-            }
-
-            target = layers[j]; // if the z-index for this layer is
-            // above the mask, then ignore by default
-            // TODO: would we like to add a property to allow
-            // masks to work from the bottom?
-
-            if (!((target.displayObject.zIndex || 0) > (_layer.displayObject.zIndex || 0))) {
-              _context.next = 35;
-              break;
-            }
-
-            return _context.abrupt("continue", 39);
-
-          case 35:
-            if (!(!!target.data.ignoreMask || !!target.data.breakMask)) {
-              _context.next = 37;
-              break;
-            }
-
-            return _context.abrupt("continue", 39);
-
-          case 37:
-            // apply the mask
-            target.displayObject.mask = _layer.displayObject;
-            didSetMask = true;
-
-          case 39:
-            j++;
-            _context.next = 31;
-            break;
-
-          case 42:
-            // if there's an idle mask
-            if (!didSetMask) {
-              console.warn("Unused mask created for ".concat(path, ". Mask will be hidden"));
-              _layer.displayObject.visible = false;
-            }
-
-          case 43:
-            _context.next = 23;
-            break;
-
-          case 45:
-            // update based on ordering
             container.sortChildren(); // return the final layer
 
             return _context.abrupt("return", container);
 
-          case 47:
+          case 28:
           case "end":
             return _context.stop();
         }
@@ -78032,7 +78001,7 @@ function _createInstance() {
   }));
   return _createInstance.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js","../expressions":"animation/expressions.js","../variables":"animation/variables.js"}],"animation/importManifest.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js","../expressions":"animation/expressions.js","../variables":"animation/variables.js","../../pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js"}],"animation/importManifest.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

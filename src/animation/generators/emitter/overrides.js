@@ -15,10 +15,10 @@ function applyParticleOverride(target) {
 	const update = target.prototype.update;
 
 	// override the update function
-	target.update = function (...args) {
+	target.prototype.update = function (...args) {
 	
 		// perform normal updateialzation
-		update.apply(this, args);
+		let result = update.apply(this, args);
 
 		// apply the default starting rotation
 		if (this.rotationModifier) {
@@ -28,11 +28,12 @@ function applyParticleOverride(target) {
 		// allow sprite flipping on x axis
 		if (this.emitter.config.flipParticleX && this.scale.x > 0)
 			this.scale.x *= -1;
-
+		
 		// allow sprite flipping on y axis
 		if (this.emitter.config.flipParticleY && this.scale.y > 0)
 			this.scale.y *= -1;
 		
+		return result;
 	};
 
 	target.prototype.init = function (...args) {
