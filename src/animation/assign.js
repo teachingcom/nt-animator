@@ -5,6 +5,7 @@ import ResponsiveStage from '../pixi/stage';
 import { MAPPINGS } from './mappings';
 
 const MISSING_STAGE = { width: 0, height: 0 };
+const MISSING_PLAYER = { };
 const DYNAMIC_PROPERTY_DEFAULTS = {
 	x: 0,
 	y: 0,
@@ -115,7 +116,8 @@ export function applyDynamicProperties(obj, props) {
 	// create the handler function
 	const updateProperties = () => {
 		let stage = obj.__responsiveStage__ = obj.__responsiveStage__ || ResponsiveStage.findResponsiveStage(obj);
-		update(obj, stage || MISSING_STAGE);
+		let player = obj.__player__ = obj.__player__ || findParent(obj, obj => obj.isPlayerRoot);
+		update(obj, stage || MISSING_STAGE, player || MISSING_PLAYER);
 	};
 
 	// set the initial values
@@ -136,4 +138,15 @@ export function applyDynamicProperties(obj, props) {
 		return __renderCanvas__.apply(obj, args);
 	};
 
+}
+
+function findParent(obj, matching) {
+	let check = obj.parent
+	while (check) {
+		if (matching(check)) {
+			return check
+		}
+
+		check = check.parent
+	}
 }

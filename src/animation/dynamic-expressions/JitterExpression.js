@@ -40,11 +40,15 @@ export class JitterExpression {
       }
       else if (isObj && 'relative_to_stage' in arg) {
         const key = arg.relative_to_stage
-        this.modifier = (target, stage) => stage[key] || 0
+        this.modifier = (target, stage, player) => stage[key] || 0
       }
       else if (isObj && 'relative_to_self' in arg) {
         const key = arg.relative_to_self
-        this.modifier = (target, stage) => target[key] || 0
+        this.modifier = (target, stage, player) => target[key] || 0
+      }
+      else if (isObj && 'relative_to_player' in arg) {
+        const key = arg.relative_to_player
+        this.modifier = (target, stage, player) => player[key] || 0
       }
       else if (isObj && 'scale' in arg) { 
         this.scale = arg.scale * 0.01
@@ -72,7 +76,7 @@ export class JitterExpression {
 		this.nextUpdate = 0
   }
 
-  update = (target, stage) => {
+  update = (target, stage, player) => {
     const ts = ((Date.now() - JitterExpression.start) + this.offset) * this.scale
 		
 		if (ts > this.nextUpdate) {
@@ -88,7 +92,7 @@ export class JitterExpression {
 
 		}
 		else {
-			this.current += ((this.target - this.current) * this.rate) * this.modifier(target, stage)
+			this.current += ((this.target - this.current) * this.rate) * this.modifier(target, stage, player)
 		}
 
 		const value = this.current * this.flip

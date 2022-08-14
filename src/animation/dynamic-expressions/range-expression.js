@@ -32,11 +32,15 @@ export default class RangeExpression {
       }
       else if (isObj && 'relative_to_stage' in arg) {
         const key = arg.relative_to_stage
-        this.modifier = (target, stage) => stage[key] || 0
+        this.modifier = (target, stage, player) => stage[key] || 0
       }
       else if (isObj && 'relative_to_self' in arg) {
         const key = arg.relative_to_self
-        this.modifier = (target, stage) => target[key] || 0
+        this.modifier = (target, stage, player) => target[key] || 0
+      }
+      else if (isObj && 'relative_to_player' in arg) {
+        const key = arg.relative_to_player
+        this.modifier = (target, stage, player) => player[key] || 0
       }
       else if (isObj && 'scale' in arg) { 
         this.scale = arg.scale * 0.01
@@ -61,8 +65,8 @@ export default class RangeExpression {
     this.max = max
   }
 
-  update = (target, stage) => {
-    const value = this.min + ((this.max - this.min) * this.modifier(target, stage))
+  update = (target, stage, player) => {
+    const value = this.min + ((this.max - this.min) * this.modifier(target, stage, player))
 		this.mapping(target, (this.convertToInt ? 0 | value : value))
   }
 
