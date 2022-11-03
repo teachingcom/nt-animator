@@ -82,6 +82,27 @@ export default function animate(params) {
 	return handler;
 }
 
+export function animateAsync(args) {
+	const { complete } = args;
+	
+	return new Promise(resolve => {
+		const handler = animate({
+			...args,
+			complete(...result) {
+				complete?.(...result);
+				resolve(handler);
+			}
+		});
+	});
+}
+
+export function animateWait(time) {
+	return new Promise(resolve => setTimeout(resolve, time));
+}
+
+// expose
+animate.async = animateAsync;
+animate.wait = animateWait;
 
 /** helper for animation handling */
 class AnimationHandler {

@@ -105,11 +105,11 @@ class BaseSineExpression {
       value = Math.round(value)
     }
 
-    // if needed
-    if (this.sortLayers && target.parent && this.priorValue !== value) {
-      this.priorValue = value;
-      target.parent.sortChildren();
-    }
+    // // if needed
+    // if (this.sortLayers && target.parent && this.priorValue !== value) {
+    //   this.priorValue = value;
+      
+    // }
     
 		this.mapping(target, (this.convertToInt ? 0 | value : value))
   }

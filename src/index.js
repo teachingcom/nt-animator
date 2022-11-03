@@ -3,9 +3,12 @@ import { PIXI as libPIXI } from './pixi/lib';
 // skips hello messages for PIXI
 import './pixi/utils/skip-hello';
 
+
 // animation helper
 export { Animator } from './animation';
 export { default as animate } from './animate';
+export { default as reset } from './reset';
+export { default as walk } from './pixi/walk-tree';
 
 // PIXI helpers
 import ResponsiveContainer from './pixi/responsive';

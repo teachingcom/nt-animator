@@ -13,6 +13,7 @@ import PercentExpression from "./dynamic-expressions/range-expression";
 import AverageExpression from "./dynamic-expressions/average-expression";
 import SumExpression from "./dynamic-expressions/sum-expression";
 import CycleExpression from "./dynamic-expressions/cycle-expression";
+import BetweenExpression from "./dynamic-expressions/between-expression";
 import { JitterExpression } from "./dynamic-expressions/JitterExpression";
 
 /** expression types */
@@ -38,6 +39,7 @@ const DYNAMICS = {
   ':jit': { instance: JitterExpression },
   ':mod': { instance: ModExpression },
   ':percent': { instance: PercentExpression },
+  ':between': { instance: BetweenExpression },
   ':cos': { instance: CosineExpression },
   ':sin': { instance: SineExpression },
   ':bez': { instance: BezierExpression },

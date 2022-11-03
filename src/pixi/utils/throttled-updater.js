@@ -59,6 +59,13 @@ export function createThrottledUpdater (key, animator, ...args) {
   }
 }
 
+export function disposeAllThrottledUpdaters() {
+  throttled.updates = [ ];
+  throttled.frame = 0;
+  throttled.elapsed = Date.now();
+  console.log('has', throttled);
+}
+
 // resolve optional args
 function resolveArgs (args) {
   let [scale, action] = args

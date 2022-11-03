@@ -21,11 +21,32 @@ export const MAPPINGS = [
 	// transforms
 	{ prop: 'x', apply: (t, v) => t.x = v },
 	{ prop: 'y', apply: (t, v) => t.y = v },
-	{ prop: 'z', apply: (t, v) => t.zIndex = v },
+	{ prop: 'z', apply: (t, v) => {
+
+		if (t.__zIndex !== v) {
+			t.__zIndex = t.zIndex = v;
+			// t.parent?.sortChildren?.();
+			if (t.parent) {
+				t.parent.sortableChildren = true;
+			}
+		} 
+
+	 }},
 	{ prop: 'rotation', apply: (t, v) => t.rotation = toRotation(v) },
 
 	// animation
-	{ prop: 'fps', apply: (t, v) => t.animationSpeed = toAnimationSpeed(v) },
+	{ prop: 'fps', apply: (t, v) => {
+		// only update when changing
+		if (v !== t.__animationSpeed) {	
+			t.animationSpeed = toAnimationSpeed(v);
+			t.__animationSpeed = v;
+			
+			// needs to reset the animation
+			t.stop?.();
+			t.play?.();
+		}
+	 }},
+
 	// { prop: '// currentFrame', apply: ? }?
 
 	{ prop: 'visible', apply: (t, v) => t.visible = !!v },
