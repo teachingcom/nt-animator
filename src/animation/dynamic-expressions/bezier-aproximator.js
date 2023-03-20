@@ -44,12 +44,12 @@ export default class BezierAproximator {
 		this.aY = 1 - this.cY - this.bY
 
 		// prepopulate values
-		this._precalculate()
+		// this._precalculate()
 	}
 
 	// look up table of values so this isn't
 	// constantly calculated
-	_lut = [ ]
+	_lut = { }
 
 	// Functions for calculating x, x', y for t
 	_bezierX(t){
@@ -74,34 +74,46 @@ export default class BezierAproximator {
 		return t
 	}
 
-	// precalculate all values
-	_precalculate() {
-		const lut = [ ]
+	// // precalculate all values
+	// _precalculate() {
+	// 	const lut = [ ]
 
-		// calculate all values
-		for (let i = 0; i < 1; i += 0.005) {
-			const t = this._newtonRaphson(i) || 0
-			const v = t * (this.cY + t * (this.bY + t * this.aY))
-			lut.push(v)
+	// 	// calculate all values
+	// 	for (let i = 0; i < 1; i += 0.005) {
+	// 		const t = this._newtonRaphson(i) || 0
+	// 		const v = t * (this.cY + t * (this.bY + t * this.aY))
+	// 		lut.push(v)
+	// 	}
+
+	// 	this._lut = lut;
+	// 	this._lut = [ ...lut ];
+
+	// 	lut.reverse();
+	// 	this._lut = [ ...this._lut, ...lut ]
+	// 	this._total = this._lut.length
+
+	// }
+
+	calc(value) {
+		const comp = value % 1
+		const id = Math.floor(comp * 100)
+		let result = this._lut[id]
+
+		if (result === undefined) {
+			const t = this._newtonRaphson(comp) || 0
+			result = t * (this.cY + t * (this.bY + t * this.aY))
+			this._lut[id] = result
 		}
 
-		this._lut = lut;
-		this._lut = [ ...lut ];
+		return result
 
-		lut.reverse();
-		this._lut = [ ...this._lut, ...lut ]
-		this._total = this._lut.length
+		// t = (t * 100)
+		// // t = (t * min) + (t * max) - (t * min)
+		// if (t < 0) {
+		// 	t = 200 + t
+		// }
 
-	}
-
-	calc(t) {
-		t = (t * 100)
-		// t = (t * min) + (t * max) - (t * min)
-		if (t < 0) {
-			t = 200 + t
-		}
-
-		return this._lut[t % this._total]
+		// return this._lut[t % this._total]
 	}
 
 }

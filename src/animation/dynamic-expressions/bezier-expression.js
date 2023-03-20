@@ -57,11 +57,8 @@ export default class BezierExpression {
 
   update = (target, stage) => {
     const ts = ((Date.now() - BezierExpression.start) + this.offset) * this.scale
-		const scale = this.bezier.calc(ts);
-		const value = this.min + (this.range * scale);
-
-		// calculate the current mod value
-		// const value = (ts % this.modOf) * this.flip
+		const scale = this.bezier.calc(ts)
+		const value = this.min + (this.range * scale)
 
 		// apply the value
 		this.mapping(target, (this.convertToInt ? 0 | value : value))

@@ -166,6 +166,7 @@ export default async function createEmitter(animator, controller, path, composit
 		assignIf(emit.freq, isNumber, config, (t, v) => t.frequency = 1 / v);
 		assignIf(emit.chance, isNumber, config, (t, v) => t.spawnChance = v);
 		assignIf(emit.duration, isNumber, config, (t, v) => t.emitterLifetime = v / 1000);
+		assignIf(emit.delay, isNumber, config, (t, v) => t.delay = v);
 		
 		// this is established using shorthands for bounds
 		// assignIf(emit.type, isString, config, (t, v) => t.spawnType = v);
@@ -291,18 +292,20 @@ export default async function createEmitter(animator, controller, path, composit
 		}
 
 		// manual start
-		if (manualStart) {
+		if (manualStart || config.delay) {
 			emitter.autoUpdate = false;
 			emitter.activate = create;
 			emitter.emit = false;
 		}
 		
 		// delayed start
-		else if ((config.delay || 0) > 0)
+		if (!isNaN(config.delay) && config.delay > 0) {
 			setTimeout(create, config.delay);
-
-		// auto start
-		else create();
+		}
+		// create immediately
+		else {
+			create()
+		}
 
 		// create dynamically rendered properties
 		phase = 'creating dynamic properties';

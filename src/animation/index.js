@@ -121,6 +121,7 @@ export class Animator extends EventEmitter {
 		instance.type = data.type;
 		instance.path = resource;
 		instance.controller = controller;
+		instance.config = data;
 
 		return instance;
 	}

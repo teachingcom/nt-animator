@@ -53,11 +53,13 @@ export default class BetweenExpression {
 
 		// calculate the current mod value
 		const mod = this.modifier?.(target, stage, player) || 0
-		let value = this.min + (this.max * mod)
+    const range = this.max - this.min
+		let value = (range * mod) + this.min // this.min + (this.max * mod)
 
 		// inverting
 		if (this.flip) {
-			value = this.max - value
+			// value = this.max - value
+			value = range - value
 		}
 
 		value *= this.scale
