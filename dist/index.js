@@ -77247,15 +77247,16 @@ function _createEmitter() {
 
             if (manualStart || config.delay) {
               emitter.autoUpdate = false;
+              emitter.emit = false; // create activation function
+
               emitter.activate = create;
-              emitter.emit = false;
             } // delayed start
 
 
-            if (!isNaN(config.delay) && config.delay > 0) {
+            if (!manualStart && !isNaN(config.delay) && config.delay > 0) {
               setTimeout(create, config.delay);
             } // create immediately
-            else {
+            else if (!manualStart) {
                 create();
               } // create dynamically rendered properties
 

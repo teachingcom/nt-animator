@@ -294,16 +294,18 @@ export default async function createEmitter(animator, controller, path, composit
 		// manual start
 		if (manualStart || config.delay) {
 			emitter.autoUpdate = false;
-			emitter.activate = create;
 			emitter.emit = false;
+			
+			// create activation function
+			emitter.activate = create;
 		}
 		
 		// delayed start
-		if (!isNaN(config.delay) && config.delay > 0) {
+		if (!manualStart && !isNaN(config.delay) && config.delay > 0) {
 			setTimeout(create, config.delay);
 		}
 		// create immediately
-		else {
+		else if (!manualStart) {
 			create()
 		}
 
