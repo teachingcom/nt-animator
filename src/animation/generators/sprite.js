@@ -48,13 +48,12 @@ export default async function createSprite(animator, controller, path, compositi
 			// gather all required images
 			phase = 'resolving images';
 			const textures = await resolveImages(animator, path, composition, layer);
-			
+
 			// create the instance of the sprite
 			phase = 'creating sprite instance';
 			const isAnimated = textures.length > 1;
-			sprite = isAnimated
-				? new PIXI.AnimatedSprite(textures)
-				: new PIXI.Sprite(textures[0]);
+			sprite = isAnimated ? new PIXI.AnimatedSprite(textures)
+					: new PIXI.Sprite(textures[0]);
 
 			// set other values
 			sprite.loop = layer.props?.loop !== false;
