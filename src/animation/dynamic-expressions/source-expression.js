@@ -1,11 +1,14 @@
-import { findDisplayObjectsOfRole } from '../../../dist'
 import { isObject } from '../../utils'
 import * as mappings from '../mappings'
 
 export default class SourceExpression {
 
-	getFrontOfCar(stage, player) {
+	getWidthOfCar(stage, player) {
 		window.PLAYER = player
+
+		// return 344
+		return player.car?.positions?.back / -0.7
+		// return player.car?.width || 0
 
 		if (!this.frontPosition) {
 			return 0
@@ -57,8 +60,8 @@ export default class SourceExpression {
 
 		// handle look up helpers
 
-		if (this.source === 'front_of_car') {
-			this.getValue = this.getFrontOfCar
+		if (this.source === 'width_of_car') {
+			this.getValue = this.getWidthOfCar
 		}
 		else {
 			console.log('src unknown:', this.source)

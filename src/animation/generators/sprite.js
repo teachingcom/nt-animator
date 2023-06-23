@@ -120,7 +120,7 @@ export default async function createSprite(animator, controller, path, compositi
 		if (isMarker) {
 			if (layer.debug) {
 				sprite.visible = true;
-				sprite.alpha = layer.debug;
+				sprite.alpha = layer.debug ? (layer.props.alpha || layer.debug || 1) : NaN;
 				if (isNaN(sprite.alpha)) {
 					sprite.alpha = 1;
 				}
