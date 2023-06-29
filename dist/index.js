@@ -77144,7 +77144,7 @@ function _createEmitter() {
               return t.blendMode = v;
             }); // boolean props
 
-            manualStart = emit.auto === false || emit.autoplay === false || emit.autoPlay === false;
+            manualStart = layer.auto === false || layer.autoPlay === false || emit.auto === false || emit.autoplay === false || emit.autoPlay === false;
             config.noRotation = !!emit.noRotation;
             config.addAtBack = !!emit.atBack;
             config.orderedArt = !!emit.orderedArt;
