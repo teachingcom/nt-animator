@@ -16,6 +16,7 @@ class BaseSineExpression {
     this.modifier = () => 1
 
     this.sortLayers = this.prop === 'z';
+    let startAt = BaseSineExpression.start
 
     let min = 0
     let max = 1
@@ -38,6 +39,9 @@ class BaseSineExpression {
       }
       else if (isObj && 'inverse' in arg) {
         this.inverse = arg.inverse || 1
+      }
+      else if (isObj && 'start' in arg) {
+        startAt = arg.start
       }
       else if (isObj && 'min' in arg) {
         min = arg.min
@@ -77,14 +81,15 @@ class BaseSineExpression {
       max = min
       min = 0
     }
-    
+
     // save the args
+    this.startAt = startAt
     this.min = min
     this.max = max
   }
 
   update = (target, stage, player) => {
-    const ts = ((Date.now() - BaseSineExpression.start) + this.offset) * this.scale
+    const ts = ((Date.now() - this.startAt) + this.offset) * this.scale
     let modifier = this.modifier(target, stage, player)
 
     // inverses so the value so it's the reverse of

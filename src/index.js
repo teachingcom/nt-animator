@@ -1,4 +1,5 @@
 import { PIXI as libPIXI } from './pixi/lib';
+import * as Particles from 'pixi-particles';
 
 // skips hello messages for PIXI
 import './pixi/utils/skip-hello';
@@ -16,7 +17,7 @@ import ResponsiveStage from './pixi/stage';
 import DetatchedContainer from './pixi/detatched-container';
 
 // share libraries
-export const PIXI = { ...libPIXI, ResponsiveContainer, ResponsiveStage, DetatchedContainer };
+export const PIXI = { ...libPIXI, ResponsiveContainer, ResponsiveStage, DetatchedContainer, Particles };
 
 // helpful utils
 export { default as ToggleHelper } from './animation/toggle';

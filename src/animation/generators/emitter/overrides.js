@@ -32,6 +32,10 @@ function applyParticleOverride(target) {
 		// allow sprite flipping on y axis
 		if (this.emitter.config.flipParticleY && this.scale.y > 0)
 			this.scale.y *= -1;
+
+		// perform flipping
+		this.scale.x *= this.randomFlipX;
+		this.scale.y *= this.randomFlipY;
 		
 		return result;
 	};
@@ -49,7 +53,8 @@ function applyParticleOverride(target) {
 			hasRandomStartRotation,
 			hasAssignedTint,
 			hasDefinedRotationOffset,
-			definedRotationOffset
+			definedRotationOffset,
+			randomFlip
 		} = this.emitter.config;
 
 		if (hasAssignedTint) {
@@ -70,6 +75,26 @@ function applyParticleOverride(target) {
 		// no rotation modification
 		else {
 			this.rotation = this.rotationModifier = 0;
+		}
+
+		// set the default
+		this.randomFlipX = 1;
+		this.randomFlipY = 1;
+
+		if (randomFlip === 'x') {
+			this.randomFlipX = Math.random() > 0.5 ? -1 : 1;
+		}
+		else if (randomFlip === 'y') {
+			this.randomFlipY = Math.random() > 0.5 ? -1 : 1;
+		}
+		else if (['any', 'either'].includes(randomFlip)) {
+			this.randomFlipX = Math.random() > 0.5 ? -1 : 1;
+			this.randomFlipY = Math.random() > 0.5 ? -1 : 1;
+		}
+		else if (!!randomFlip) {
+			const flip = Math.random() > 0.5 ? -1 : 1;
+			this.randomFlipX = flip;
+			this.randomFlipY = flip;
 		}
 
 		// if there's a constant rotation applied, then

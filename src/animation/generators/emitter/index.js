@@ -182,6 +182,7 @@ export default async function createEmitter(animator, controller, path, composit
 		config.hueShift = !!emit.hueShift;
 		config.flipParticleX = !!(emit.flipParticleX || emit.flipX || emit['flip.x']);
 		config.flipParticleY = !!(emit.flipParticleY || emit.flipY || emit['flip.y']);
+		config.randomFlip = emit.randomFlip;
 
 		if ('tint' in emit) {
 			config.hasAssignedTint = true;
