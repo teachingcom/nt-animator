@@ -25,17 +25,32 @@ function applyParticleOverride(target) {
 			this.rotation += this.rotationModifier;
 		}
 
-		// allow sprite flipping on x axis
-		if (this.emitter.config.flipParticleX && this.scale.x > 0)
-			this.scale.x *= -1;
-		
-		// allow sprite flipping on y axis
-		if (this.emitter.config.flipParticleY && this.scale.y > 0)
-			this.scale.y *= -1;
-
 		// perform flipping
-		this.scale.x *= this.randomFlipX;
-		this.scale.y *= this.randomFlipY;
+		if (this.lastKnownScaleX !== this.scale.x) {
+			
+			// allow sprite flipping on x axis
+			if (this.emitter.config.flipParticleX) {
+				this.scale.x *= -1;
+			}
+			
+			if (this.randomFlipX === -1) {
+				this.scale.x *= -1;
+			}
+		}
+
+		if (this.lastKnownScaleY !== this.scale.y) {
+			// allow sprite flipping on y axis
+			if (this.emitter.config.flipParticleY) {
+				this.scale.y *= -1;
+			}
+			
+			if (this.randomFlipY === -1) {
+				this.scale.y *= -1;
+			}
+		}
+
+		this.lastKnownScaleX = this.scale.x;
+		this.lastKnownScaleY = this.scale.y;
 		
 		return result;
 	};
@@ -80,6 +95,8 @@ function applyParticleOverride(target) {
 		// set the default
 		this.randomFlipX = 1;
 		this.randomFlipY = 1;
+		this.lastKnownScaleX = null;
+		this.lastKnownScaleY = null;
 
 		if (randomFlip === 'x') {
 			this.randomFlipX = Math.random() > 0.5 ? -1 : 1;
@@ -87,7 +104,7 @@ function applyParticleOverride(target) {
 		else if (randomFlip === 'y') {
 			this.randomFlipY = Math.random() > 0.5 ? -1 : 1;
 		}
-		else if (['any', 'either'].includes(randomFlip)) {
+		else if (randomFlip === 'any') {
 			this.randomFlipX = Math.random() > 0.5 ? -1 : 1;
 			this.randomFlipY = Math.random() > 0.5 ? -1 : 1;
 		}

@@ -17,6 +17,7 @@ import BetweenExpression from "./dynamic-expressions/between-expression";
 import { JitterExpression } from "./dynamic-expressions/JitterExpression";
 import TweenExpression from "./dynamic-expressions/tween-expression";
 import SourceExpression from "./dynamic-expressions/source-expression";
+import StepExpression from "./dynamic-expressions/step-expression";
 
 /** expression types */
 const EXPRESSIONS = {
@@ -40,6 +41,7 @@ const DYNAMICS = {
   ':avg': { instance: AverageExpression },
   ':jit': { instance: JitterExpression },
   ':mod': { instance: ModExpression },
+  ':step': { instance: StepExpression },
   ':src': { instance: SourceExpression },
   ':percent': { instance: PercentExpression },
   ':between': { instance: BetweenExpression },

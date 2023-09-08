@@ -9,6 +9,7 @@ import { unpack, toRole } from '../utils';
 // for creating child instances
 import createInstance from '.';
 import { normalizeProps } from '../normalize';
+import { evaluateExpression } from '../expressions';
 
 // default parameters to create a sprite
 const GROUP_DEFAULTS = {
@@ -33,6 +34,8 @@ export default async function createGroup(animator, controller, path, compositio
 	// tracking setup phase
 	let phase = '';
 	try {
+		// check for any expressions
+		layer.compose = evaluateExpression(layer.compose)
 		
 		// if the composition refers to a path
 		if (isString(layer.compose)) {
