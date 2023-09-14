@@ -69410,8 +69410,9 @@ function isBoolean(obj) {
 /** rounds to a precision and avoids string casting, if possible */
 
 
-var toPrecision = function toPrecision(num, val) {
-  return val === 1 ? (0 | num * 10) / 10 : val === 2 ? (0 | num * 100) / 100 : val === 3 ? (0 | num * 1000) / 1000 : val === 4 ? (0 | num * 10000) / 10000 : parseFloat(num.toPrecision(val));
+var toPrecision = function toPrecision(num, precision) {
+  var value = Math.pow(10, precision);
+  return (0 | num * value) / value;
 };
 /** non-action function */
 
