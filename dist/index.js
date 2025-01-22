@@ -70437,6 +70437,7 @@ var BaseRelativeTo = /*#__PURE__*/function () {
     this.isVisibility = prop === 'visible';
     this.flip = args.indexOf('flip') > -1;
     this.toInt = args.indexOf('int') > -1;
+    this.clamp = args.indexOf('clamp') > -1;
     this.min = args[0];
     this.max = args[1];
   }
@@ -70452,6 +70453,11 @@ var BaseRelativeTo = /*#__PURE__*/function () {
         percent = Math.abs((at - mid) / mid); // full range
       } else {
         percent = at / relativeTo;
+      } // also clamp
+
+
+      if (this.clamp) {
+        percent = Math.max(-1, Math.min(1, percent));
       } // specials
 
 
@@ -71394,6 +71400,7 @@ var BetweenExpression = function BetweenExpression(prop, args) {
   (0, _defineProperty2.default)(this, "flip", false);
   (0, _defineProperty2.default)(this, "min", 0);
   (0, _defineProperty2.default)(this, "max", 0);
+  (0, _defineProperty2.default)(this, "clamp", false);
   (0, _defineProperty2.default)(this, "update", function (target, stage, player) {
     var _this$modifier;
 
@@ -71408,7 +71415,13 @@ var BetweenExpression = function BetweenExpression(prop, args) {
       value = range - value;
     }
 
-    value *= _this.scale; // apply the value
+    value *= _this.scale;
+
+    if (_this.clamp) {
+      value = Math.min(_this.max, value);
+      value = Math.max(_this.min, value);
+    } // apply the value
+
 
     _this.mapping(target, _this.convertToInt ? 0 | value : value);
   });
@@ -71425,6 +71438,8 @@ var BetweenExpression = function BetweenExpression(prop, args) {
 
       if (arg === 'int') {
         this.convertToInt = true;
+      } else if (arg === 'clamp') {
+        this.clamp = true;
       } else if (arg === 'invert' || arg === 'flip') {
         this.flip = true;
       } else if ('min' in arg) {

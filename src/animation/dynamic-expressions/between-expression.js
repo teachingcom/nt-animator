@@ -8,6 +8,7 @@ export default class BetweenExpression {
   flip = false
 	min = 0
 	max = 0
+  clamp = false
 
   constructor (prop, args) {
 		this.prop = prop
@@ -17,6 +18,9 @@ export default class BetweenExpression {
 			const isObj = isObject(arg);
 			if (arg === 'int') {
         this.convertToInt = true
+      }
+      else if (arg === 'clamp') {
+        this.clamp = true
       }
 			else if (arg === 'invert' || arg === 'flip') {
 				this.flip = true;
@@ -63,6 +67,11 @@ export default class BetweenExpression {
 		}
 
 		value *= this.scale
+    
+    if (this.clamp) {
+      value = Math.min(this.max, value)
+      value = Math.max(this.min, value)
+    }
 
 		// apply the value
 		this.mapping(target, (this.convertToInt ? 0 | value : value))

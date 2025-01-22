@@ -8,6 +8,7 @@ class BaseRelativeTo {
     this.isVisibility = prop === 'visible'
     this.flip = args.indexOf('flip') > -1
     this.toInt = args.indexOf('int') > -1
+    this.clamp = args.indexOf('clamp') > -1
     this.min = args[0]
     this.max = args[1]
   }
@@ -26,13 +27,18 @@ class BaseRelativeTo {
       percent = at / relativeTo
     }
 
+    // also clamp
+    if (this.clamp) {
+      percent = Math.max(-1, Math.min(1, percent))
+    }
+
     // specials
     if (this.isVisibility) {
       target.visible = percent > this.min && percent < this.max
       return
     }
 
-    const value = ((this.max - this.min) * percent) + this.min
+    let value = ((this.max - this.min) * percent) + this.min
     if (!isFinite(value) || isNaN(value)) {
       return
     }
