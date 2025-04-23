@@ -1,3 +1,4 @@
+import { PIXI } from "../pixi/lib";
 import { toRotation, toAnimationSpeed, toBlendMode, toRelative } from "./converters";
 
 
@@ -50,6 +51,7 @@ export const MAPPINGS = [
 	// { prop: '// currentFrame', apply: ? }?
 
 	{ prop: 'visible', apply: (t, v) => t.visible = !!v },
+	{ prop: 'alias', apply: (t, v) => t.texture.baseTexture.scaleMode = !!v ? PIXI.SCALE_MODES.LINEAR : PIXI.SCALE_MODES.NEAREST },
 	
 	// colors and styling
 	{ prop: 'alpha', apply: (t, v) => t.alpha = v },
@@ -65,6 +67,17 @@ export const MAPPINGS = [
 		const [r, g, b] = v.replace(/[^0-9\,\.]/g, '').split(/\,/g);
 		t.tint = ((0 | r) * 65536) + ((0 | g) * 256) + (0 | b);
 	}},
+
+	// tiling
+	{ prop: 'tileScale', apply: (t, v) => {
+		t.tileScale.x = v 
+		t.tileScale.y = v 
+	}},
+	{ prop: 'tileScaleY', apply: (t, v) => t.tileScale.x = v },
+	{ prop: 'tileScaleY', apply: (t, v) => t.tileScale.y = v },
+	{ prop: 'tileX', apply: (t, v) => t.tileTransform.position.x = v },
+	{ prop: 'tileY', apply: (t, v) => t.tileTransform.position.y = v },
+	{ prop: 'tileRotation', apply: (t, v) => t.tileTransform.rotation = toRotation(v) },
 
 	// layer pivoting
 	{ prop: 'pivotX', apply: (t, v) => t.pivot.x = detectPivot(t, v, t.width) },

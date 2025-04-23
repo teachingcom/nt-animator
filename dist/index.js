@@ -69637,7 +69637,45 @@ function _slicedToArray(arr, i) {
 }
 
 module.exports = _slicedToArray;
-},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArrayLimit":"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"utils/collection.js":[function(require,module,exports) {
+},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArrayLimit":"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"randomizer.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.random = random;
+exports.setRandomizer = setRandomizer;
+// defaults to standard Math random function
+var randomizer = Math;
+
+function random() {
+  return randomizer.random();
+}
+/** assigns a randomizer to use for the random expression */
+
+
+function setRandomizer(val) {
+  randomizer = val;
+}
+},{}],"animation/variables.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.save = save;
+exports.pull = pull;
+var variables = {}; // saves a value
+
+function save(name, value) {
+  variables[name] = value;
+} // grabs a stored value
+
+
+function pull(name) {
+  return variables[name];
+}
+},{}],"utils/collection.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -69802,6 +69840,8 @@ exports.MAPPINGS = void 0;
 
 var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 
+var _lib = require("../pixi/lib");
+
 var _converters = require("./converters");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -69873,6 +69913,11 @@ var MAPPINGS = [// transforms
   apply: function apply(t, v) {
     return t.visible = !!v;
   }
+}, {
+  prop: 'alias',
+  apply: function apply(t, v) {
+    return t.texture.baseTexture.scaleMode = !!v ? _lib.PIXI.SCALE_MODES.LINEAR : _lib.PIXI.SCALE_MODES.NEAREST;
+  }
 }, // colors and styling
 {
   prop: 'alpha',
@@ -69912,6 +69957,38 @@ var MAPPINGS = [// transforms
         b = _v$replace$split2[2];
 
     t.tint = (0 | r) * 65536 + (0 | g) * 256 + (0 | b);
+  }
+}, // tiling
+{
+  prop: 'tileScale',
+  apply: function apply(t, v) {
+    t.tileScale.x = v;
+    t.tileScale.y = v;
+  }
+}, {
+  prop: 'tileScaleY',
+  apply: function apply(t, v) {
+    return t.tileScale.x = v;
+  }
+}, {
+  prop: 'tileScaleY',
+  apply: function apply(t, v) {
+    return t.tileScale.y = v;
+  }
+}, {
+  prop: 'tileX',
+  apply: function apply(t, v) {
+    return t.tileTransform.position.x = v;
+  }
+}, {
+  prop: 'tileY',
+  apply: function apply(t, v) {
+    return t.tileTransform.position.y = v;
+  }
+}, {
+  prop: 'tileRotation',
+  apply: function apply(t, v) {
+    return t.tileTransform.rotation = (0, _converters.toRotation)(v);
   }
 }, // layer pivoting
 {
@@ -69998,45 +70075,7 @@ for (var _i = 0, _MAPPINGS = MAPPINGS; _i < _MAPPINGS.length; _i++) {
   var mapping = _MAPPINGS[_i];
   LOOKUP[mapping.prop] = mapping.apply;
 }
-},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","./converters":"animation/converters.js"}],"randomizer.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.random = random;
-exports.setRandomizer = setRandomizer;
-// defaults to standard Math random function
-var randomizer = Math;
-
-function random() {
-  return randomizer.random();
-}
-/** assigns a randomizer to use for the random expression */
-
-
-function setRandomizer(val) {
-  randomizer = val;
-}
-},{}],"animation/variables.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.save = save;
-exports.pull = pull;
-var variables = {}; // saves a value
-
-function save(name, value) {
-  variables[name] = value;
-} // grabs a stored value
-
-
-function pull(name) {
-  return variables[name];
-}
-},{}],"animation/dynamic-expressions/get-random.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../pixi/lib":"pixi/lib.js","./converters":"animation/converters.js"}],"animation/dynamic-expressions/get-random.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -73840,7 +73879,92 @@ var StepExpression = function StepExpression(prop, args) {
 
 exports.default = StepExpression;
 var DELTA_TARGET = 1000 / 60;
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../mappings":"animation/mappings.js"}],"animation/expressions.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../mappings":"animation/mappings.js"}],"animation/dynamic-expressions/increment-expression.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _utils = require("../../utils");
+
+var mappings = _interopRequireWildcard(require("../mappings"));
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createForOfIteratorHelper(o) { if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (o = _unsupportedIterableToArray(o))) { var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var it, normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var IncrementExpression = function IncrementExpression(prop, args) {
+  var _this = this;
+
+  (0, _classCallCheck2.default)(this, IncrementExpression);
+  (0, _defineProperty2.default)(this, "offset", 0);
+  (0, _defineProperty2.default)(this, "scale", 1);
+  (0, _defineProperty2.default)(this, "flip", 1);
+  (0, _defineProperty2.default)(this, "update", function (target, stage) {
+    _this.value += _this.per;
+    var value = _this.value * _this.flip;
+
+    if (_this.mod) {
+      value %= _this.mod;
+    }
+
+    _this.mapping(target, _this.convertToInt ? 0 | value : value);
+  });
+  this.prop = prop;
+  this.mapping = mappings.lookup(prop);
+  var _value = 0;
+  var per = 1;
+
+  var _iterator = _createForOfIteratorHelper(args),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var arg = _step.value;
+      var isObj = (0, _utils.isObject)(arg);
+
+      if (arg === 'int') {
+        this.convertToInt = true;
+      } else if (arg === 'invert') {
+        this.flip = -1;
+      } else if (isObj && 'per' in arg) {
+        per = arg.per;
+      } else if (isObj && 'mod' in arg) {
+        this.mod = arg.mod;
+      } else if (arg === 'stagger' || isObj && arg.stagger) {
+        this.offset += 0 | (arg.stagger || 10000) * Math.random();
+      } else if (arg.offset) {
+        this.offset = arg.offset * 1000;
+      }
+    } // save the args
+
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+
+  this.value = _value + (this.offset || 0);
+  this.per = per || 1;
+};
+
+exports.default = IncrementExpression;
+(0, _defineProperty2.default)(IncrementExpression, "start", Date.now());
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js","../mappings":"animation/mappings.js"}],"animation/expressions.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -73868,8 +73992,6 @@ var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/sli
 var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
 var _utils = require("../utils");
-
-var mappings = _interopRequireWildcard(require("./mappings"));
 
 var randomizer = _interopRequireWildcard(require("../randomizer"));
 
@@ -73903,12 +74025,15 @@ var _sourceExpression = _interopRequireDefault(require("./dynamic-expressions/so
 
 var _stepExpression = _interopRequireDefault(require("./dynamic-expressions/step-expression"));
 
+var _incrementExpression = _interopRequireDefault(require("./dynamic-expressions/increment-expression"));
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// import * as mappings from './mappings';
 // dynamic expressions
 
 /** expression types */
@@ -73951,6 +74076,9 @@ var EXPRESSIONS = {
   }
 };
 var DYNAMICS = {
+  ':inc': {
+    instance: _incrementExpression.default
+  },
   ':sum': {
     instance: _sumExpression.default
   },
@@ -74255,7 +74383,7 @@ function shuffle(items) {
 
   items.push.apply(items, shuffled);
 }
-},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","../utils":"utils/index.js","./mappings":"animation/mappings.js","../randomizer":"randomizer.js","./variables":"animation/variables.js","./dynamic-expressions/get-random":"animation/dynamic-expressions/get-random.js","./dynamic-expressions/mod-expression":"animation/dynamic-expressions/mod-expression.js","./dynamic-expressions/sine-expressions":"animation/dynamic-expressions/sine-expressions.js","./dynamic-expressions/relative-expressions":"animation/dynamic-expressions/relative-expressions.js","./dynamic-expressions/bezier-expression":"animation/dynamic-expressions/bezier-expression.js","./dynamic-expressions/range-expression":"animation/dynamic-expressions/range-expression.js","./dynamic-expressions/average-expression":"animation/dynamic-expressions/average-expression.js","./dynamic-expressions/sum-expression":"animation/dynamic-expressions/sum-expression.js","./dynamic-expressions/cycle-expression":"animation/dynamic-expressions/cycle-expression.js","./dynamic-expressions/between-expression":"animation/dynamic-expressions/between-expression.js","./dynamic-expressions/JitterExpression":"animation/dynamic-expressions/JitterExpression.js","./dynamic-expressions/tween-expression":"animation/dynamic-expressions/tween-expression.js","./dynamic-expressions/source-expression":"animation/dynamic-expressions/source-expression.js","./dynamic-expressions/step-expression":"animation/dynamic-expressions/step-expression.js"}],"animation/utils.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","../utils":"utils/index.js","../randomizer":"randomizer.js","./variables":"animation/variables.js","./dynamic-expressions/get-random":"animation/dynamic-expressions/get-random.js","./dynamic-expressions/mod-expression":"animation/dynamic-expressions/mod-expression.js","./dynamic-expressions/sine-expressions":"animation/dynamic-expressions/sine-expressions.js","./dynamic-expressions/relative-expressions":"animation/dynamic-expressions/relative-expressions.js","./dynamic-expressions/bezier-expression":"animation/dynamic-expressions/bezier-expression.js","./dynamic-expressions/range-expression":"animation/dynamic-expressions/range-expression.js","./dynamic-expressions/average-expression":"animation/dynamic-expressions/average-expression.js","./dynamic-expressions/sum-expression":"animation/dynamic-expressions/sum-expression.js","./dynamic-expressions/cycle-expression":"animation/dynamic-expressions/cycle-expression.js","./dynamic-expressions/between-expression":"animation/dynamic-expressions/between-expression.js","./dynamic-expressions/JitterExpression":"animation/dynamic-expressions/JitterExpression.js","./dynamic-expressions/tween-expression":"animation/dynamic-expressions/tween-expression.js","./dynamic-expressions/source-expression":"animation/dynamic-expressions/source-expression.js","./dynamic-expressions/step-expression":"animation/dynamic-expressions/step-expression.js","./dynamic-expressions/increment-expression":"animation/dynamic-expressions/increment-expression.js"}],"animation/utils.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -75637,7 +75765,6 @@ function disposeAllThrottledUpdaters() {
   throttled.updates = [];
   throttled.frame = 0;
   throttled.elapsed = Date.now();
-  console.log('has', throttled);
 } // resolve optional args
 
 
@@ -76351,71 +76478,7 @@ function _resolveImages() {
   }));
   return _resolveImages.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../utils":"utils/index.js","../path":"animation/path.js","../utils":"animation/utils.js","./getSprite":"animation/resources/getSprite.js","./loadImage":"animation/resources/loadImage.js","../expressions":"animation/expressions.js"}],"animation/resources/createTextureFromImage.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = createTextureFromImage;
-
-var _lib = require("../../pixi/lib");
-
-var _errors = require("../errors");
-
-// internal texture cache
-var TEXTURES = {};
-/** handles creating a texture from an image */
-
-function createTextureFromImage(img) {
-  var spritesheet;
-  var sprite;
-
-  try {
-    if (!img) {
-      throw new _errors.InvalidTextureRequestException();
-    } // get sprite info
-
-
-    spritesheet = img.getAttribute('spritesheet');
-    sprite = img.getAttribute('sprite');
-    var useCache = spritesheet && sprite; // texture to load
-
-    var texture; // create the cache, if missing
-
-    if (useCache) {
-      TEXTURES[spritesheet] = TEXTURES[spritesheet] || {};
-      texture = TEXTURES[spritesheet][sprite];
-    } // if it exists, reuse it
-
-
-    if (texture) {
-      return texture;
-    } // create the new texture
-
-
-    texture = _lib.PIXI.Texture.from(img);
-    texture.scaleMode = _lib.PIXI.SCALE_MODES.LINEAR;
-    texture.mipmap = true; // cache, if needed
-
-    if (useCache) {
-      TEXTURES[spritesheet][sprite] = texture;
-    } // return the result
-
-
-    return texture;
-  } // handle the error
-  catch (ex) {
-    console.error(ex); // the image has data to work with
-
-    if (sprite && spritesheet) {
-      console.error("failed to load ".concat(sprite, " from source ").concat(spritesheet));
-    }
-
-    throw ex;
-  }
-}
-},{"../../pixi/lib":"pixi/lib.js","../errors":"animation/errors.js"}],"animation/normalize.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../utils":"utils/index.js","../path":"animation/path.js","../utils":"animation/utils.js","./getSprite":"animation/resources/getSprite.js","./loadImage":"animation/resources/loadImage.js","../expressions":"animation/expressions.js"}],"animation/normalize.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -76434,6 +76497,12 @@ function normalizeProps(props) {
   normalizeTo(props, 'scaleY', 'scale.y');
   normalizeTo(props, 'pivotX', 'pivot.x');
   normalizeTo(props, 'pivotY', 'pivot.y');
+  normalizeTo(props, 'tileX', 'tile.x');
+  normalizeTo(props, 'tileY', 'tile.y');
+  normalizeTo(props, 'tileScaleX', 'tile.scale.x');
+  normalizeTo(props, 'tileScaleY', 'tile.scale.y');
+  normalizeTo(props, 'tileScale', 'tile.scale');
+  normalizeTo(props, 'tileRotation', 'tile.rotation');
   normalizeTo(props, 'anchorX', 'anchor.x');
   normalizeTo(props, 'anchorY', 'anchor.y');
   normalizeTo(props, 'skewX', 'skew.x');
@@ -76531,10 +76600,6 @@ var _assign = require("../assign");
 
 var _utils = require("../../utils");
 
-var _createTextureFromImage = _interopRequireDefault(require("../resources/createTextureFromImage"));
-
-var _collection = require("../../utils/collection");
-
 var _normalize = require("../normalize");
 
 var _utils2 = require("../utils");
@@ -76543,6 +76608,8 @@ var _animatedSprite = _interopRequireDefault(require("../../pixi/utils/animated-
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// import createTextureFromImage from '../resources/createTextureFromImage';
+// import { map } from '../../utils/collection';
 // default parameters to create a sprite
 var SPRITE_DEFAULTS = {
   alpha: 1,
@@ -76565,7 +76632,7 @@ function createSprite(_x, _x2, _x3, _x4, _x5) {
 
 function _createSprite() {
   _createSprite = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, composition, layer) {
-    var update, dispose, phase, type, isSprite, isMarker, sprite, _layer$props, _layer$props2, textures, isAnimated, startFrame, goto, _layer$props3, _layer$props4;
+    var update, dispose, phase, type, isSprite, isMarker, sprite, _layer$props, _layer$props2, textures, isAnimated, isTile, startFrame, goto, _layer$props3, _layer$props4;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -76582,7 +76649,7 @@ function _createSprite() {
             isMarker = !isSprite; // create the required sprite
 
             if (!isSprite) {
-              _context.next = 24;
+              _context.next = 26;
               break;
             }
 
@@ -76596,10 +76663,12 @@ function _createSprite() {
             // create the instance of the sprite
             phase = 'creating sprite instance';
             isAnimated = textures.length > 1;
-            sprite = isAnimated ? new _lib.PIXI.AnimatedSprite(textures) : new _lib.PIXI.Sprite(textures[0]); // set other values
+            isTile = !!layer.tile && layer.width && layer.height;
+            sprite = isAnimated ? new _lib.PIXI.AnimatedSprite(textures) : isTile ? new _lib.PIXI.TilingSprite(textures[0], layer.width, layer.height) : new _lib.PIXI.Sprite(textures[0]); // set other values
 
             sprite.loop = ((_layer$props = layer.props) === null || _layer$props === void 0 ? void 0 : _layer$props.loop) !== false;
             sprite.isSprite = true;
+            sprite.isTileSprite = isTile;
             sprite.autoPlay = false;
             sprite.isAnimatedSprite = isAnimated; // choose the correct starting frame
 
@@ -76617,10 +76686,10 @@ function _createSprite() {
               (0, _animatedSprite.default)(sprite, layer.props);
             }
 
-            _context.next = 25;
+            _context.next = 27;
             break;
 
-          case 24:
+          case 26:
             // markers act like normal sprites and are used to define
             // bounds and positions without needing an actual sprite
             if (isMarker) {
@@ -76628,7 +76697,7 @@ function _createSprite() {
               sprite.visible = false;
             }
 
-          case 25:
+          case 27:
             // shared data
             sprite.role = (0, _utils2.toRole)(layer.role);
             sprite.path = path; // set some default values
@@ -76679,23 +76748,23 @@ function _createSprite() {
               dispose: dispose
             }]);
 
-          case 46:
-            _context.prev = 46;
+          case 48:
+            _context.prev = 48;
             _context.t0 = _context["catch"](3);
             console.error("Failed to create sprite ".concat(path, " while ").concat(phase));
             console.error(_context.t0);
             throw _context.t0;
 
-          case 51:
+          case 53:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[3, 46]]);
+    }, _callee, null, [[3, 48]]);
   }));
   return _createSprite.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./animation":"animation/generators/animation.js","../resources/resolveImages":"animation/resources/resolveImages.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../resources/createTextureFromImage":"animation/resources/createTextureFromImage.js","../../utils/collection":"utils/collection.js","../normalize":"animation/normalize.js","../utils":"animation/utils.js","../../pixi/utils/animated-sprite":"pixi/utils/animated-sprite.js"}],"animation/generators/emitter/bounds.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./animation":"animation/generators/animation.js","../resources/resolveImages":"animation/resources/resolveImages.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../normalize":"animation/normalize.js","../utils":"animation/utils.js","../../pixi/utils/animated-sprite":"pixi/utils/animated-sprite.js"}],"animation/generators/emitter/bounds.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -77611,7 +77680,71 @@ function _createGroup() {
   }));
   return _createGroup.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../utils":"animation/utils.js",".":"animation/generators/index.js","../normalize":"animation/normalize.js","../expressions":"animation/expressions.js"}],"utils/graphics.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../utils":"animation/utils.js",".":"animation/generators/index.js","../normalize":"animation/normalize.js","../expressions":"animation/expressions.js"}],"animation/resources/createTextureFromImage.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = createTextureFromImage;
+
+var _lib = require("../../pixi/lib");
+
+var _errors = require("../errors");
+
+// internal texture cache
+var TEXTURES = {};
+/** handles creating a texture from an image */
+
+function createTextureFromImage(img) {
+  var spritesheet;
+  var sprite;
+
+  try {
+    if (!img) {
+      throw new _errors.InvalidTextureRequestException();
+    } // get sprite info
+
+
+    spritesheet = img.getAttribute('spritesheet');
+    sprite = img.getAttribute('sprite');
+    var useCache = spritesheet && sprite; // texture to load
+
+    var texture; // create the cache, if missing
+
+    if (useCache) {
+      TEXTURES[spritesheet] = TEXTURES[spritesheet] || {};
+      texture = TEXTURES[spritesheet][sprite];
+    } // if it exists, reuse it
+
+
+    if (texture) {
+      return texture;
+    } // create the new texture
+
+
+    texture = _lib.PIXI.Texture.from(img);
+    texture.scaleMode = _lib.PIXI.SCALE_MODES.LINEAR;
+    texture.mipmap = true; // cache, if needed
+
+    if (useCache) {
+      TEXTURES[spritesheet][sprite] = texture;
+    } // return the result
+
+
+    return texture;
+  } // handle the error
+  catch (ex) {
+    console.error(ex); // the image has data to work with
+
+    if (sprite && spritesheet) {
+      console.error("failed to load ".concat(sprite, " from source ").concat(spritesheet));
+    }
+
+    throw ex;
+  }
+}
+},{"../../pixi/lib":"pixi/lib.js","../errors":"animation/errors.js"}],"utils/graphics.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -77731,6 +77864,8 @@ var _normalize = require("../normalize");
 
 var _utils2 = require("../utils");
 
+var _pixi = require("pixi.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // definging sprites by size requires scale to be set - in the
@@ -77847,11 +77982,14 @@ function _createMask() {
             phase = 'creating animations';
             (0, _animation.default)(animator, path, composition, layer, mask); // add to the view
 
+            container.maskFilter = new _pixi.SpriteMaskFilter(mask);
             container.zIndex = mask.zIndex;
             container.addChild(mask);
             container.isMask = true;
             container.name = layer.name;
-            container.maskInstance = mask; // never hue shift a mask
+            container.maskInstance = mask; // if there's a blend mode, apply it to the filter
+
+            container.maskFilter.blendMode = mask.blendMode; // never hue shift a mask
 
             container.config = {
               ignoreHueShift: true
@@ -77868,22 +78006,22 @@ function _createMask() {
               update: update
             }]);
 
-          case 56:
-            _context.prev = 56;
+          case 58:
+            _context.prev = 58;
             _context.t1 = _context["catch"](2);
             console.error("Failed to create mask ".concat(path, " while ").concat(phase));
             throw _context.t1;
 
-          case 60:
+          case 62:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[2, 56], [12, 16]]);
+    }, _callee, null, [[2, 58], [12, 16]]);
   }));
   return _createMask.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../resources/resolveImages":"animation/resources/resolveImages.js","../resources/createTextureFromImage":"animation/resources/createTextureFromImage.js","../../utils":"utils/index.js","../../utils/collection":"utils/collection.js","../errors":"animation/errors.js","../../utils/graphics":"utils/graphics.js","../normalize":"animation/normalize.js","../utils":"animation/utils.js"}],"pixi/utils/find-objects-of-role.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../resources/resolveImages":"animation/resources/resolveImages.js","../resources/createTextureFromImage":"animation/resources/createTextureFromImage.js","../../utils":"utils/index.js","../../utils/collection":"utils/collection.js","../errors":"animation/errors.js","../../utils/graphics":"utils/graphics.js","../normalize":"animation/normalize.js","../utils":"animation/utils.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js"}],"pixi/utils/find-objects-of-role.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -78356,6 +78494,8 @@ var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"))
 
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
 var _lib = require("../../pixi/lib");
@@ -78383,6 +78523,8 @@ var _expressions = require("../expressions");
 var variables = _interopRequireWildcard(require("../variables"));
 
 var _findObjectsOfRole = require("../../pixi/utils/find-objects-of-role");
+
+var _pixi = require("pixi.js");
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
@@ -78417,7 +78559,12 @@ function _createInstance() {
             path = path.replace(/^\/*/, ''); // unpack all data
 
             instance = (0, _fastCopy.default)(data);
-            if (data && 'base' in data) (0, _utils.inheritFrom)(animator, data, instance, 'base'); // create the instance container
+            if (data && 'base' in data) (0, _utils.inheritFrom)(animator, data, instance, 'base'); // apply params to this instance
+
+            if (instance.params) {
+              applyParameters(instance);
+            } // create the instance container
+
 
             container = new _lib.PIXI.Container();
             container.update = _utils2.noop;
@@ -78428,9 +78575,9 @@ function _createInstance() {
 
             i = instance.compose.length;
 
-          case 8:
+          case 9:
             if (!(i-- > 0)) {
-              _context.next = 18;
+              _context.next = 19;
               break;
             }
 
@@ -78439,13 +78586,13 @@ function _createInstance() {
             delete layer.base; // check if hidden
 
             if (!(layer.hide || layer.hidden)) {
-              _context.next = 14;
+              _context.next = 15;
               break;
             }
 
-            return _context.abrupt("continue", 16);
+            return _context.abrupt("continue", 17);
 
-          case 14:
+          case 15:
             // sprite layers
             type = layer.type;
 
@@ -78487,15 +78634,15 @@ function _createInstance() {
                           }
                       }
 
-          case 16:
-            _context.next = 8;
+          case 17:
+            _context.next = 9;
             break;
 
-          case 18:
-            _context.next = 20;
+          case 19:
+            _context.next = 21;
             return Promise.all(pending);
 
-          case 20:
+          case 21:
             composite = _context.sent;
             layers = (0, _collection.flatten)(composite); // append each layer
 
@@ -78520,7 +78667,8 @@ function _createInstance() {
                 try {
                   for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
                     target = _step2.value;
-                    target.mask = _mask.maskInstance;
+                    ;
+                    target.filters = [_mask.maskFilter];
                   }
                 } catch (err) {
                   _iterator2.e(err);
@@ -78539,7 +78687,7 @@ function _createInstance() {
 
             return _context.abrupt("return", container);
 
-          case 28:
+          case 29:
           case "end":
             return _context.stop();
         }
@@ -78548,7 +78696,30 @@ function _createInstance() {
   }));
   return _createInstance.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js","../expressions":"animation/expressions.js","../variables":"animation/variables.js","../../pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js"}],"animation/importManifest.js":[function(require,module,exports) {
+
+function hasChildren(obj) {
+  return (0, _typeof2.default)(obj) === 'object' || typeof obj === 'array' || obj instanceof Array || obj instanceof Object;
+}
+
+function applyParameters(instance) {
+  var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : instance.params;
+
+  for (var id in instance) {
+    var _instance$id;
+
+    if (((_instance$id = instance[id]) === null || _instance$id === void 0 ? void 0 : _instance$id[0]) === ':param') {
+      var _instance$id2;
+
+      instance[id] = params[(_instance$id2 = instance[id]) === null || _instance$id2 === void 0 ? void 0 : _instance$id2[1]];
+    } // check children
+
+
+    if (hasChildren(instance[id])) {
+      applyParameters(instance[id], params);
+    }
+  }
+}
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js","../expressions":"animation/expressions.js","../variables":"animation/variables.js","../../pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js"}],"animation/importManifest.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

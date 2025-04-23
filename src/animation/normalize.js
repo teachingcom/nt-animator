@@ -8,6 +8,12 @@ export function normalizeProps(props) {
 	normalizeTo(props, 'scaleY', 'scale.y');
 	normalizeTo(props, 'pivotX', 'pivot.x');
 	normalizeTo(props, 'pivotY', 'pivot.y');
+	normalizeTo(props, 'tileX', 'tile.x');
+	normalizeTo(props, 'tileY', 'tile.y');
+	normalizeTo(props, 'tileScaleX', 'tile.scale.x');
+	normalizeTo(props, 'tileScaleY', 'tile.scale.y');
+	normalizeTo(props, 'tileScale', 'tile.scale');
+	normalizeTo(props, 'tileRotation', 'tile.rotation');
 	normalizeTo(props, 'anchorX', 'anchor.x');
 	normalizeTo(props, 'anchorY', 'anchor.y');
 	normalizeTo(props, 'skewX', 'skew.x');

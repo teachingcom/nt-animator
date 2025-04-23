@@ -1,5 +1,5 @@
 import { isArray, isString, isNumber, isBoolean, TAU } from "../utils";
-import * as mappings from './mappings';
+// import * as mappings from './mappings';
 import * as randomizer from '../randomizer';
 import * as variables from './variables';
 
@@ -18,6 +18,7 @@ import { JitterExpression } from "./dynamic-expressions/JitterExpression";
 import TweenExpression from "./dynamic-expressions/tween-expression";
 import SourceExpression from "./dynamic-expressions/source-expression";
 import StepExpression from "./dynamic-expressions/step-expression";
+import IncrementExpression from "./dynamic-expressions/increment-expression";
 
 /** expression types */
 const EXPRESSIONS = {
@@ -36,6 +37,7 @@ const EXPRESSIONS = {
 }
 
 const DYNAMICS = {
+  ':inc': { instance: IncrementExpression },
   ':sum': { instance: SumExpression },
   ':cycle': { instance: CycleExpression },
   ':avg': { instance: AverageExpression },

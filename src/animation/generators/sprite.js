@@ -5,8 +5,8 @@ import resolveImages from '../resources/resolveImages';
 
 import { assignDisplayObjectProps, applyExpressions, applyDynamicProperties } from '../assign';
 import { setDefaults, noop, isNumber } from '../../utils';
-import createTextureFromImage from '../resources/createTextureFromImage';
-import { map } from '../../utils/collection';
+// import createTextureFromImage from '../resources/createTextureFromImage';
+// import { map } from '../../utils/collection';
 import { normalizeProps } from '../normalize';
 import { toRole } from '../utils';
 import createAnimatedSpriteHelper from '../../pixi/utils/animated-sprite';
@@ -52,12 +52,15 @@ export default async function createSprite(animator, controller, path, compositi
 			// create the instance of the sprite
 			phase = 'creating sprite instance';
 			const isAnimated = textures.length > 1;
+			const isTile = !!layer.tile && layer.width && layer.height
 			sprite = isAnimated ? new PIXI.AnimatedSprite(textures)
+					: isTile ? new PIXI.TilingSprite(textures[0], layer.width, layer.height)
 					: new PIXI.Sprite(textures[0]);
 
 			// set other values
 			sprite.loop = layer.props?.loop !== false;
 			sprite.isSprite = true;
+			sprite.isTileSprite = isTile;
 			sprite.autoPlay = false;
 			sprite.isAnimatedSprite = isAnimated;
 			

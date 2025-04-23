@@ -12,6 +12,7 @@ import { InvalidMaskBoundsException } from '../errors';
 import { createContext } from '../../utils/graphics';
 import { normalizeProps } from '../normalize';
 import { toRole } from '../utils';
+import { BLEND_MODES, SpriteMaskFilter } from 'pixi.js';
 
 // definging sprites by size requires scale to be set - in the
 // event at user creates a mask that doesn't have an image, we're
@@ -119,11 +120,15 @@ export default async function createMask(animator, controller, path, composition
 		createAnimation(animator, path, composition, layer, mask);
 
 		// add to the view
+		container.maskFilter = new SpriteMaskFilter(mask)
 		container.zIndex = mask.zIndex;
 		container.addChild(mask);
 		container.isMask = true;
 		container.name = layer.name;
 		container.maskInstance = mask;
+
+		// if there's a blend mode, apply it to the filter
+		container.maskFilter.blendMode = mask.blendMode
 
 		// never hue shift a mask
 		container.config = { ignoreHueShift: true };

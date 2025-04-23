@@ -13,6 +13,7 @@ import createRepeater from './repeater';
 import { evaluateExpression } from '../expressions';
 import * as variables from '../variables';
 import { findDisplayObjectsOfRole } from '../../pixi/utils/find-objects-of-role';
+import { BLEND_MODES } from 'pixi.js';
 
 // creates an instance of a car
 export default async function createInstance(animator, controller, path, data, relativeTo) {
@@ -23,6 +24,11 @@ export default async function createInstance(animator, controller, path, data, r
 	const instance = fastCopy(data);
 	if (data && 'base' in data)
 		inheritFrom(animator, data, instance, 'base');
+
+	// apply params to this instance
+	if (instance.params) {
+		applyParameters(instance)
+	}
 
 	// create the instance container
 	const container = new PIXI.Container();
@@ -107,8 +113,8 @@ export default async function createInstance(animator, controller, path, data, r
 	const masks = findDisplayObjectsOfRole(container, 'mask');
 	for (const mask of masks) {
 		const applyTo = findDisplayObjectsOfRole(container, `mask:${mask.name}`)
-		for (const target of applyTo) {
-			target.mask = mask.maskInstance;
+		for (const target of applyTo) {;
+			target.filters = [mask.maskFilter]
 		}
 	}
 
@@ -117,4 +123,22 @@ export default async function createInstance(animator, controller, path, data, r
 
 	// return the final layer
 	return container;
+}
+
+function hasChildren(obj) {
+	return typeof obj === 'object' || typeof obj === 'array' || obj instanceof Array || obj instanceof Object
+}
+
+function applyParameters(instance, params = instance.params) {
+	for (const id in instance) {
+		if (instance[id]?.[0] === ':param') {
+			instance[id] = params[instance[id]?.[1]]
+		}
+
+		// check children
+		if (hasChildren(instance[id])) {
+			applyParameters(instance[id], params)
+		}
+	}
+	
 }

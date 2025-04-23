@@ -63,7 +63,6 @@ export function disposeAllThrottledUpdaters() {
   throttled.updates = [ ];
   throttled.frame = 0;
   throttled.elapsed = Date.now();
-  console.log('has', throttled);
 }
 
 // resolve optional args
