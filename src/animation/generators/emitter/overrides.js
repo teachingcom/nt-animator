@@ -1,6 +1,7 @@
 import { PIXI } from '../../../pixi/lib';
 import * as Particles from 'pixi-particles';
 import { RAD } from '../../../utils';
+import { BLEND_MODES } from 'pixi.js';
 
 
 
@@ -16,9 +17,23 @@ function applyParticleOverride(target) {
 
 	// override the update function
 	target.prototype.update = function (...args) {
-	
+		const now = Date.now() 
+
 		// perform normal updateialzation
+		let x = this.x
 		let result = update.apply(this, args);
+
+		// customs scripts
+		if (this.__leaf) {
+			const { ts, tx, ty, xm, ym, sy, sx, ry, rx, rs, cx, gy } = this.__leaf
+			this.__leaf.cy -= this.__leaf.py
+			this.__leaf.py *= gy
+			this.y = ym((now + ts + ty) * sy) * ry + this.__leaf.cy
+			this.x = x - (cx + xm((now + ts + tx) * sx) * rx)
+
+			this.scale.x *= rs
+			this.scale.y *= rs
+		}
 
 		// apply the default starting rotation
 		if (this.rotationModifier) {
@@ -56,9 +71,44 @@ function applyParticleOverride(target) {
 	};
 
 	target.prototype.init = function (...args) {
+		const now = Date.now()
 		
 		// perform normal updateialzation
 		init.apply(this, args);
+
+		// Ideally we'd use behaviors, but that's not in this version of PIXI particles
+		// include custom leaf behaviors
+		if (!!this.emitter.config.custom?.leaf) {
+			const {
+				x = [3, 5],
+				rx = [1, 2],
+				ry = [10, 25],
+				py = [5, 10],
+				gy = [0.7, 0.9],
+				rs = [1, 1],
+				scale = 0.01,
+				blend = 1
+			} = this.emitter.config.custom?.leaf ?? { }
+
+			this.blendMode = Math.random() > blend ? BLEND_MODES.ADD : BLEND_MODES.NORMAL
+
+			this.__leaf = {
+				xm: Math.random() < 0.5 ? Math.sin : Math.cos,
+				cx: getValue(x),
+				rx: getValue(rx),
+				sx: Math.random() * scale,
+				tx: Math.random() * 5000,
+				ym: Math.random() < 0.5 ? Math.sin : Math.cos,
+				py: getValue(py),
+				gy: getValue(gy),
+				rs: getValue(rs),
+				cy: 0,
+				ry: getValue(ry),
+				sy: Math.random() * scale,
+				ty: Math.random() * 5000,
+				ts: now
+			}
+		}
 
 		// apply the default starting rotation
 		const {
@@ -128,3 +178,5 @@ function applyParticleOverride(target) {
 applyParticleOverride(Particles.AnimatedParticle);
 applyParticleOverride(Particles.Particle);
 
+
+const getValue = (values) => values.length === 2 ? ((values[1] - values[0]) * Math.random()) + values[0] : values

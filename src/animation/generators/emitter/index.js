@@ -21,6 +21,7 @@ const MAPPINGS = {
 	scale: { props: ['start', 'end'], displayAsList: true },
 	color: { props: ['start', 'end'], displayAsList: true, converter: toColor },
 	speed: { props: ['start', 'end'], displayAsList: true },
+	accel: { props: ['x', 'y'], displayAsList: true, renameTo: 'acceleration' },
 	dir: { props: ['min', 'max'], renameTo: 'startRotation' },
 	rotation: { props: ['min', 'max'], renameTo: 'rotationSpeed' },
 	life: { props: ['min', 'max'], renameTo: 'lifetime' }
@@ -99,6 +100,9 @@ export default async function createEmitter(animator, controller, path, composit
 		const { emit = { } } = layer;
 		const auto = layer.auto !== false && layer.autoStart !== false;
 		const config = { autoUpdate: auto };
+
+		// copy anything custom (maybe do work here)
+		config.custom = emit.custom
 
 		// fix common naming mistakes
 		if (emit.colors) {

@@ -14,6 +14,7 @@ import { evaluateExpression } from '../expressions';
 import * as variables from '../variables';
 import { findDisplayObjectsOfRole } from '../../pixi/utils/find-objects-of-role';
 import { BLEND_MODES } from 'pixi.js';
+import applyVariables from '../../variables';
 
 // creates an instance of a car
 export default async function createInstance(animator, controller, path, data, relativeTo) {
@@ -30,6 +31,11 @@ export default async function createInstance(animator, controller, path, data, r
 		applyParameters(instance)
 	}
 
+	// check for variables
+	if (instance.variables) {
+		applyVariables(instance)
+	}
+	
 	// create the instance container
 	const container = new PIXI.Container();
 	container.update = noop;

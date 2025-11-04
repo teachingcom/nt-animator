@@ -33,7 +33,8 @@ const EXPRESSIONS = {
   ':seq': { func: sequence },
   ':sequence': { func: sequence },
   ':range': { func: range },
-  ':var': { func: getVariable }
+  ':var': { func: getVariable },
+  ':random': { func: getRandom }
 }
 
 const DYNAMICS = {
@@ -54,6 +55,15 @@ const DYNAMICS = {
   ':rnd': { instance: GetRandomExpression },
   ':rx': { instance: RelativeToX },
   ':ry': { instance: RelativeToY }
+}
+
+function getRandom(min, max, asInt) {
+  let val = ((max - min) * Math.random()) + min
+  if (asInt) {
+    val = 0 | val
+  }
+
+  return val
 }
 
 function getVariable(name) {
@@ -149,7 +159,8 @@ export function expression(...args) {
   let val = args[0];
   for (let i = 1; i < args.length; i += 2) {
     const action = EXPRESSIONS[args[i]];
-    val = action(val, args[i + 1]);
+    // val = action(val, args[i + 1]);
+    val = action(val, ...args.slice(1));
   }
 
   return isNaN(val) ? 0 : val;

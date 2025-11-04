@@ -64,7 +64,7 @@ class BaseSineExpression {
       else if (isObj && 'scale' in arg) { 
         this.scale = arg.scale * 0.01
       }
-      else if (arg === 'stagger' || (isObj && arg.stagger)) { 
+      else if (arg === 'stagger' || (isObj && arg.stagger)) {  
         this.offset += 0 | (arg.stagger || 10000) * Math.random()
       }
       else if (arg.offset) { 

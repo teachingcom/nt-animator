@@ -1,3 +1,5 @@
+import LoadResourceError from "../common/resource-error"
+
 export default async function importManifest ({ manifest, version, path, baseUrl, timeout }) {
   try {
     // get the manifest sub path and then
@@ -26,8 +28,10 @@ export default async function importManifest ({ manifest, version, path, baseUrl
         }
 
         // no more attempts
-        console.error(`failed to import ${path}`)
-        throw ex
+        throw new LoadResourceError(path, { path, baseUrl })
+        // console.error(`failed to import ${path}`)
+        // throw new Error(`Failed to load "${path}"`, { path, baseUrl })
+        // throw ex
       }
     }
 
@@ -39,8 +43,9 @@ export default async function importManifest ({ manifest, version, path, baseUrl
 
   // had an issue loading this resource
   } catch (ex) {
-    console.error('Failed to load', path)
-    throw ex
+    throw new LoadResourceError(path, { path, baseUrl })
+    // console.error('Failed to load', path)
+    // throw ex
   }
 }
 
@@ -62,3 +67,4 @@ async function attemptFetch (url, timeout) {
   clearTimeout(pendingTimeout)
   return await response.json()
 }
+

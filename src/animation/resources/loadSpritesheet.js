@@ -1,3 +1,4 @@
+import LoadResourceError from '../../common/resource-error'
 import { PIXI } from '../../pixi/lib'
 import loadImage from './loadImage'
 
@@ -16,7 +17,8 @@ export default async function loadSpritesheet (animator, spritesheetId, spritesh
     // if the image failed to load, and we're not using placeholder
     // images, then crash here
     if (!image) {
-      throw new ImageRequestFailedException(url)
+      throw new LoadResourceError(url, { path: url })
+      // throw new ImageRequestFailedException(url)
     }
 
     // create a spritesheet with the image. If the image is

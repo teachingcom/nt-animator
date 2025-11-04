@@ -69523,66 +69523,7 @@ function RecursiveLimitExceededException() {}
 function InvalidTextureRequestException() {}
 
 function InvalidMaskBoundsException() {}
-},{}],"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":[function(require,module,exports) {
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) {
-    arr2[i] = arr[i];
-  }
-
-  return arr2;
-}
-
-module.exports = _arrayLikeToArray;
-},{}],"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js":[function(require,module,exports) {
-var arrayLikeToArray = require("./arrayLikeToArray");
-
-function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) return arrayLikeToArray(arr);
-}
-
-module.exports = _arrayWithoutHoles;
-},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/iterableToArray.js":[function(require,module,exports) {
-function _iterableToArray(iter) {
-  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
-}
-
-module.exports = _iterableToArray;
-},{}],"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js":[function(require,module,exports) {
-var arrayLikeToArray = require("./arrayLikeToArray");
-
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return arrayLikeToArray(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(o);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
-}
-
-module.exports = _unsupportedIterableToArray;
-},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/nonIterableSpread.js":[function(require,module,exports) {
-function _nonIterableSpread() {
-  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}
-
-module.exports = _nonIterableSpread;
-},{}],"../node_modules/@babel/runtime/helpers/toConsumableArray.js":[function(require,module,exports) {
-var arrayWithoutHoles = require("./arrayWithoutHoles");
-
-var iterableToArray = require("./iterableToArray");
-
-var unsupportedIterableToArray = require("./unsupportedIterableToArray");
-
-var nonIterableSpread = require("./nonIterableSpread");
-
-function _toConsumableArray(arr) {
-  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
-}
-
-module.exports = _toConsumableArray;
-},{"./arrayWithoutHoles":"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js","./iterableToArray":"../node_modules/@babel/runtime/helpers/iterableToArray.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableSpread":"../node_modules/@babel/runtime/helpers/nonIterableSpread.js"}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
+},{}],"../node_modules/@babel/runtime/helpers/arrayWithHoles.js":[function(require,module,exports) {
 function _arrayWithHoles(arr) {
   if (Array.isArray(arr)) return arr;
 }
@@ -69617,7 +69558,32 @@ function _iterableToArrayLimit(arr, i) {
 }
 
 module.exports = _iterableToArrayLimit;
-},{}],"../node_modules/@babel/runtime/helpers/nonIterableRest.js":[function(require,module,exports) {
+},{}],"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js":[function(require,module,exports) {
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+
+  return arr2;
+}
+
+module.exports = _arrayLikeToArray;
+},{}],"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js":[function(require,module,exports) {
+var arrayLikeToArray = require("./arrayLikeToArray");
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+
+module.exports = _unsupportedIterableToArray;
+},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/nonIterableRest.js":[function(require,module,exports) {
 function _nonIterableRest() {
   throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }
@@ -69637,7 +69603,41 @@ function _slicedToArray(arr, i) {
 }
 
 module.exports = _slicedToArray;
-},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArrayLimit":"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"randomizer.js":[function(require,module,exports) {
+},{"./arrayWithHoles":"../node_modules/@babel/runtime/helpers/arrayWithHoles.js","./iterableToArrayLimit":"../node_modules/@babel/runtime/helpers/iterableToArrayLimit.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableRest":"../node_modules/@babel/runtime/helpers/nonIterableRest.js"}],"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js":[function(require,module,exports) {
+var arrayLikeToArray = require("./arrayLikeToArray");
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return arrayLikeToArray(arr);
+}
+
+module.exports = _arrayWithoutHoles;
+},{"./arrayLikeToArray":"../node_modules/@babel/runtime/helpers/arrayLikeToArray.js"}],"../node_modules/@babel/runtime/helpers/iterableToArray.js":[function(require,module,exports) {
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+module.exports = _iterableToArray;
+},{}],"../node_modules/@babel/runtime/helpers/nonIterableSpread.js":[function(require,module,exports) {
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableSpread;
+},{}],"../node_modules/@babel/runtime/helpers/toConsumableArray.js":[function(require,module,exports) {
+var arrayWithoutHoles = require("./arrayWithoutHoles");
+
+var iterableToArray = require("./iterableToArray");
+
+var unsupportedIterableToArray = require("./unsupportedIterableToArray");
+
+var nonIterableSpread = require("./nonIterableSpread");
+
+function _toConsumableArray(arr) {
+  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
+}
+
+module.exports = _toConsumableArray;
+},{"./arrayWithoutHoles":"../node_modules/@babel/runtime/helpers/arrayWithoutHoles.js","./iterableToArray":"../node_modules/@babel/runtime/helpers/iterableToArray.js","./unsupportedIterableToArray":"../node_modules/@babel/runtime/helpers/unsupportedIterableToArray.js","./nonIterableSpread":"../node_modules/@babel/runtime/helpers/nonIterableSpread.js"}],"randomizer.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -73985,9 +73985,9 @@ exports.isDynamic = isDynamic;
 exports.evaluateExpression = evaluateExpression;
 exports.createDynamicExpression = createDynamicExpression;
 
-var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
-
 var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 
 var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
@@ -74073,6 +74073,9 @@ var EXPRESSIONS = {
   },
   ':var': {
     func: getVariable
+  },
+  ':random': {
+    func: getRandom
   }
 };
 var DYNAMICS = {
@@ -74128,6 +74131,16 @@ var DYNAMICS = {
     instance: _relativeExpressions.RelativeToY
   }
 };
+
+function getRandom(min, max, asInt) {
+  var val = (max - min) * Math.random() + min;
+
+  if (asInt) {
+    val = 0 | val;
+  }
+
+  return val;
+}
 
 function getVariable(name) {
   return variables.pull(name);
@@ -74246,8 +74259,9 @@ function expression() {
   var val = args[0];
 
   for (var i = 1; i < args.length; i += 2) {
-    var action = EXPRESSIONS[args[i]];
-    val = action(val, args[i + 1]);
+    var action = EXPRESSIONS[args[i]]; // val = action(val, args[i + 1]);
+
+    val = action.apply(void 0, [val].concat((0, _toConsumableArray2.default)(args.slice(1))));
   }
 
   return isNaN(val) ? 0 : val;
@@ -74383,7 +74397,7 @@ function shuffle(items) {
 
   items.push.apply(items, shuffled);
 }
-},{"@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","../utils":"utils/index.js","../randomizer":"randomizer.js","./variables":"animation/variables.js","./dynamic-expressions/get-random":"animation/dynamic-expressions/get-random.js","./dynamic-expressions/mod-expression":"animation/dynamic-expressions/mod-expression.js","./dynamic-expressions/sine-expressions":"animation/dynamic-expressions/sine-expressions.js","./dynamic-expressions/relative-expressions":"animation/dynamic-expressions/relative-expressions.js","./dynamic-expressions/bezier-expression":"animation/dynamic-expressions/bezier-expression.js","./dynamic-expressions/range-expression":"animation/dynamic-expressions/range-expression.js","./dynamic-expressions/average-expression":"animation/dynamic-expressions/average-expression.js","./dynamic-expressions/sum-expression":"animation/dynamic-expressions/sum-expression.js","./dynamic-expressions/cycle-expression":"animation/dynamic-expressions/cycle-expression.js","./dynamic-expressions/between-expression":"animation/dynamic-expressions/between-expression.js","./dynamic-expressions/JitterExpression":"animation/dynamic-expressions/JitterExpression.js","./dynamic-expressions/tween-expression":"animation/dynamic-expressions/tween-expression.js","./dynamic-expressions/source-expression":"animation/dynamic-expressions/source-expression.js","./dynamic-expressions/step-expression":"animation/dynamic-expressions/step-expression.js","./dynamic-expressions/increment-expression":"animation/dynamic-expressions/increment-expression.js"}],"animation/utils.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","../utils":"utils/index.js","../randomizer":"randomizer.js","./variables":"animation/variables.js","./dynamic-expressions/get-random":"animation/dynamic-expressions/get-random.js","./dynamic-expressions/mod-expression":"animation/dynamic-expressions/mod-expression.js","./dynamic-expressions/sine-expressions":"animation/dynamic-expressions/sine-expressions.js","./dynamic-expressions/relative-expressions":"animation/dynamic-expressions/relative-expressions.js","./dynamic-expressions/bezier-expression":"animation/dynamic-expressions/bezier-expression.js","./dynamic-expressions/range-expression":"animation/dynamic-expressions/range-expression.js","./dynamic-expressions/average-expression":"animation/dynamic-expressions/average-expression.js","./dynamic-expressions/sum-expression":"animation/dynamic-expressions/sum-expression.js","./dynamic-expressions/cycle-expression":"animation/dynamic-expressions/cycle-expression.js","./dynamic-expressions/between-expression":"animation/dynamic-expressions/between-expression.js","./dynamic-expressions/JitterExpression":"animation/dynamic-expressions/JitterExpression.js","./dynamic-expressions/tween-expression":"animation/dynamic-expressions/tween-expression.js","./dynamic-expressions/source-expression":"animation/dynamic-expressions/source-expression.js","./dynamic-expressions/step-expression":"animation/dynamic-expressions/step-expression.js","./dynamic-expressions/increment-expression":"animation/dynamic-expressions/increment-expression.js"}],"animation/utils.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -75988,7 +76002,139 @@ function decToHex(dec) {
   var val = dec.toString(16);
   return ['#', "000000".substr(val.length), val].join('');
 }
-},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-get-set":"../node_modules/deep-get-set/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js","../converters":"animation/converters.js","../../animate":"animate/index.js","../../pixi/utils/throttled-updater":"pixi/utils/throttled-updater.js"}],"animation/resources/loadImage.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","deep-get-set":"../node_modules/deep-get-set/index.js","../utils":"animation/utils.js","../../utils":"utils/index.js","../assign":"animation/assign.js","../expressions":"animation/expressions.js","../converters":"animation/converters.js","../../animate":"animate/index.js","../../pixi/utils/throttled-updater":"pixi/utils/throttled-updater.js"}],"../node_modules/@babel/runtime/helpers/isNativeFunction.js":[function(require,module,exports) {
+function _isNativeFunction(fn) {
+  return Function.toString.call(fn).indexOf("[native code]") !== -1;
+}
+
+module.exports = _isNativeFunction;
+},{}],"../node_modules/@babel/runtime/helpers/isNativeReflectConstruct.js":[function(require,module,exports) {
+function _isNativeReflectConstruct() {
+  if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+  if (Reflect.construct.sham) return false;
+  if (typeof Proxy === "function") return true;
+
+  try {
+    Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+module.exports = _isNativeReflectConstruct;
+},{}],"../node_modules/@babel/runtime/helpers/construct.js":[function(require,module,exports) {
+var setPrototypeOf = require("./setPrototypeOf");
+
+var isNativeReflectConstruct = require("./isNativeReflectConstruct");
+
+function _construct(Parent, args, Class) {
+  if (isNativeReflectConstruct()) {
+    module.exports = _construct = Reflect.construct;
+  } else {
+    module.exports = _construct = function _construct(Parent, args, Class) {
+      var a = [null];
+      a.push.apply(a, args);
+      var Constructor = Function.bind.apply(Parent, a);
+      var instance = new Constructor();
+      if (Class) setPrototypeOf(instance, Class.prototype);
+      return instance;
+    };
+  }
+
+  return _construct.apply(null, arguments);
+}
+
+module.exports = _construct;
+},{"./setPrototypeOf":"../node_modules/@babel/runtime/helpers/setPrototypeOf.js","./isNativeReflectConstruct":"../node_modules/@babel/runtime/helpers/isNativeReflectConstruct.js"}],"../node_modules/@babel/runtime/helpers/wrapNativeSuper.js":[function(require,module,exports) {
+var getPrototypeOf = require("./getPrototypeOf");
+
+var setPrototypeOf = require("./setPrototypeOf");
+
+var isNativeFunction = require("./isNativeFunction");
+
+var construct = require("./construct");
+
+function _wrapNativeSuper(Class) {
+  var _cache = typeof Map === "function" ? new Map() : undefined;
+
+  module.exports = _wrapNativeSuper = function _wrapNativeSuper(Class) {
+    if (Class === null || !isNativeFunction(Class)) return Class;
+
+    if (typeof Class !== "function") {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    if (typeof _cache !== "undefined") {
+      if (_cache.has(Class)) return _cache.get(Class);
+
+      _cache.set(Class, Wrapper);
+    }
+
+    function Wrapper() {
+      return construct(Class, arguments, getPrototypeOf(this).constructor);
+    }
+
+    Wrapper.prototype = Object.create(Class.prototype, {
+      constructor: {
+        value: Wrapper,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+    return setPrototypeOf(Wrapper, Class);
+  };
+
+  return _wrapNativeSuper(Class);
+}
+
+module.exports = _wrapNativeSuper;
+},{"./getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","./setPrototypeOf":"../node_modules/@babel/runtime/helpers/setPrototypeOf.js","./isNativeFunction":"../node_modules/@babel/runtime/helpers/isNativeFunction.js","./construct":"../node_modules/@babel/runtime/helpers/construct.js"}],"common/resource-error.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function () { var Super = (0, _getPrototypeOf2.default)(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2.default)(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2.default)(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+var LoadResourceError = /*#__PURE__*/function (_Error) {
+  (0, _inherits2.default)(LoadResourceError, _Error);
+
+  var _super = _createSuper(LoadResourceError);
+
+  function LoadResourceError() {
+    var _this;
+
+    var path = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "unknown";
+    var data = arguments.length > 1 ? arguments[1] : undefined;
+    (0, _classCallCheck2.default)(this, LoadResourceError);
+    _this = _super.call(this, "Failed to load resource \"".concat(path, "\""));
+    _this.data = data;
+    return _this;
+  }
+
+  return LoadResourceError;
+}( /*#__PURE__*/(0, _wrapNativeSuper2.default)(Error));
+
+exports.default = LoadResourceError;
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/inherits":"../node_modules/@babel/runtime/helpers/inherits.js","@babel/runtime/helpers/possibleConstructorReturn":"../node_modules/@babel/runtime/helpers/possibleConstructorReturn.js","@babel/runtime/helpers/getPrototypeOf":"../node_modules/@babel/runtime/helpers/getPrototypeOf.js","@babel/runtime/helpers/wrapNativeSuper":"../node_modules/@babel/runtime/helpers/wrapNativeSuper.js"}],"animation/resources/loadImage.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -76103,6 +76249,8 @@ var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/sli
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
+var _resourceError = _interopRequireDefault(require("../../common/resource-error"));
+
 var _lib = require("../../pixi/lib");
 
 var _loadImage = _interopRequireDefault(require("./loadImage"));
@@ -76144,7 +76292,9 @@ function _loadSpritesheet() {
               break;
             }
 
-            throw new ImageRequestFailedException(url);
+            throw new _resourceError.default(url, {
+              path: url
+            });
 
           case 7:
             // create a spritesheet with the image. If the image is
@@ -76196,7 +76346,7 @@ function generateSprites(image, spritesheetId, spritesheet, ext) {
 function ImageRequestFailedException(src) {
   this.src = src;
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./loadImage":"animation/resources/loadImage.js"}],"animation/resources/getSpritesheet.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../common/resource-error":"common/resource-error.js","../../pixi/lib":"pixi/lib.js","./loadImage":"animation/resources/loadImage.js"}],"animation/resources/getSpritesheet.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -76936,6 +77086,8 @@ var Particles = _interopRequireWildcard(require("pixi-particles"));
 
 var _utils = require("../../../utils");
 
+var _pixi = require("pixi.js");
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -76953,12 +77105,38 @@ function applyParticleOverride(target) {
   var update = target.prototype.update; // override the update function
 
   target.prototype.update = function () {
+    var now = Date.now(); // perform normal updateialzation
+
+    var x = this.x;
+
     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
     }
 
-    // perform normal updateialzation
-    var result = update.apply(this, args); // apply the default starting rotation
+    var result = update.apply(this, args); // customs scripts
+
+    if (this.__leaf) {
+      var _this$__leaf = this.__leaf,
+          ts = _this$__leaf.ts,
+          tx = _this$__leaf.tx,
+          ty = _this$__leaf.ty,
+          xm = _this$__leaf.xm,
+          ym = _this$__leaf.ym,
+          sy = _this$__leaf.sy,
+          sx = _this$__leaf.sx,
+          ry = _this$__leaf.ry,
+          rx = _this$__leaf.rx,
+          rs = _this$__leaf.rs,
+          cx = _this$__leaf.cx,
+          gy = _this$__leaf.gy;
+      this.__leaf.cy -= this.__leaf.py;
+      this.__leaf.py *= gy;
+      this.y = ym((now + ts + ty) * sy) * ry + this.__leaf.cy;
+      this.x = x - (cx + xm((now + ts + tx) * sx) * rx);
+      this.scale.x *= rs;
+      this.scale.y *= rs;
+    } // apply the default starting rotation
+
 
     if (this.rotationModifier) {
       this.rotation += this.rotationModifier;
@@ -76993,12 +77171,57 @@ function applyParticleOverride(target) {
   };
 
   target.prototype.init = function () {
+    var _this$emitter$config$;
+
+    var now = Date.now(); // perform normal updateialzation
+
     for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
       args[_key2] = arguments[_key2];
     }
 
-    // perform normal updateialzation
-    init.apply(this, args); // apply the default starting rotation
+    init.apply(this, args); // Ideally we'd use behaviors, but that's not in this version of PIXI particles
+    // include custom leaf behaviors
+
+    if (!!((_this$emitter$config$ = this.emitter.config.custom) === null || _this$emitter$config$ === void 0 ? void 0 : _this$emitter$config$.leaf)) {
+      var _this$emitter$config$2, _this$emitter$config$3;
+
+      var _ref = (_this$emitter$config$2 = (_this$emitter$config$3 = this.emitter.config.custom) === null || _this$emitter$config$3 === void 0 ? void 0 : _this$emitter$config$3.leaf) !== null && _this$emitter$config$2 !== void 0 ? _this$emitter$config$2 : {},
+          _ref$x = _ref.x,
+          x = _ref$x === void 0 ? [3, 5] : _ref$x,
+          _ref$rx = _ref.rx,
+          rx = _ref$rx === void 0 ? [1, 2] : _ref$rx,
+          _ref$ry = _ref.ry,
+          ry = _ref$ry === void 0 ? [10, 25] : _ref$ry,
+          _ref$py = _ref.py,
+          py = _ref$py === void 0 ? [5, 10] : _ref$py,
+          _ref$gy = _ref.gy,
+          gy = _ref$gy === void 0 ? [0.7, 0.9] : _ref$gy,
+          _ref$rs = _ref.rs,
+          rs = _ref$rs === void 0 ? [1, 1] : _ref$rs,
+          _ref$scale = _ref.scale,
+          scale = _ref$scale === void 0 ? 0.01 : _ref$scale,
+          _ref$blend = _ref.blend,
+          blend = _ref$blend === void 0 ? 1 : _ref$blend;
+
+      this.blendMode = Math.random() > blend ? _pixi.BLEND_MODES.ADD : _pixi.BLEND_MODES.NORMAL;
+      this.__leaf = {
+        xm: Math.random() < 0.5 ? Math.sin : Math.cos,
+        cx: getValue(x),
+        rx: getValue(rx),
+        sx: Math.random() * scale,
+        tx: Math.random() * 5000,
+        ym: Math.random() < 0.5 ? Math.sin : Math.cos,
+        py: getValue(py),
+        gy: getValue(gy),
+        rs: getValue(rs),
+        cy: 0,
+        ry: getValue(ry),
+        sy: Math.random() * scale,
+        ty: Math.random() * 5000,
+        ts: now
+      };
+    } // apply the default starting rotation
+
 
     var _this$emitter$config = this.emitter.config,
         rotationSpeed = _this$emitter$config.rotationSpeed,
@@ -77020,10 +77243,10 @@ function applyParticleOverride(target) {
       this.rotation = this.rotationModifier = definedRotationOffset;
     } // has a random range of start rotations
     else if (hasRandomStartRotation) {
-        var _ref = randomStartRotation || DEFAULT_RANDOM_ROTATIONS,
-            _ref2 = (0, _slicedToArray2.default)(_ref, 2),
-            min = _ref2[0],
-            max = _ref2[1];
+        var _ref2 = randomStartRotation || DEFAULT_RANDOM_ROTATIONS,
+            _ref3 = (0, _slicedToArray2.default)(_ref2, 2),
+            min = _ref3[0],
+            max = _ref3[1];
 
         var angle = Math.random() * (max - min) + min;
         this.rotation = this.rotationModifier = angle * _utils.RAD;
@@ -77062,7 +77285,11 @@ function applyParticleOverride(target) {
 
 applyParticleOverride(Particles.AnimatedParticle);
 applyParticleOverride(Particles.Particle);
-},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../../../pixi/lib":"pixi/lib.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../../../utils":"utils/index.js"}],"animation/generators/emitter/index.js":[function(require,module,exports) {
+
+var getValue = function getValue(values) {
+  return values.length === 2 ? (values[1] - values[0]) * Math.random() + values[0] : values;
+};
+},{"@babel/runtime/helpers/slicedToArray":"../node_modules/@babel/runtime/helpers/slicedToArray.js","../../../pixi/lib":"pixi/lib.js","pixi-particles":"../node_modules/pixi-particles/lib/pixi-particles.es.js","../../../utils":"utils/index.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js"}],"animation/generators/emitter/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -77132,6 +77359,11 @@ var MAPPINGS = {
   speed: {
     props: ['start', 'end'],
     displayAsList: true
+  },
+  accel: {
+    props: ['x', 'y'],
+    displayAsList: true,
+    renameTo: 'acceleration'
   },
   dir: {
     props: ['min', 'max'],
@@ -77225,7 +77457,9 @@ function _createEmitter() {
             auto = layer.auto !== false && layer.autoStart !== false;
             config = {
               autoUpdate: auto
-            }; // fix common naming mistakes
+            }; // copy anything custom (maybe do work here)
+
+            config.custom = emit.custom; // fix common naming mistakes
 
             if (emit.colors) {
               emit.color = emit.colors;
@@ -77285,9 +77519,9 @@ function _createEmitter() {
 
             _context.t0 = _regenerator.default.keys(emit);
 
-          case 21:
+          case 22:
             if ((_context.t1 = _context.t0()).done) {
-              _context.next = 28;
+              _context.next = 29;
               break;
             }
 
@@ -77295,17 +77529,17 @@ function _createEmitter() {
             _ret = _loop(prop);
 
             if (!(_ret === "continue")) {
-              _context.next = 26;
+              _context.next = 27;
               break;
             }
 
-            return _context.abrupt("continue", 21);
+            return _context.abrupt("continue", 22);
 
-          case 26:
-            _context.next = 21;
+          case 27:
+            _context.next = 22;
             break;
 
-          case 28:
+          case 29:
             // assign a few more values
             (0, _assign2.assignIf)(emit.per, _utils.isNumber, config, function (t, v) {
               return t.particlesPerWave = v;
@@ -77502,18 +77736,18 @@ function _createEmitter() {
               dispose: dispose
             }]);
 
-          case 76:
-            _context.prev = 76;
+          case 77:
+            _context.prev = 77;
             _context.t2 = _context["catch"](7);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
             throw _context.t2;
 
-          case 80:
+          case 81:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[7, 76]]);
+    }, _callee, null, [[7, 77]]);
   }));
   return _createEmitter.apply(this, arguments);
 }
@@ -78482,7 +78716,149 @@ function findPivot(container) {
 
   return pivot;
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../../pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js",".":"animation/generators/index.js","../expressions":"animation/expressions.js","../normalize":"animation/normalize.js","../utils":"animation/utils.js"}],"animation/generators/index.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","./animation":"animation/generators/animation.js","../assign":"animation/assign.js","../../utils":"utils/index.js","../../pixi/utils/get-bounds-of-role":"pixi/utils/get-bounds-of-role.js",".":"animation/generators/index.js","../expressions":"animation/expressions.js","../normalize":"animation/normalize.js","../utils":"animation/utils.js"}],"variables.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = applyVariables;
+exports.evaluateVariable = evaluateVariable;
+
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _toArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toArray"));
+
+var _utils = require("./utils");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// variable evaluators
+// it would be nice to use the other evaluators eventually
+var add = function add(a, b) {
+  return a + b;
+};
+
+var subtract = function subtract(a, b) {
+  return a - b;
+};
+
+var multiply = function multiply(a, b) {
+  return a * b;
+};
+
+var divide = function divide(a, b) {
+  return a / b;
+};
+
+var pow = function pow(a, b) {
+  return a ^ b;
+};
+
+var cos = function cos(a) {
+  var b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+  return Math.cos(a) * b;
+};
+
+var sin = function sin(a) {
+  var b = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+  return Math.cos(a) * b;
+};
+
+var pick = function pick() {
+  for (var _len = arguments.length, all = new Array(_len), _key = 0; _key < _len; _key++) {
+    all[_key] = arguments[_key];
+  }
+
+  return all[Math.floor(Math.random() * all.length)];
+};
+
+var random = function random(a, b, toInt) {
+  var value = a + (b - a) * Math.random();
+  return toInt ? 0 | value : value;
+}; // currently supported expressions
+
+
+var EXPRESSIONS = {
+  ':+': add,
+  ':add': add,
+  ':sum': add,
+  ':-': subtract,
+  ':sub': subtract,
+  ':subtract': subtract,
+  ':choose': pick,
+  ':pick': pick,
+  ':rnd': random,
+  ':random': random,
+  ':*': multiply,
+  ':multiply': multiply,
+  ':/': divide,
+  ':divide': divide,
+  ':^': pow,
+  ':pow': pow,
+  ':cos': cos,
+  ':sin': sin
+};
+
+function applyVariables(instance) {
+  var _instance$variables;
+
+  var map = {};
+  (_instance$variables = instance.variables) === null || _instance$variables === void 0 ? void 0 : _instance$variables.forEach(function (obj) {
+    var key = Object.keys(obj)[0];
+    var args = obj[key];
+
+    if ((0, _utils.isArray)(args)) {
+      var _args = (0, _toArray2.default)(args),
+          type = _args[0],
+          rest = _args.slice(1);
+
+      var evaluator = EXPRESSIONS[type];
+      map["$".concat(key)] = evaluator.apply(void 0, (0, _toConsumableArray2.default)(rest.map(function (a) {
+        return evaluateVariable(a, map);
+      })));
+    } else {
+      map["$".concat(key)] = args;
+    }
+  }); // now, recursively search to replace variables
+
+  findAndApply(instance, map);
+}
+
+function hasChildren(obj) {
+  return (0, _typeof2.default)(obj) === 'object' || typeof obj === 'array' || obj instanceof Array || obj instanceof Object;
+}
+
+function findAndApply(instance, vars) {
+  if ((0, _utils.isArray)(instance)) {
+    for (var i = 0; i < instance.length; i++) {
+      if (hasChildren(instance[i])) {
+        findAndApply(instance[i], vars);
+      } else {
+        instance[i] = evaluateVariable(instance[i], vars);
+      }
+    }
+  } else if ((0, _utils.isObject)(instance)) {
+    Object.keys(instance !== null && instance !== void 0 ? instance : {}).forEach(function (key) {
+      var target = instance[key];
+
+      if (hasChildren(target)) {
+        findAndApply(target, vars);
+      } else {
+        instance[key] = evaluateVariable(instance[key], vars);
+      }
+    });
+  }
+}
+
+function evaluateVariable(val, vars) {
+  var _vars$val;
+
+  return (_vars$val = vars === null || vars === void 0 ? void 0 : vars[val]) !== null && _vars$val !== void 0 ? _vars$val : val;
+}
+},{"@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","@babel/runtime/helpers/toConsumableArray":"../node_modules/@babel/runtime/helpers/toConsumableArray.js","@babel/runtime/helpers/toArray":"../node_modules/@babel/runtime/helpers/toArray.js","./utils":"utils/index.js"}],"animation/generators/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -78526,6 +78902,8 @@ var _findObjectsOfRole = require("../../pixi/utils/find-objects-of-role");
 
 var _pixi = require("pixi.js");
 
+var _variables2 = _interopRequireDefault(require("../../variables"));
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -78563,6 +78941,11 @@ function _createInstance() {
 
             if (instance.params) {
               applyParameters(instance);
+            } // check for variables
+
+
+            if (instance.variables) {
+              (0, _variables2.default)(instance);
             } // create the instance container
 
 
@@ -78575,9 +78958,9 @@ function _createInstance() {
 
             i = instance.compose.length;
 
-          case 9:
+          case 10:
             if (!(i-- > 0)) {
-              _context.next = 19;
+              _context.next = 20;
               break;
             }
 
@@ -78586,13 +78969,13 @@ function _createInstance() {
             delete layer.base; // check if hidden
 
             if (!(layer.hide || layer.hidden)) {
-              _context.next = 15;
+              _context.next = 16;
               break;
             }
 
-            return _context.abrupt("continue", 17);
+            return _context.abrupt("continue", 18);
 
-          case 15:
+          case 16:
             // sprite layers
             type = layer.type;
 
@@ -78634,15 +79017,15 @@ function _createInstance() {
                           }
                       }
 
-          case 17:
-            _context.next = 9;
+          case 18:
+            _context.next = 10;
             break;
 
-          case 19:
-            _context.next = 21;
+          case 20:
+            _context.next = 22;
             return Promise.all(pending);
 
-          case 21:
+          case 22:
             composite = _context.sent;
             layers = (0, _collection.flatten)(composite); // append each layer
 
@@ -78687,7 +79070,7 @@ function _createInstance() {
 
             return _context.abrupt("return", container);
 
-          case 29:
+          case 30:
           case "end":
             return _context.stop();
         }
@@ -78719,7 +79102,7 @@ function applyParameters(instance) {
     }
   }
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js","../expressions":"animation/expressions.js","../variables":"animation/variables.js","../../pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js"}],"animation/importManifest.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","@babel/runtime/helpers/typeof":"../node_modules/@babel/runtime/helpers/typeof.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../../pixi/lib":"pixi/lib.js","fast-copy":"../node_modules/fast-copy/dist/fast-copy.js","../utils":"animation/utils.js","../../utils":"utils/index.js","./sprite":"animation/generators/sprite.js","./emitter":"animation/generators/emitter/index.js","./group":"animation/generators/group.js","./mask":"animation/generators/mask.js","../../utils/collection":"utils/collection.js","./repeater":"animation/generators/repeater.js","../expressions":"animation/expressions.js","../variables":"animation/variables.js","../../pixi/utils/find-objects-of-role":"pixi/utils/find-objects-of-role.js","pixi.js":"../node_modules/pixi.js/lib/pixi.es.js","../../variables":"variables.js"}],"animation/importManifest.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -78730,6 +79113,8 @@ exports.default = importManifest;
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+
+var _resourceError = _interopRequireDefault(require("../common/resource-error"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -78778,7 +79163,7 @@ function _importManifest() {
 
           case 9:
             if (!(attempts > 0)) {
-              _context.next = 25;
+              _context.next = 24;
               break;
             }
 
@@ -78788,7 +79173,7 @@ function _importManifest() {
 
           case 13:
             data = _context.sent;
-            return _context.abrupt("break", 25);
+            return _context.abrupt("break", 24);
 
           case 17:
             _context.prev = 17;
@@ -78802,32 +79187,35 @@ function _importManifest() {
             return _context.abrupt("continue", 9);
 
           case 21:
-            // no more attempts
-            console.error("failed to import ".concat(path));
-            throw _context.t0;
+            throw new _resourceError.default(path, {
+              path: path,
+              baseUrl: baseUrl
+            });
 
-          case 23:
+          case 22:
             _context.next = 9;
             break;
 
-          case 25:
+          case 24:
             // save the result
             target[key] = data; // return it, in case it's needed
 
             return _context.abrupt("return", data);
 
-          case 29:
-            _context.prev = 29;
+          case 28:
+            _context.prev = 28;
             _context.t1 = _context["catch"](1);
-            console.error('Failed to load', path);
-            throw _context.t1;
+            throw new _resourceError.default(path, {
+              path: path,
+              baseUrl: baseUrl
+            });
 
-          case 33:
+          case 31:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[1, 29], [10, 17]]);
+    }, _callee, null, [[1, 28], [10, 17]]);
   }));
   return _importManifest.apply(this, arguments);
 }
@@ -78879,7 +79267,7 @@ function _attemptFetch() {
   }));
   return _attemptFetch.apply(this, arguments);
 }
-},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js"}],"animation/resources/addTexture.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","../common/resource-error":"common/resource-error.js"}],"animation/resources/addTexture.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
