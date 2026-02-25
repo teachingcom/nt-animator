@@ -287,7 +287,7 @@ export default async function createEmitter(animator, controller, path, composit
 		normalizeEmit(layer.emit);
 
 		// create the emitter
-		const create = () => {
+		let create = () => {
 			emitter.autoUpdate = false;
 			emitter.emit = true;
 
@@ -304,9 +304,17 @@ export default async function createEmitter(animator, controller, path, composit
 			// create activation function
 			emitter.activate = create;
 		}
-		
+
+		const hasDelay = !isNaN(config.delay) && config.delay > 0
+
+		// if manual start, but includes a delay
+		if (manualStart && hasDelay) {
+			const createFn = create
+			create = () => setTimeout(createFn, config.delay)
+			emitter.activate = create;
+		}
 		// delayed start
-		if (!manualStart && !isNaN(config.delay) && config.delay > 0) {
+		else if (!manualStart && hasDelay) {
 			setTimeout(create, config.delay);
 		}
 		// create immediately

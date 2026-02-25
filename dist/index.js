@@ -75027,6 +75027,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
@@ -75083,27 +75087,52 @@ var Controller = /*#__PURE__*/function () {
         _iterator2.f();
       }
     });
-    (0, _defineProperty2.default)(this, "activateEmitters", function () {
-      var emitters = _this.emitters;
+    (0, _defineProperty2.default)(this, "activateEmitters", /*#__PURE__*/(0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee() {
+      var emitters, _iterator3, _step3, _loop;
 
-      var _iterator3 = _createForOfIteratorHelper(emitters),
-          _step3;
+      return _regenerator.default.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              emitters = _this.emitters;
+              _iterator3 = _createForOfIteratorHelper(emitters);
 
-      try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-          var instance = _step3.value;
-          var emitter = instance.emitter;
-          var config = emitter.config;
-          emitter.autoUpdate = true;
-          emitter.lifetime = (0, _utils.isNumber)(config.duration) ? config.duration / 1000 : undefined;
-          emitter.emit = true;
+              try {
+                _loop = function _loop() {
+                  var instance = _step3.value;
+                  var emitter = instance.emitter;
+                  var config = emitter.config;
+
+                  var activate = function activate() {
+                    emitter.autoUpdate = true;
+                    emitter.lifetime = (0, _utils.isNumber)(config.duration) ? config.duration / 1000 : undefined;
+                    emitter.emit = true;
+                  };
+
+                  if (config.delay) {
+                    setTimeout(activate, config.delay);
+                  } else {
+                    activate();
+                  } // check for a delay
+
+                };
+
+                for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+                  _loop();
+                }
+              } catch (err) {
+                _iterator3.e(err);
+              } finally {
+                _iterator3.f();
+              }
+
+            case 3:
+            case "end":
+              return _context.stop();
+          }
         }
-      } catch (err) {
-        _iterator3.e(err);
-      } finally {
-        _iterator3.f();
-      }
-    });
+      }, _callee);
+    })));
     (0, _defineProperty2.default)(this, "dispose", function () {
       var objects = _this.objects;
 
@@ -75149,7 +75178,7 @@ var Controller = /*#__PURE__*/function () {
 }();
 
 exports.default = Controller;
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js"}],"../node_modules/deep-get-set/index.js":[function(require,module,exports) {
+},{"@babel/runtime/regenerator":"../node_modules/@babel/runtime/regenerator/index.js","@babel/runtime/helpers/asyncToGenerator":"../node_modules/@babel/runtime/helpers/asyncToGenerator.js","@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/createClass":"../node_modules/@babel/runtime/helpers/createClass.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js"}],"../node_modules/deep-get-set/index.js":[function(require,module,exports) {
 var hasOwnProp = Object.prototype.hasOwnProperty;
 
 module.exports = deep;
@@ -77108,12 +77137,18 @@ function applyParticleOverride(target) {
     var now = Date.now(); // perform normal updateialzation
 
     var x = this.x;
+    var y = this.y;
 
     for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
     }
 
-    var result = update.apply(this, args); // customs scripts
+    var result = update.apply(this, args);
+
+    if (this.__wave) {
+      this.y = this.__wave.y + this.__wave.func((now + this.__wave.offset) * this.__wave.freq * 0.001) * this.__wave.amp;
+    } // customs scripts
+
 
     if (this.__leaf) {
       var _this$__leaf = this.__leaf,
@@ -77171,7 +77206,7 @@ function applyParticleOverride(target) {
   };
 
   target.prototype.init = function () {
-    var _this$emitter$config$;
+    var _this$emitter$config$, _this$emitter$config$6;
 
     var now = Date.now(); // perform normal updateialzation
 
@@ -77179,13 +77214,26 @@ function applyParticleOverride(target) {
       args[_key2] = arguments[_key2];
     }
 
-    init.apply(this, args); // Ideally we'd use behaviors, but that's not in this version of PIXI particles
+    init.apply(this, args); // has a wave effect
+
+    if (!!((_this$emitter$config$ = this.emitter.config.custom) === null || _this$emitter$config$ === void 0 ? void 0 : _this$emitter$config$.wave)) {
+      var _this$emitter$config$2, _this$emitter$config$3, _this$emitter$config$4, _this$emitter$config$5;
+
+      this.__wave = {
+        y: this.y,
+        amp: (_this$emitter$config$2 = this.emitter.config.custom) === null || _this$emitter$config$2 === void 0 ? void 0 : _this$emitter$config$2.wave.amp,
+        freq: (_this$emitter$config$3 = this.emitter.config.custom) === null || _this$emitter$config$3 === void 0 ? void 0 : _this$emitter$config$3.wave.freq,
+        func: ((_this$emitter$config$4 = this.emitter.config.custom) === null || _this$emitter$config$4 === void 0 ? void 0 : _this$emitter$config$4.wave.func) === 'sin' ? Math.sin : Math.cos,
+        offset: Math.random() * (((_this$emitter$config$5 = this.emitter.config.custom) === null || _this$emitter$config$5 === void 0 ? void 0 : _this$emitter$config$5.wave.offset) || 1000)
+      };
+    } // Ideally we'd use behaviors, but that's not in this version of PIXI particles
     // include custom leaf behaviors
 
-    if (!!((_this$emitter$config$ = this.emitter.config.custom) === null || _this$emitter$config$ === void 0 ? void 0 : _this$emitter$config$.leaf)) {
-      var _this$emitter$config$2, _this$emitter$config$3;
 
-      var _ref = (_this$emitter$config$2 = (_this$emitter$config$3 = this.emitter.config.custom) === null || _this$emitter$config$3 === void 0 ? void 0 : _this$emitter$config$3.leaf) !== null && _this$emitter$config$2 !== void 0 ? _this$emitter$config$2 : {},
+    if (!!((_this$emitter$config$6 = this.emitter.config.custom) === null || _this$emitter$config$6 === void 0 ? void 0 : _this$emitter$config$6.leaf)) {
+      var _this$emitter$config$7, _this$emitter$config$8;
+
+      var _ref = (_this$emitter$config$7 = (_this$emitter$config$8 = this.emitter.config.custom) === null || _this$emitter$config$8 === void 0 ? void 0 : _this$emitter$config$8.leaf) !== null && _this$emitter$config$7 !== void 0 ? _this$emitter$config$7 : {},
           _ref$x = _ref.x,
           x = _ref$x === void 0 ? [3, 5] : _ref$x,
           _ref$rx = _ref.rx,
@@ -77400,7 +77448,7 @@ function createEmitter(_x, _x2, _x3, _x4, _x5) {
 
 function _createEmitter() {
   _createEmitter = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(animator, controller, path, composition, layer) {
-    var container, generator, update, dispose, phase, textures, _layer$emit, emit, auto, config, _loop, prop, _ret, manualStart, sequences, source, _iterator, _step, sequence, frames, _iterator2, _step2, _loop2, emitter, create;
+    var container, generator, update, dispose, phase, textures, _layer$emit, emit, auto, config, _loop, prop, _ret, manualStart, sequences, source, _iterator, _step, sequence, frames, _iterator2, _step2, _loop2, emitter, create, hasDelay, createFn;
 
     return _regenerator.default.wrap(function _callee$(_context) {
       while (1) {
@@ -77704,15 +77752,25 @@ function _createEmitter() {
               emitter.emit = false; // create activation function
 
               emitter.activate = create;
+            }
+
+            hasDelay = !isNaN(config.delay) && config.delay > 0; // if manual start, but includes a delay
+
+            if (manualStart && hasDelay) {
+              createFn = create;
+
+              create = function create() {
+                return setTimeout(createFn, config.delay);
+              };
+
+              emitter.activate = create;
             } // delayed start
-
-
-            if (!manualStart && !isNaN(config.delay) && config.delay > 0) {
-              setTimeout(create, config.delay);
-            } // create immediately
-            else if (!manualStart) {
-                create();
-              } // create dynamically rendered properties
+            else if (!manualStart && hasDelay) {
+                setTimeout(create, config.delay);
+              } // create immediately
+              else if (!manualStart) {
+                  create();
+                } // create dynamically rendered properties
 
 
             phase = 'creating dynamic properties';
@@ -77736,18 +77794,18 @@ function _createEmitter() {
               dispose: dispose
             }]);
 
-          case 77:
-            _context.prev = 77;
+          case 78:
+            _context.prev = 78;
             _context.t2 = _context["catch"](7);
             console.error("Failed to create emitter ".concat(path, " while ").concat(phase));
             throw _context.t2;
 
-          case 81:
+          case 82:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[7, 77]]);
+    }, _callee, null, [[7, 78]]);
   }));
   return _createEmitter.apply(this, arguments);
 }

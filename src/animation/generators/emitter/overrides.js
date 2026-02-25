@@ -19,9 +19,16 @@ function applyParticleOverride(target) {
 	target.prototype.update = function (...args) {
 		const now = Date.now() 
 
+
+
 		// perform normal updateialzation
 		let x = this.x
+		let y = this.y
 		let result = update.apply(this, args);
+
+		if (this.__wave) {
+			this.y = this.__wave.y + this.__wave.func((now + this.__wave.offset) * this.__wave.freq * 0.001) * this.__wave.amp;
+		}
 
 		// customs scripts
 		if (this.__leaf) {
@@ -72,9 +79,20 @@ function applyParticleOverride(target) {
 
 	target.prototype.init = function (...args) {
 		const now = Date.now()
-		
+
 		// perform normal updateialzation
 		init.apply(this, args);
+
+		// has a wave effect
+		if (!!this.emitter.config.custom?.wave) {
+			this.__wave = {
+				y: this.y,
+				amp: this.emitter.config.custom?.wave.amp,
+				freq: this.emitter.config.custom?.wave.freq,
+				func: this.emitter.config.custom?.wave.func === 'sin' ? Math.sin : Math.cos,
+				offset: Math.random() * (this.emitter.config.custom?.wave.offset || 1000),
+			}
+		}
 
 		// Ideally we'd use behaviors, but that's not in this version of PIXI particles
 		// include custom leaf behaviors

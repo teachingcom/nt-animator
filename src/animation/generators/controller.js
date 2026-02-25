@@ -37,14 +37,29 @@ export default class Controller {
 		}
 	}
 
-	activateEmitters = () => {
+	activateEmitters = async () => {
 		const { emitters } = this;
 		for (const instance of emitters) {
 			const { emitter } = instance;
 			const { config } = emitter;
-			emitter.autoUpdate = true;
-			emitter.lifetime = isNumber(config.duration) ? config.duration / 1000 : undefined;
-			emitter.emit = true;
+
+			const activate = () => {
+				emitter.autoUpdate = true;
+				emitter.lifetime = isNumber(config.duration) ? config.duration / 1000 : undefined;
+				emitter.emit = true;
+			}
+
+			if (config.delay) {
+				setTimeout(activate, config.delay)
+			}
+			else {
+				activate()
+			}
+
+			
+
+			// check for a delay
+
 		}
 	}
 
