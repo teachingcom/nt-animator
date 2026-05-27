@@ -71318,7 +71318,66 @@ var SumExpression = function SumExpression(prop, args) {
 
 exports.default = SumExpression;
 (0, _defineProperty2.default)(SumExpression, "start", Date.now());
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js","../mappings":"animation/mappings.js"}],"animation/dynamic-expressions/cycle-expression.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js","../mappings":"animation/mappings.js"}],"animation/easings.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.linear = linear;
+exports.easeIn = easeIn;
+exports.easeOut = easeOut;
+exports.easeInQuad = easeInQuad;
+exports.easeOutQuad = easeOutQuad;
+exports.resolveEasing = resolveEasing;
+exports.default = void 0;
+
+/** @param {number} t 0-1 */
+function linear(t) {
+  return t;
+}
+/** @param {number} t 0-1 */
+
+
+function easeIn(t) {
+  return t * t * t;
+}
+/** @param {number} t 0-1 */
+
+
+function easeOut(t) {
+  return 1 - Math.pow(1 - t, 3);
+}
+/** @param {number} t 0-1 */
+
+
+function easeInQuad(t) {
+  return t * t;
+}
+/** @param {number} t 0-1 */
+
+
+function easeOutQuad(t) {
+  return t * (2 - t);
+}
+
+var easings = {
+  linear: linear,
+  in: easeIn,
+  out: easeOut,
+  inQuad: easeInQuad,
+  outQuad: easeOutQuad
+};
+/** @param {string|Function} ease */
+
+function resolveEasing(ease) {
+  if (typeof ease === 'function') return ease;
+  return easings[ease] || linear;
+}
+
+var _default = easings;
+exports.default = _default;
+},{}],"animation/dynamic-expressions/cycle-expression.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -71334,6 +71393,8 @@ var _utils = require("../../utils");
 
 var mappings = _interopRequireWildcard(require("../mappings"));
 
+var _easings = require("../easings");
+
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -71346,6 +71407,11 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
+/** @param {number} from @param {number} to @param {number} t */
+function lerp(from, to, t) {
+  return from * (1 - t) + to * t;
+}
+
 var CycleExpression = function CycleExpression(prop, args) {
   var _this = this;
 
@@ -71353,8 +71419,19 @@ var CycleExpression = function CycleExpression(prop, args) {
   (0, _defineProperty2.default)(this, "offset", 0);
   (0, _defineProperty2.default)(this, "update", function (target, stage) {
     var now = Date.now();
-    var index = (now + _this.offset - CycleExpression.start) / _this.interval % _this.valueCount;
-    var value = _this.values[0 | index];
+    var step = (now + _this.offset - CycleExpression.start) / _this.interval;
+    var index = 0 | step % _this.valueCount;
+    var value;
+
+    if (_this.easeFn) {
+      var next = _this.values[(index + 1) % _this.valueCount];
+
+      var t = _this.easeFn(step - (0 | step));
+
+      value = lerp(_this.values[index], next, t);
+    } else {
+      value = _this.values[index];
+    }
 
     _this.mapping(target, _this.convertToInt ? 0 | value : value);
   });
@@ -71365,8 +71442,10 @@ var CycleExpression = function CycleExpression(prop, args) {
     return 1;
   };
 
+  console.log('args', args);
   var values = [];
   var interval = 1000;
+  var ease;
 
   var _iterator = _createForOfIteratorHelper(args),
       _step;
@@ -71378,6 +71457,8 @@ var CycleExpression = function CycleExpression(prop, args) {
 
       if (arg === 'int') {
         this.convertToInt = true;
+      } else if (isObj && 'ease' in arg) {
+        ease = arg.ease;
       } else if (isObj && 'interval' in arg) {
         interval = arg.interval;
       } else if (isObj && 'values' in arg) {
@@ -71398,11 +71479,15 @@ var CycleExpression = function CycleExpression(prop, args) {
   this.interval = interval;
   this.values = values;
   this.valueCount = this.values.length;
+
+  if (ease) {
+    this.easeFn = (0, _easings.resolveEasing)(ease);
+  }
 };
 
 exports.default = CycleExpression;
 (0, _defineProperty2.default)(CycleExpression, "start", Date.now());
-},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js","../mappings":"animation/mappings.js"}],"animation/dynamic-expressions/between-expression.js":[function(require,module,exports) {
+},{"@babel/runtime/helpers/classCallCheck":"../node_modules/@babel/runtime/helpers/classCallCheck.js","@babel/runtime/helpers/defineProperty":"../node_modules/@babel/runtime/helpers/defineProperty.js","../../utils":"utils/index.js","../mappings":"animation/mappings.js","../easings":"animation/easings.js"}],"animation/dynamic-expressions/between-expression.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

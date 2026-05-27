@@ -11,7 +11,7 @@ import { createThrottledUpdater } from '../../pixi/utils/throttled-updater';
 
 // creates an animation
 export default function createAnimation(animator, path, composition, layer, instance) {
-
+	
 	// check for special debugging flags
 	if (layer.animate === false) return;
 
