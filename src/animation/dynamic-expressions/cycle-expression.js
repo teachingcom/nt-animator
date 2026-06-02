@@ -2,7 +2,6 @@ import { isObject } from '../../utils'
 import * as mappings from '../mappings'
 import { resolveEasing } from '../easings'
 
-/** @param {number} from @param {number} to @param {number} t */
 function lerp (from, to, t) {
   return from * (1 - t) + to * t
 }
@@ -17,9 +16,6 @@ export default class CycleExpression {
 		this.prop = prop
 		this.mapping = mappings.lookup(prop)
     this.modifier = () => 1
-
-    console.log('args', args)
-    
 
 		let values = []
 		let interval = 1000
