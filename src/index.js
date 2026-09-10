@@ -27,6 +27,6 @@ export { getBoundsForRole } from './pixi/utils/get-bounds-of-role';
 export { findDisplayObjectsOfRole } from './pixi/utils/find-objects-of-role';
 export { default as createAnimatedSpriteHelper } from './pixi/utils/animated-sprite';
 export { createContext, createPlaceholderImage, drawPixiTexture } from './utils/graphics';
+export { noop, RAD } from './utils';
 export { removeDisplayObject } from './pixi/utils/remove';
 export { setMaximumImageLoadAttempts } from './animation/resources/loadImage';
-
